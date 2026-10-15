@@ -303,7 +303,7 @@ async function buildCurriculum() {
 }
 
 function generateOfflineShell() {
-  console.log('📱 Generating responsive offline shell (index.html & app.js)...');
+  console.log('📱 Generating adaptive tablet/phone offline shell (index.html & app.js)...');
   
   const htmlContent = `<!DOCTYPE html>
 <html lang="en" data-theme="dark">
@@ -319,18 +319,22 @@ function generateOfflineShell() {
       --bg: #0d1117;
       --bg-surface: #161b22;
       --bg-card: #21262d;
+      --bg-card-hover: #292e36;
       --text: #c9d1d9;
       --text-muted: #8b949e;
       --accent: #58a6ff;
       --border: #30363d;
       --success: #3fb950;
       --danger: #f85149;
-      --sidebar-width: 320px;
+      --sidebar-width: 340px;
+      --reader-font-size: 1.05rem;
+      --reader-line-height: 1.75;
     }
     [data-theme="light"] {
       --bg: #ffffff;
       --bg-surface: #f6f8fa;
       --bg-card: #f0f2f5;
+      --bg-card-hover: #e6e8eb;
       --text: #24292f;
       --text-muted: #57606a;
       --accent: #0969da;
@@ -342,6 +346,7 @@ function generateOfflineShell() {
       --bg: #fbf0d9;
       --bg-surface: #f4e3c1;
       --bg-card: #ecdcbb;
+      --bg-card-hover: #e4d3b0;
       --text: #433422;
       --text-muted: #705e46;
       --accent: #9e4a1a;
@@ -362,6 +367,8 @@ function generateOfflineShell() {
       display: flex;
       flex-direction: column;
     }
+
+    /* Top App Header */
     header.app-header {
       height: 56px;
       background: var(--bg-surface);
@@ -372,21 +379,30 @@ function generateOfflineShell() {
       padding: 0 16px;
       z-index: 100;
       flex-shrink: 0;
+      gap: 12px;
     }
     .header-left { display: flex; align-items: center; gap: 12px; }
-    .header-title { font-family: 'VT323', monospace; font-size: 1.4rem; color: var(--accent); font-weight: bold; }
-    .menu-btn {
-      background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; padding: 4px; display: none;
+    .header-title { font-family: 'VT323', monospace; font-size: 1.5rem; color: var(--accent); font-weight: bold; letter-spacing: 0.5px; }
+    .sidebar-toggle-btn {
+      background: var(--bg-card); border: 1px solid var(--border); color: var(--text); font-size: 1.1rem; cursor: pointer; padding: 6px 10px; border-radius: 6px;
+    }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .font-btn {
+      background: var(--bg-card); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: bold;
     }
     .theme-select {
-      background: var(--bg-card); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-card); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; cursor: pointer;
     }
+
+    /* Overall Layout: Dual Pane on Tablet */
     .main-container {
       display: flex;
       flex: 1;
       overflow: hidden;
       position: relative;
     }
+
+    /* Sidebar (Master Pane) */
     aside.sidebar {
       width: var(--sidebar-width);
       background: var(--bg-surface);
@@ -395,10 +411,37 @@ function generateOfflineShell() {
       flex-direction: column;
       flex-shrink: 0;
       overflow-y: auto;
-      transition: transform 0.25s ease;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.2s ease;
+      z-index: 50;
+    }
+    aside.sidebar.collapsed {
+      display: none;
+    }
+    .progress-banner {
+      padding: 12px 14px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.82rem;
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--success);
+      width: 0%;
+      transition: width 0.3s ease;
     }
     .search-box {
-      padding: 12px;
+      padding: 10px 12px;
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
@@ -418,46 +461,72 @@ function generateOfflineShell() {
     .phase-list { list-style: none; padding: 0; margin: 0; }
     .phase-item { border-bottom: 1px solid var(--border); }
     .phase-header {
-      padding: 10px 14px;
-      font-weight: bold;
+      padding: 11px 14px;
+      font-weight: 600;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       background: var(--bg-surface);
       color: var(--accent);
       cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      user-select: none;
     }
+    .phase-header:hover { background: var(--bg-card); }
+    .phase-chevron { transition: transform 0.2s ease; display: inline-block; }
+    .phase-item.collapsed .phase-chevron { transform: rotate(-90deg); }
+    .phase-item.collapsed .lesson-sublist { display: none; }
     .lesson-item {
-      padding: 8px 14px 8px 24px;
+      padding: 9px 14px 9px 26px;
       font-size: 0.88rem;
       cursor: pointer;
       border-left: 3px solid transparent;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      transition: background 0.1s, color 0.1s;
     }
     .lesson-item:hover, .lesson-item.active {
       background: var(--bg-card);
       border-left-color: var(--accent);
       color: var(--accent);
     }
-    .lesson-item .check { font-size: 0.8rem; color: var(--success); display: none; }
+    .lesson-item .check { font-size: 0.85rem; color: var(--success); font-weight: bold; display: none; }
     .lesson-item.completed .check { display: inline; }
 
+    /* Reading Detail Pane */
     main.content-area {
       flex: 1;
       overflow-y: auto;
-      padding: 32px 48px;
       scroll-behavior: smooth;
+      display: flex;
+      flex-direction: column;
+    }
+    .breadcrumbs-bar {
+      padding: 10px 32px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 20;
     }
     .article-wrap {
-      max-width: 860px;
+      max-width: 880px;
+      width: 100%;
       margin: 0 auto;
-      line-height: 1.7;
-      font-size: 1.05rem;
+      padding: 32px 32px 48px;
+      line-height: var(--reader-line-height);
+      font-size: var(--reader-font-size);
+      flex: 1;
     }
+    .article-wrap h1 { font-size: 2.2rem; margin-top: 0; line-height: 1.25; }
+    .article-wrap h2 { font-size: 1.5rem; margin-top: 36px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .article-wrap h3 { font-size: 1.2rem; margin-top: 24px; }
+    .article-wrap p { margin: 16px 0; }
     .article-wrap pre {
       background: var(--bg-card);
       padding: 16px;
@@ -466,43 +535,82 @@ function generateOfflineShell() {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.9rem;
       border: 1px solid var(--border);
+      position: relative;
     }
     .article-wrap code {
       font-family: 'JetBrains Mono', monospace;
       background: var(--bg-card);
-      padding: 2px 5px;
+      padding: 2px 6px;
       border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .article-wrap blockquote {
+      border-left: 4px solid var(--accent);
+      margin: 20px 0;
+      padding: 8px 18px;
+      background: var(--bg-surface);
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
     }
 
-    /* Quiz Widget */
+    /* Lesson Navigation Footer */
+    .lesson-nav-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 14px 18px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      cursor: pointer;
+      flex: 1;
+      max-width: 360px;
+      transition: all 0.15s ease;
+    }
+    .nav-btn:hover { border-color: var(--accent); background: var(--bg-card); }
+    .nav-btn-label { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--accent); text-transform: uppercase; }
+    .nav-btn-title { font-size: 0.95rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nav-btn.next { text-align: right; margin-left: auto; }
+
+    /* Interactive Quiz Card */
     .quiz-card {
-      margin-top: 48px;
-      padding: 24px;
+      margin-top: 50px;
+      padding: 28px;
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: 12px;
     }
-    .quiz-title { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; color: var(--accent); margin-bottom: 16px; }
+    .quiz-title { font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; color: var(--accent); margin-bottom: 20px; font-weight: bold; }
     .quiz-q { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-    .quiz-q p { font-weight: bold; margin-bottom: 10px; }
+    .quiz-q p { font-weight: bold; margin-bottom: 12px; }
     .quiz-options { display: flex; flex-direction: column; gap: 8px; }
     .quiz-option {
-      padding: 10px 14px;
+      padding: 12px 16px;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 8px;
       cursor: pointer;
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       transition: all 0.15s;
     }
-    .quiz-option:hover { border-color: var(--accent); }
-    .quiz-option.selected { border-color: var(--accent); background: rgba(88, 166, 255, 0.1); }
-    .quiz-option.correct { border-color: var(--success) !important; background: rgba(63, 185, 80, 0.15) !important; }
-    .quiz-option.incorrect { border-color: var(--danger) !important; background: rgba(248, 81, 73, 0.15) !important; }
-    .quiz-explain { margin-top: 8px; font-size: 0.85rem; color: var(--text-muted); display: none; }
+    .quiz-option:hover { border-color: var(--accent); background: var(--bg-card-hover); }
+    .quiz-option.selected { border-color: var(--accent); background: rgba(88, 166, 255, 0.12); }
+    .quiz-option.correct { border-color: var(--success) !important; background: rgba(63, 185, 80, 0.18) !important; }
+    .quiz-option.incorrect { border-color: var(--danger) !important; background: rgba(248, 81, 73, 0.18) !important; }
+    .quiz-explain { margin-top: 10px; font-size: 0.9rem; color: var(--text-muted); display: none; line-height: 1.5; padding: 10px; background: var(--bg-card); border-radius: 6px; }
     .quiz-submit-btn {
       margin-top: 16px;
-      padding: 10px 20px;
+      padding: 12px 24px;
       background: var(--accent);
       color: #fff;
       border: none;
@@ -510,30 +618,45 @@ function generateOfflineShell() {
       font-weight: bold;
       cursor: pointer;
       font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      transition: opacity 0.15s;
     }
+    .quiz-submit-btn:hover { opacity: 0.9; }
 
-    /* Responsive for Phones (< 768px) */
+    /* Mobile Backdrop & Layout (< 768px) */
+    .drawer-backdrop {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 45;
+    }
     @media (max-width: 768px) {
-      .menu-btn { display: block; }
       aside.sidebar {
         position: absolute;
         top: 0; left: 0; bottom: 0;
-        z-index: 90;
+        z-index: 50;
         transform: translateX(-100%);
-        box-shadow: 2px 0 12px rgba(0,0,0,0.4);
+        box-shadow: 4px 0 20px rgba(0,0,0,0.5);
       }
       aside.sidebar.open { transform: translateX(0); }
-      main.content-area { padding: 18px 16px; }
+      .drawer-backdrop.open { display: block; }
+      .breadcrumbs-bar { padding: 8px 16px; font-size: 0.75rem; }
+      .article-wrap { padding: 20px 16px; }
+      .lesson-nav-footer { flex-direction: column; }
+      .nav-btn { max-width: 100%; }
     }
   </style>
 </head>
 <body>
   <header class="app-header">
     <div class="header-left">
-      <button class="menu-btn" id="menuToggle" aria-label="Toggle Navigation">☰</button>
+      <button class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Toggle Sidebar">☰</button>
       <div class="header-title">AI / FROM SCRATCH</div>
     </div>
-    <div class="header-right">
+    <div class="header-actions">
+      <button class="font-btn" id="fontDecBtn" title="Decrease font size">A-</button>
+      <button class="font-btn" id="fontIncBtn" title="Increase font size">A+</button>
       <select class="theme-select" id="themeSelect">
         <option value="dark">Dark Theme</option>
         <option value="light">Light Theme</option>
@@ -543,7 +666,18 @@ function generateOfflineShell() {
   </header>
 
   <div class="main-container">
+    <div class="drawer-backdrop" id="drawerBackdrop"></div>
+
     <aside class="sidebar" id="sidebar">
+      <div class="progress-banner">
+        <div style="display: flex; justify-content: space-between;">
+          <span>Progress</span>
+          <span id="progressText">0 / 542</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+      </div>
       <div class="search-box">
         <input type="text" class="search-input" id="searchInput" placeholder="Search 542 lessons...">
       </div>
@@ -551,6 +685,7 @@ function generateOfflineShell() {
     </aside>
 
     <main class="content-area" id="contentArea">
+      <div class="breadcrumbs-bar" id="breadcrumbsBar">Phase · Lesson</div>
       <div class="article-wrap" id="articleWrap">
         <h1>Loading Curriculum...</h1>
       </div>
@@ -565,15 +700,34 @@ function generateOfflineShell() {
 
 (function () {
   let curriculum = null;
+  let allLessonsInOrder = [];
+  let lessonIndexMap = new Map();
   let activeLessonId = null;
   const completedLessons = new Set(JSON.parse(localStorage.getItem('completed_lessons') || '[]'));
 
-  const menuToggle = document.getElementById('menuToggle');
+  const sidebarToggle = document.getElementById('sidebarToggle');
   const sidebar = document.getElementById('sidebar');
+  const drawerBackdrop = document.getElementById('drawerBackdrop');
   const phaseList = document.getElementById('phaseList');
   const searchInput = document.getElementById('searchInput');
   const articleWrap = document.getElementById('articleWrap');
+  const breadcrumbsBar = document.getElementById('breadcrumbsBar');
   const themeSelect = document.getElementById('themeSelect');
+  const fontDecBtn = document.getElementById('fontDecBtn');
+  const fontIncBtn = document.getElementById('fontIncBtn');
+  const progressText = document.getElementById('progressText');
+  const progressBarFill = document.getElementById('progressBarFill');
+
+  // Font sizing
+  let currentFontSize = parseFloat(localStorage.getItem('app_font_size') || '1.05');
+  function applyFontSize(size) {
+    currentFontSize = Math.min(Math.max(size, 0.85), 1.5);
+    document.documentElement.style.setProperty('--reader-font-size', currentFontSize + 'rem');
+    localStorage.setItem('app_font_size', currentFontSize.toString());
+  }
+  applyFontSize(currentFontSize);
+  fontDecBtn.addEventListener('click', () => applyFontSize(currentFontSize - 0.1));
+  fontIncBtn.addEventListener('click', () => applyFontSize(currentFontSize + 0.1));
 
   // Theme setup
   const savedTheme = localStorage.getItem('app_theme') || 'dark';
@@ -584,19 +738,47 @@ function generateOfflineShell() {
     localStorage.setItem('app_theme', e.target.value);
   });
 
-  // Mobile menu toggle
-  menuToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
+  // Responsive Sidebar Drawer toggle
+  function toggleSidebar() {
+    if (window.innerWidth <= 768) {
+      sidebar.classList.toggle('open');
+      drawerBackdrop.classList.toggle('open', sidebar.classList.contains('open'));
+    } else {
+      sidebar.classList.toggle('collapsed');
+    }
+  }
+  sidebarToggle.addEventListener('click', toggleSidebar);
+  drawerBackdrop.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    drawerBackdrop.classList.remove('open');
   });
+
+  // Progress update
+  function updateProgress() {
+    const total = allLessonsInOrder.length || 542;
+    const completed = completedLessons.size;
+    progressText.textContent = \`\${completed} / \${total} (\${Math.round((completed / total) * 100)}%)\`;
+    progressBarFill.style.width = \`\${(completed / total) * 100}%\`;
+  }
 
   // Fetch curriculum
   fetch('data/curriculum.json')
     .then(res => res.json())
     .then(data => {
       curriculum = data;
+      // Index all lessons for sequential Prev/Next navigation
+      allLessonsInOrder = [];
+      curriculum.phases.forEach(phase => {
+        phase.lessons.forEach(lesson => {
+          allLessonsInOrder.push(lesson);
+          lessonIndexMap.set(lesson.id, allLessonsInOrder.length - 1);
+        });
+      });
+
       renderSidebar(curriculum.phases);
-      // Load first lesson or saved lesson
-      const initialId = localStorage.getItem('last_lesson') || (curriculum.phases[0] && curriculum.phases[0].lessons[0].id);
+      updateProgress();
+
+      const initialId = localStorage.getItem('last_lesson') || (allLessonsInOrder[0] && allLessonsInOrder[0].id);
       if (initialId) loadLesson(initialId);
     })
     .catch(err => {
@@ -614,11 +796,21 @@ function generateOfflineShell() {
 
       if (query && filteredLessons.length === 0) return;
 
+      const phaseCompletedCount = phase.lessons.filter(l => completedLessons.has(l.id)).length;
       const li = document.createElement('li');
       li.className = 'phase-item';
-      li.innerHTML = \`<div class="phase-header">\${phase.title} <span>(\${filteredLessons.length})</span></div>\`;
+
+      const header = document.createElement('div');
+      header.className = 'phase-header';
+      header.innerHTML = \`<span>\${phase.title} <small style="color:var(--text-muted)">(\${phaseCompletedCount}/\${phase.lessons.length})</small></span>
+        <span class="phase-chevron">▾</span>\`;
+      header.addEventListener('click', () => {
+        li.classList.toggle('collapsed');
+      });
+      li.appendChild(header);
 
       const ul = document.createElement('ul');
+      ul.className = 'lesson-sublist';
       ul.style.listStyle = 'none';
       ul.style.padding = '0';
       ul.style.margin = '0';
@@ -631,7 +823,10 @@ function generateOfflineShell() {
         item.innerHTML = \`<span>\${lesson.title}</span><span class="check">✓</span>\`;
         item.addEventListener('click', () => {
           loadLesson(lesson.id);
-          if (window.innerWidth <= 768) sidebar.classList.remove('open');
+          if (window.innerWidth <= 768) {
+            sidebar.classList.remove('open');
+            drawerBackdrop.classList.remove('open');
+          }
         });
         ul.appendChild(item);
       });
@@ -650,7 +845,7 @@ function generateOfflineShell() {
     activeLessonId = lessonId;
     localStorage.setItem('last_lesson', lessonId);
 
-    // Update active class in sidebar
+    // Update active highlight in sidebar
     document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
 
     articleWrap.innerHTML = '<p>Loading lesson...</p>';
@@ -665,11 +860,18 @@ function generateOfflineShell() {
   }
 
   function renderLesson(lesson) {
+    const currentIndex = lessonIndexMap.get(lesson.id) || 0;
+    const prevLesson = currentIndex > 0 ? allLessonsInOrder[currentIndex - 1] : null;
+    const nextLesson = currentIndex < allLessonsInOrder.length - 1 ? allLessonsInOrder[currentIndex + 1] : null;
+
+    // Breadcrumbs
+    breadcrumbsBar.textContent = \`\${lesson.phaseId} · \${lesson.title}\`;
+
     let content = '<div class="lesson-header">';
-    content += \`<div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--accent); margin-bottom: 8px;">\${lesson.phaseId} · \${lesson.time} · \${lesson.type}</div>\`;
+    content += \`<div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--accent); margin-bottom: 8px;">\${lesson.phaseId} · \${lesson.time} · \${lesson.type} · \${lesson.languages}</div>\`;
     content += \`<h1>\${lesson.title}</h1>\`;
     if (lesson.hook) {
-      content += \`<blockquote style="border-left: 3px solid var(--accent); margin: 16px 0; padding-left: 14px; font-style: italic; color: var(--text-muted);">\${lesson.hook}</blockquote>\`;
+      content += \`<blockquote>\${lesson.hook}</blockquote>\`;
     }
     content += '</div>';
 
@@ -681,14 +883,47 @@ function generateOfflineShell() {
       content += renderQuiz(lesson.quiz, lesson.id);
     }
 
+    // Previous / Next Lesson Navigation Footer
+    content += '<div class="lesson-nav-footer">';
+    if (prevLesson) {
+      content += \`<div class="nav-btn prev" id="prevLessonBtn">
+        <span class="nav-btn-label">← Previous Lesson</span>
+        <span class="nav-btn-title">\${prevLesson.title}</span>
+      </div>\`;
+    } else {
+      content += '<div></div>';
+    }
+    if (nextLesson) {
+      content += \`<div class="nav-btn next" id="nextLessonBtn">
+        <span class="nav-btn-label">Next Lesson →</span>
+        <span class="nav-btn-title">\${nextLesson.title}</span>
+      </div>\`;
+    }
+    content += '</div>';
+
     articleWrap.innerHTML = content;
     document.getElementById('contentArea').scrollTop = 0;
+
+    // Setup interactive hooks
     setupQuizListeners(lesson.quiz, lesson.id);
+    setupNavButtonListeners(prevLesson, nextLesson);
+  }
+
+  function setupNavButtonListeners(prevLesson, nextLesson) {
+    const prevBtn = document.getElementById('prevLessonBtn');
+    if (prevBtn && prevLesson) {
+      prevBtn.addEventListener('click', () => loadLesson(prevLesson.id));
+    }
+    const nextBtn = document.getElementById('nextLessonBtn');
+    if (nextBtn && nextLesson) {
+      nextBtn.addEventListener('click', () => loadLesson(nextLesson.id));
+    }
   }
 
   function renderQuiz(quiz, lessonId) {
+    const isCompleted = completedLessons.has(lessonId);
     let html = \`<div class="quiz-card" id="quizContainer">
-      <div class="quiz-title">Interactive Quiz (6 Questions)</div>\`;
+      <div class="quiz-title">Interactive Quiz (\${quiz.questions.length} Questions)</div>\`;
 
     quiz.questions.forEach((q, idx) => {
       html += \`<div class="quiz-q" data-q="\${idx}">
@@ -702,13 +937,13 @@ function generateOfflineShell() {
       </div>\`;
     });
 
-    html += \`<button class="quiz-submit-btn" id="quizSubmit">Submit Quiz Answers</button></div>\`;
+    html += \`<button class="quiz-submit-btn" id="quizSubmit">\${isCompleted ? 'Quiz Completed (Retake)' : 'Submit Quiz Answers'}</button></div>\`;
     return html;
   }
 
   function setupQuizListeners(quiz, lessonId) {
     const container = document.getElementById('quizContainer');
-    if (!container) return;
+    if (!container || !quiz) return;
 
     const selectedAnswers = {};
 
@@ -747,8 +982,8 @@ function generateOfflineShell() {
       completedLessons.add(lessonId);
       localStorage.setItem('completed_lessons', JSON.stringify(Array.from(completedLessons)));
       if (curriculum) renderSidebar(curriculum.phases);
+      updateProgress();
 
-      submitBtn.disabled = true;
       submitBtn.textContent = \`Score: \${score} / \${quiz.questions.length} (Saved!)\`;
     });
   }
