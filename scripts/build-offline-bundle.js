@@ -195,6 +195,12 @@ function copyStaticAssets() {
   if (fs.existsSync(searchEngineJs)) {
     fs.copyFileSync(searchEngineJs, path.join(DIST_DIR, 'search-engine.js'));
   }
+
+  // Copy viewer-controller.js
+  const viewerControllerJs = path.join(REPO_ROOT, 'offline-app', 'viewer-controller.js');
+  if (fs.existsSync(viewerControllerJs)) {
+    fs.copyFileSync(viewerControllerJs, path.join(DIST_DIR, 'viewer-controller.js'));
+  }
 }
 
 async function buildCurriculum() {
@@ -359,6 +365,133 @@ function generateOfflineShell() {
       --border: #dac4a5;
       --success: #2d7a47;
       --danger: #b33927;
+    }
+    [data-theme="amoled"] {
+      --bg: #000000;
+      --bg-surface: #0a0a0a;
+      --bg-card: #141414;
+      --bg-card-hover: #1f1f1f;
+      --text: #e6edf3;
+      --text-muted: #7d8590;
+      --accent: #58a6ff;
+      --border: #21262d;
+      --success: #3fb950;
+      --danger: #f85149;
+    }
+
+    /* Code block with copy button */
+    .article-wrap pre {
+      position: relative;
+    }
+    .copy-code-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      opacity: 0.85;
+      transition: all 0.15s;
+    }
+    .copy-code-btn:hover {
+      opacity: 1;
+      color: var(--text);
+      border-color: var(--accent);
+    }
+    .copy-code-btn.copied {
+      color: var(--success);
+      border-color: var(--success);
+    }
+
+    /* SVG Zoom Modal */
+    .figure-modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 200;
+      flex-direction: column;
+    }
+    .figure-modal-backdrop.open { display: flex; }
+    .figure-modal-toolbar {
+      height: 52px;
+      padding: 0 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .figure-modal-title { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); font-weight: bold; }
+    .figure-modal-btns { display: flex; gap: 8px; }
+    .figure-tool-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+    }
+    .figure-tool-btn.close { color: var(--danger); font-weight: bold; }
+    .figure-viewport {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    .figure-container {
+      transition: transform 0.05s ease-out;
+      transform-origin: center center;
+      max-width: 90vw;
+      max-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .figure-container svg, .figure-container img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* Quiz Enhancements */
+    .quiz-stage-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .quiz-result-banner {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      font-weight: bold;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .quiz-result-banner.passed {
+      background: rgba(63, 185, 80, 0.15);
+      border-color: var(--success);
+      color: var(--success);
+    }
+    .quiz-result-banner.failed {
+      background: rgba(248, 81, 73, 0.15);
+      border-color: var(--danger);
+      color: var(--danger);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -716,6 +849,7 @@ function generateOfflineShell() {
       <button class="font-btn" id="fontIncBtn" title="Increase font size">A+</button>
       <select class="theme-select" id="themeSelect">
         <option value="dark">Dark Theme</option>
+        <option value="amoled">AMOLED Night</option>
         <option value="light">Light Theme</option>
         <option value="sepia">Sepia Theme</option>
       </select>
@@ -768,6 +902,23 @@ function generateOfflineShell() {
     </main>
   </div>
 
+  <!-- Figure Zoom / Pan Modal -->
+  <div class="figure-modal-backdrop" id="figureModal">
+    <div class="figure-modal-toolbar">
+      <div class="figure-modal-title">DIAGRAM VIEWER</div>
+      <div class="figure-modal-btns">
+        <button class="figure-tool-btn" id="zoomOutBtn" title="Zoom Out">-</button>
+        <button class="figure-tool-btn" id="zoomResetBtn" title="Reset Zoom">100%</button>
+        <button class="figure-tool-btn" id="zoomInBtn" title="Zoom In">+</button>
+        <button class="figure-tool-btn close" id="closeFigureBtn" title="Close">✕</button>
+      </div>
+    </div>
+    <div class="figure-viewport" id="figureViewport">
+      <div class="figure-container" id="figureContainer"></div>
+    </div>
+  </div>
+
+  <script src="viewer-controller.js"></script>
   <script src="search-engine.js"></script>
   <script src="app.js"></script>
 </body>
@@ -1043,9 +1194,118 @@ function generateOfflineShell() {
     articleWrap.innerHTML = content;
     document.getElementById('contentArea').scrollTop = 0;
 
+    // Attach Copy buttons to code blocks
+    articleWrap.querySelectorAll('pre').forEach(pre => {
+      if (pre.querySelector('.copy-code-btn')) return;
+      const btn = document.createElement('button');
+      btn.className = 'copy-code-btn';
+      btn.textContent = 'Copy';
+      btn.setAttribute('aria-label', 'Copy code to clipboard');
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const code = pre.querySelector('code') ? pre.querySelector('code').innerText : pre.innerText;
+        navigator.clipboard.writeText(code).then(() => {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        }).catch(() => {
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+        });
+      });
+      pre.appendChild(btn);
+    });
+
+    // Attach Figure Zoom handler on SVG diagrams and figure frames
+    articleWrap.querySelectorAll('figure, .figure-frame, svg').forEach(el => {
+      if (el.closest('button') || el.closest('header') || el.closest('.copy-code-btn')) return;
+      el.style.cursor = 'zoom-in';
+      el.title = 'Click to enlarge diagram';
+      el.addEventListener('click', (e) => {
+        if (e.target.closest('button') || e.target.closest('a')) return;
+        openFigureModal(el);
+      });
+    });
+
     // Setup interactive hooks
     setupQuizListeners(lesson.quiz, lesson.id);
     setupNavButtonListeners(prevLesson, nextLesson);
+  }
+
+  // Diagram Zoom & Pan Modal
+  const figureModal = document.getElementById('figureModal');
+  const figureContainer = document.getElementById('figureContainer');
+  const zoomInBtn = document.getElementById('zoomInBtn');
+  const zoomOutBtn = document.getElementById('zoomOutBtn');
+  const zoomResetBtn = document.getElementById('zoomResetBtn');
+  const closeFigureBtn = document.getElementById('closeFigureBtn');
+
+  let currentZoomState = { scale: 1.0, x: 0, y: 0 };
+
+  function updateFigureTransform() {
+    if (figureContainer) {
+      figureContainer.style.transform = \`matrix(\${currentZoomState.scale}, 0, 0, \${currentZoomState.scale}, \${currentZoomState.x}, \${currentZoomState.y})\`;
+      if (zoomResetBtn) zoomResetBtn.textContent = \`\${Math.round(currentZoomState.scale * 100)}%\`;
+    }
+  }
+
+  function openFigureModal(sourceEl) {
+    if (!figureModal || !figureContainer) return;
+    figureContainer.innerHTML = sourceEl.outerHTML;
+    currentZoomState = { scale: 1.0, x: 0, y: 0 };
+    updateFigureTransform();
+    figureModal.classList.add('open');
+  }
+
+  function closeFigureModal() {
+    if (!figureModal) return;
+    figureModal.classList.remove('open');
+    if (figureContainer) figureContainer.innerHTML = '';
+  }
+
+  if (closeFigureBtn) closeFigureBtn.addEventListener('click', closeFigureModal);
+  if (figureModal) {
+    figureModal.addEventListener('click', (e) => {
+      if (e.target === figureModal || e.target.id === 'figureViewport') {
+        closeFigureModal();
+      }
+    });
+  }
+
+  if (zoomInBtn) {
+    zoomInBtn.addEventListener('click', () => {
+      if (typeof calculateZoomTransform === 'function') {
+        currentZoomState = calculateZoomTransform(currentZoomState, { type: 'zoomIn' });
+      } else {
+        currentZoomState.scale = Math.min(currentZoomState.scale * 1.25, 4.0);
+      }
+      updateFigureTransform();
+    });
+  }
+
+  if (zoomOutBtn) {
+    zoomOutBtn.addEventListener('click', () => {
+      if (typeof calculateZoomTransform === 'function') {
+        currentZoomState = calculateZoomTransform(currentZoomState, { type: 'zoomOut' });
+      } else {
+        currentZoomState.scale = Math.max(currentZoomState.scale / 1.25, 0.5);
+      }
+      updateFigureTransform();
+    });
+  }
+
+  if (zoomResetBtn) {
+    zoomResetBtn.addEventListener('click', () => {
+      if (typeof calculateZoomTransform === 'function') {
+        currentZoomState = calculateZoomTransform(currentZoomState, { type: 'reset' });
+      } else {
+        currentZoomState = { scale: 1.0, x: 0, y: 0 };
+      }
+      updateFigureTransform();
+    });
   }
 
   function setupNavButtonListeners(prevLesson, nextLesson) {
@@ -1062,10 +1322,15 @@ function generateOfflineShell() {
   function renderQuiz(quiz, lessonId) {
     const isCompleted = completedLessons.has(lessonId);
     let html = \`<div class="quiz-card" id="quizContainer">
-      <div class="quiz-title">Interactive Quiz (\${quiz.questions.length} Questions)</div>\`;
+      <div class="quiz-title">Interactive Knowledge Check (\${quiz.questions.length} Questions)</div>\`;
 
     quiz.questions.forEach((q, idx) => {
+      const stageInfo = typeof formatQuizStage === 'function' 
+        ? formatQuizStage(q.stage) 
+        : { label: (q.stage || 'check').toUpperCase(), color: '#58a6ff' };
+
       html += \`<div class="quiz-q" data-q="\${idx}">
+        <div class="quiz-stage-badge" style="background:\${stageInfo.color}">\${stageInfo.label}</div>
         <p>\${idx + 1}. \${q.question}</p>
         <div class="quiz-options">\`;
       q.options.forEach((opt, optIdx) => {
@@ -1076,7 +1341,8 @@ function generateOfflineShell() {
       </div>\`;
     });
 
-    html += \`<button class="quiz-submit-btn" id="quizSubmit">\${isCompleted ? 'Quiz Completed (Retake)' : 'Submit Quiz Answers'}</button></div>\`;
+    html += \`<div id="quizResultBanner" style="display:none;" class="quiz-result-banner"></div>\`;
+    html += \`<button class="quiz-submit-btn" id="quizSubmit">\${isCompleted ? 'Quiz Completed (Retake)' : 'Grade & Submit Answers'}</button></div>\`;
     return html;
   }
 
@@ -1099,7 +1365,10 @@ function generateOfflineShell() {
 
     const submitBtn = document.getElementById('quizSubmit');
     submitBtn.addEventListener('click', () => {
-      let score = 0;
+      const grading = typeof gradeQuiz === 'function'
+        ? gradeQuiz(quiz.questions, selectedAnswers)
+        : { score: 0, total: quiz.questions.length, percentage: 0, passed: false };
+
       quiz.questions.forEach((q, idx) => {
         const selected = selectedAnswers[idx];
         const qDiv = container.querySelector(\`[data-q="\${idx}"]\`);
@@ -1113,17 +1382,24 @@ function generateOfflineShell() {
             optBtn.classList.add('incorrect');
           }
         });
-
-        if (selected === q.correct) score++;
       });
 
-      // Mark lesson as completed
-      completedLessons.add(lessonId);
-      localStorage.setItem('completed_lessons', JSON.stringify(Array.from(completedLessons)));
-      if (curriculum) renderSidebar(curriculum.phases);
-      updateProgress();
+      const banner = document.getElementById('quizResultBanner');
+      if (banner) {
+        banner.style.display = 'block';
+        banner.className = 'quiz-result-banner ' + (grading.passed ? 'passed' : 'failed');
+        banner.textContent = \`Score: \${grading.score} / \${grading.total} (\${grading.percentage}%) — \` +
+          (grading.passed ? 'Passed! Excellent work.' : 'Keep reviewing the material and try again.');
+      }
 
-      submitBtn.textContent = \`Score: \${score} / \${quiz.questions.length} (Saved!)\`;
+      if (grading.passed) {
+        completedLessons.add(lessonId);
+        localStorage.setItem('completed_lessons', JSON.stringify(Array.from(completedLessons)));
+        if (curriculum) renderSidebar(curriculum.phases);
+        updateProgress();
+      }
+
+      submitBtn.textContent = 'Retake Quiz';
     });
   }
 })();
