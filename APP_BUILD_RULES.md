@@ -162,20 +162,32 @@ grep -rn "https://" offline-app/dist/*.html offline-app/dist/*.js | grep -v "ai-
 ## 6. Environment Setup & Canonical Commands
 
 ### Required Environment Variables
-Set these before running any Android build task:
+Set these before running any Android build task (or let `rebuild-app.sh` detect them automatically):
 ```bash
 export ANDROID_HOME=/home/amihkum/Android/Sdk
 export JAVA_HOME=/home/amihkum/.jdk/jdk-21
 export PATH=$JAVA_HOME/bin:$PATH
 ```
 
-### Complete End-to-End Build Sequence
+### One-Click Automated Rebuild Command (Recommended)
+Run the automated release pipeline with a single command:
+```bash
+# Auto-increments minor version (e.g. v1.1.0 -> v1.2.0), runs tests, builds, signs, and archives
+./scripts/rebuild-app.sh
 
+# Or with an explicit version:
+./scripts/rebuild-app.sh 1.3.0
+```
+
+> **IMPORTANT RULE: Manual Release Only — Zero In-App Update Polling**  
+> The Android app must remain **100% strictly self-contained and offline**. App users are **NOT** allowed to check for updates or download patches from within the app. There are no background update checks or network calls. All releases are created and distributed manually by **Amit Kumar**.
+
+### Complete Manual End-to-End Build Sequence (Step-by-Step)
 ```bash
 # 1. Regenerate offline assets & 6 pre-compiled book volumes
 node scripts/build-offline-bundle.js
 
-# 2. Run unit tests
+# 2. Run unit tests (44+ tests across 8 suites)
 node --test offline-app/test_*.js
 
 # 3. Sync web assets to Capacitor Android project

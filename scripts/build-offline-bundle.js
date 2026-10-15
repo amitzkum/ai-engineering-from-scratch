@@ -2184,7 +2184,7 @@ function generateOfflineShell() {
       <ul class="phase-list" id="phaseList"></ul>
       <div class="sidebar-footer" id="sidebarFooter">
         <div class="sidebar-attribution">
-          <span class="sidebar-release-tag">v1.1.0 Release</span>
+          <span class="sidebar-release-tag">v1.2.0 Release</span>
           <div class="sidebar-author">App: <strong>Amit Kumar</strong></div>
           <div class="sidebar-source">Curriculum: <strong>AI Engineering from Scratch</strong></div>
         </div>
@@ -2258,7 +2258,7 @@ function generateOfflineShell() {
 
           <div class="backup-card" style="margin-top: 16px;">
             <h3>Official Release & Attribution</h3>
-            <p><strong>App Version:</strong> 1.1.0 (Release Edition)</p>
+            <p><strong>App Version:</strong> 1.2.0 (Release Edition)</p>
             <p><strong>Offline App Architecture & Packaging:</strong> Amit Kumar</p>
             <p><strong>Curriculum & Pedagogical Source:</strong> AI Engineering from Scratch Contributors</p>
             <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 8px;">Standalone offline edition featuring 542 lessons, 6 complete volumes, interactive quizzes, and local progress tracking.</p>
@@ -2369,7 +2369,7 @@ function generateOfflineShell() {
       <div class="about-modal-header">
         <div class="about-title-wrap">
           <h2 class="about-title">AI Engineering from Scratch</h2>
-          <span class="about-badge">v1.1.0 Official Release</span>
+          <span class="about-badge">v1.2.0 Official Release</span>
         </div>
         <button class="figure-tool-btn close" id="closeAboutBtn" title="Close">✕</button>
       </div>
@@ -2388,7 +2388,7 @@ function generateOfflineShell() {
         </div>
         <hr class="about-divider">
         <div class="about-modal-footer">
-          <div>Build: <strong>1.1.0 (Signed Release APK)</strong> · Local Database: <strong>542 Lessons / 6 Volumes</strong></div>
+          <div>Build: <strong>1.2.0 (Signed Release APK)</strong> · Local Database: <strong>542 Lessons / 6 Volumes</strong></div>
           <div>Zero External Network Dependencies · 100% On-Device Storage</div>
         </div>
       </div>
