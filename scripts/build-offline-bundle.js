@@ -260,7 +260,15 @@ function copyStaticAssets() {
     fs.copyFileSync(playgroundControllerJs, path.join(DIST_DIR, 'playground-controller.js'));
     console.log('   copied dist/playground-controller.js');
   }
+
+  // Copy sqlite-db.js
+  const sqliteDbJs = path.join(REPO_ROOT, 'offline-app', 'sqlite-db.js');
+  if (fs.existsSync(sqliteDbJs)) {
+    fs.copyFileSync(sqliteDbJs, path.join(DIST_DIR, 'sqlite-db.js'));
+    console.log('   copied dist/sqlite-db.js');
+  }
 }
+
 
 async function buildCurriculum() {
   console.log('📚 Pre-rendering 542 lessons and quizzes...');
@@ -1248,6 +1256,152 @@ function generateOfflineShell() {
     }
     .quiz-submit-btn:hover { opacity: 0.9; }
 
+    /* Chapter Completion Card (SQLite-backed) */
+    .chapter-complete-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 50px;
+      padding: 22px 24px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+    .chapter-complete-card.is-completed {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.05);
+    }
+    .complete-card-info {
+      flex: 1;
+    }
+    .complete-card-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .chapter-complete-card.is-completed .complete-card-badge {
+      color: #10b981;
+    }
+    .complete-card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .complete-card-status-text {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .complete-card-timestamp {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: #10b981;
+      margin-top: 4px;
+    }
+    .chapter-complete-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--bg-card);
+      border: 2px solid var(--accent);
+      color: var(--ink);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .chapter-complete-btn:hover {
+      background: var(--accent);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .chapter-complete-btn.completed {
+      background: #10b981;
+      border-color: #10b981;
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+    .chapter-complete-btn.completed:hover {
+      background: #059669;
+      border-color: #059669;
+    }
+
+    /* Per-Page SQLite Notes Section */
+    .page-notes-card {
+      margin-top: 24px;
+      padding: 20px 22px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .page-notes-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .page-notes-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .page-notes-db-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      background: rgba(88, 166, 255, 0.12);
+      color: var(--accent);
+      border-radius: 4px;
+    }
+    .page-notes-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+    .page-notes-textarea {
+      width: 100%;
+      min-height: 110px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      resize: vertical;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .page-notes-textarea:focus {
+      border-color: var(--accent);
+    }
+    .page-notes-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
     /* Lesson Navigation Footer */
     .lesson-nav-footer {
       display: flex;
@@ -2184,7 +2338,7 @@ function generateOfflineShell() {
       <ul class="phase-list" id="phaseList"></ul>
       <div class="sidebar-footer" id="sidebarFooter">
         <div class="sidebar-attribution">
-          <span class="sidebar-release-tag">v1.2.0 Release</span>
+          <span class="sidebar-release-tag">v1.3.0 Release</span>
           <div class="sidebar-author">App: <strong>Amit Kumar</strong></div>
           <div class="sidebar-source">Curriculum: <strong>AI Engineering from Scratch</strong></div>
         </div>
@@ -2258,7 +2412,7 @@ function generateOfflineShell() {
 
           <div class="backup-card" style="margin-top: 16px;">
             <h3>Official Release & Attribution</h3>
-            <p><strong>App Version:</strong> 1.2.0 (Release Edition)</p>
+            <p><strong>App Version:</strong> 1.3.0 (Release Edition)</p>
             <p><strong>Offline App Architecture & Packaging:</strong> Amit Kumar</p>
             <p><strong>Curriculum & Pedagogical Source:</strong> AI Engineering from Scratch Contributors</p>
             <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 8px;">Standalone offline edition featuring 542 lessons, 6 complete volumes, interactive quizzes, and local progress tracking.</p>
@@ -2369,7 +2523,7 @@ function generateOfflineShell() {
       <div class="about-modal-header">
         <div class="about-title-wrap">
           <h2 class="about-title">AI Engineering from Scratch</h2>
-          <span class="about-badge">v1.2.0 Official Release</span>
+          <span class="about-badge">v1.3.0 Official Release</span>
         </div>
         <button class="figure-tool-btn close" id="closeAboutBtn" title="Close">✕</button>
       </div>
@@ -2388,7 +2542,7 @@ function generateOfflineShell() {
         </div>
         <hr class="about-divider">
         <div class="about-modal-footer">
-          <div>Build: <strong>1.2.0 (Signed Release APK)</strong> · Local Database: <strong>542 Lessons / 6 Volumes</strong></div>
+          <div>Build: <strong>1.3.0 (Signed Release APK)</strong> · Local Database: <strong>542 Lessons / 6 Volumes</strong></div>
           <div>Zero External Network Dependencies · 100% On-Device Storage</div>
         </div>
       </div>
@@ -2404,6 +2558,7 @@ function generateOfflineShell() {
   <script src="mermaid.min.js"></script>
   <script src="viewer-controller.js"></script>
   <script src="library-controller.js"></script>
+  <script src="sqlite-db.js"></script>
   <script src="study-controller.js"></script>
   <script src="search-engine.js"></script>
   <script src="playground-controller.js"></script>
@@ -2418,7 +2573,24 @@ function generateOfflineShell() {
   let allLessonsInOrder = [];
   let lessonIndexMap = new Map();
   let activeLessonId = null;
-  const completedLessons = new Set(JSON.parse(localStorage.getItem('completed_lessons') || '[]'));
+  // Initialize Local SQLite Database (Phase 9)
+  const sqliteDb = typeof SQLiteDatabase !== 'undefined' ? new SQLiteDatabase() : null;
+  const completedLessons = new Set();
+  if (sqliteDb) {
+    const completions = sqliteDb.getAllCompletedChapters();
+    if (completions && completions.length > 0) {
+      completions.forEach(c => completedLessons.add(c.lesson_id));
+    } else {
+      const legacy = JSON.parse(localStorage.getItem('completed_lessons') || '[]');
+      legacy.forEach(id => {
+        completedLessons.add(id);
+        sqliteDb.markChapterComplete(id, '', id);
+      });
+    }
+  } else {
+    const legacy = JSON.parse(localStorage.getItem('completed_lessons') || '[]');
+    legacy.forEach(id => completedLessons.add(id));
+  }
 
   const sidebarToggle = document.getElementById('sidebarToggle');
   const sidebar = document.getElementById('sidebar');
@@ -2484,7 +2656,29 @@ function generateOfflineShell() {
 
   // Local Study State
   let userBookmarks = JSON.parse(localStorage.getItem('user_bookmarks') || '[]');
-  let userNotes = JSON.parse(localStorage.getItem('user_notes') || '{}');
+  let userNotes = {};
+  if (sqliteDb) {
+    const dbNotes = sqliteDb.getAllPageNotes();
+    if (dbNotes && dbNotes.length > 0) {
+      dbNotes.forEach(n => {
+        userNotes[n.lesson_id] = {
+          lessonId: n.lesson_id,
+          lessonTitle: n.title,
+          phaseId: n.phase_id,
+          text: n.note_text,
+          updatedAt: n.updated_at,
+        };
+      });
+    } else {
+      const legacyNotes = JSON.parse(localStorage.getItem('user_notes') || '{}');
+      for (const [id, n] of Object.entries(legacyNotes)) {
+        userNotes[id] = n;
+        sqliteDb.savePageNote(id, n.phaseId || '', n.lessonTitle || id, n.text, n.updatedAt);
+      }
+    }
+  } else {
+    userNotes = JSON.parse(localStorage.getItem('user_notes') || '{}');
+  }
   let quizScores = JSON.parse(localStorage.getItem('quiz_scores') || '{}');
   let currentLoadedLesson = null;
   let libraryManifest = [];
@@ -2566,16 +2760,59 @@ function generateOfflineShell() {
       bookmarkBtn.classList.toggle('active', isBkm);
       bookmarkBtn.textContent = isBkm ? '★ Bookmarked' : '🔖 Bookmark';
     }
-    const note = typeof getNote === 'function' ? getNote(userNotes, lesson.id) : null;
+    const note = (sqliteDb && typeof sqliteDb.getPageNote === 'function')
+      ? sqliteDb.getPageNote(lesson.id)
+      : (typeof getNote === 'function' ? getNote(userNotes, lesson.id) : null);
+    const noteText = note ? (note.note_text || note.text || '') : '';
+
     if (noteToggleBtn) {
-      noteToggleBtn.classList.toggle('active', !!note);
-      noteToggleBtn.textContent = note ? '📝 Note (1)' : '📝 Notes';
+      noteToggleBtn.classList.toggle('active', !!noteText);
+      noteToggleBtn.textContent = noteText ? '📝 Note (1)' : '📝 Notes';
     }
     if (noteTextarea) {
-      noteTextarea.value = note ? note.text : '';
+      noteTextarea.value = noteText;
     }
     if (noteSaveStatus) {
-      noteSaveStatus.textContent = note ? 'Saved locally' : '';
+      noteSaveStatus.textContent = noteText ? 'Saved to SQLite' : '';
+    }
+
+    // Synchronize dedicated in-page notes section if present
+    const pageNotesTextarea = document.getElementById('pageNotesTextarea');
+    const pageNotesStatus = document.getElementById('pageNotesStatus');
+    const pageNotesCharCount = document.getElementById('pageNotesCharCount');
+    if (pageNotesTextarea && pageNotesTextarea.value !== noteText) {
+      pageNotesTextarea.value = noteText;
+    }
+    if (pageNotesStatus) {
+      pageNotesStatus.textContent = noteText ? 'Saved to SQLite Database (page_notes)' : 'Ready';
+    }
+    if (pageNotesCharCount) {
+      pageNotesCharCount.textContent = noteText.length + ' characters';
+    }
+  }
+
+  function updateCompletionButtonUI(lessonId, isCompleted, timestamp) {
+    const card = document.getElementById('chapterCompleteCard');
+    const btn = document.getElementById('markCompleteBtn');
+    const statusText = document.getElementById('completeStatusText');
+    const timeEl = document.getElementById('completeCardTimestamp');
+
+    if (!btn) return;
+    if (isCompleted) {
+      btn.classList.add('completed');
+      btn.innerHTML = '<span class="complete-icon">✓</span><span class="complete-text">Chapter Completed</span>';
+      if (card) card.classList.add('is-completed');
+      if (statusText) statusText.textContent = '✓ Completed and tracked in local SQLite database';
+      if (timeEl) {
+        const d = timestamp ? new Date(timestamp) : new Date();
+        timeEl.textContent = 'Completed on ' + d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+    } else {
+      btn.classList.remove('completed');
+      btn.innerHTML = '<span class="complete-icon">○</span><span class="complete-text">Mark Chapter as Complete</span>';
+      if (card) card.classList.remove('is-completed');
+      if (statusText) statusText.textContent = 'Mark this chapter as complete to record your progress in SQLite.';
+      if (timeEl) timeEl.textContent = '';
     }
   }
 
@@ -2606,19 +2843,31 @@ function generateOfflineShell() {
   let noteSaveTimeout = null;
   if (noteTextarea) {
     noteTextarea.addEventListener('input', () => {
+      const text = noteTextarea.value;
+      const pageTextarea = document.getElementById('pageNotesTextarea');
+      const pageStatus = document.getElementById('pageNotesStatus');
+      const pageCharCount = document.getElementById('pageNotesCharCount');
+      if (pageTextarea && pageTextarea.value !== text) pageTextarea.value = text;
+      if (pageCharCount) pageCharCount.textContent = text.length + ' characters';
       if (noteSaveStatus) noteSaveStatus.textContent = 'Saving...';
+      if (pageStatus) pageStatus.textContent = 'Saving to SQLite...';
+
       clearTimeout(noteSaveTimeout);
       noteSaveTimeout = setTimeout(() => {
         if (!currentLoadedLesson) return;
-        const text = noteTextarea.value;
+        if (sqliteDb) {
+          sqliteDb.savePageNote(currentLoadedLesson.id, currentLoadedLesson.phaseId, currentLoadedLesson.title, text);
+        }
         if (typeof saveNote === 'function') {
           userNotes = saveNote(userNotes, currentLoadedLesson, text);
           localStorage.setItem('user_notes', JSON.stringify(userNotes));
-          if (noteSaveStatus) noteSaveStatus.textContent = text.trim() ? 'Saved locally' : '';
-          updateLessonUserTools(currentLoadedLesson);
-          updateProgress();
         }
-      }, 400);
+        const savedLabel = text.trim() ? 'Saved to SQLite Database (page_notes)' : 'Ready';
+        if (pageStatus) pageStatus.textContent = savedLabel;
+        if (noteSaveStatus) noteSaveStatus.textContent = text.trim() ? 'Saved to SQLite' : '';
+        updateLessonUserTools(currentLoadedLesson);
+        updateProgress();
+      }, 350);
     });
   }
 
@@ -2757,6 +3006,7 @@ function generateOfflineShell() {
           btn.addEventListener('click', () => {
             const id = btn.getAttribute('data-id');
             delete userNotes[id];
+            if (sqliteDb) sqliteDb.deletePageNote(id);
             localStorage.setItem('user_notes', JSON.stringify(userNotes));
             renderDashboard();
             if (currentLoadedLesson && currentLoadedLesson.id === id) {
@@ -2823,6 +3073,13 @@ function generateOfflineShell() {
           localStorage.setItem('user_bookmarks', JSON.stringify(userBookmarks));
           localStorage.setItem('user_notes', JSON.stringify(userNotes));
           localStorage.setItem('quiz_scores', JSON.stringify(quizScores));
+
+          if (sqliteDb) {
+            (res.data.completedLessons || []).forEach(id => sqliteDb.markChapterComplete(id, '', id));
+            for (const [id, n] of Object.entries(res.data.notes || {})) {
+              sqliteDb.savePageNote(id, n.phaseId || '', n.lessonTitle || id, n.text, n.updatedAt);
+            }
+          }
 
           if (curriculum) renderSidebar(curriculum.phases);
           updateProgress();
@@ -3161,6 +3418,51 @@ function generateOfflineShell() {
       content += renderQuiz(lesson.quiz, lesson.id);
     }
 
+    // Phase 9: Chapter Completion & Per-Page SQLite Notes
+    const isCompleted = completedLessons.has(lesson.id);
+    const completionRec = sqliteDb ? sqliteDb.getChapterCompletion(lesson.id) : null;
+    let completionDateStr = '';
+    if (isCompleted && completionRec && completionRec.completed_at) {
+      const d = new Date(completionRec.completed_at);
+      completionDateStr = 'Completed on ' + d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    const noteRec = (sqliteDb && typeof sqliteDb.getPageNote === 'function')
+      ? sqliteDb.getPageNote(lesson.id)
+      : (typeof getNote === 'function' ? getNote(userNotes, lesson.id) : null);
+    const existingNoteText = noteRec ? (noteRec.note_text || noteRec.text || '') : '';
+
+    // Chapter Completion Card
+    content += '<div class="chapter-complete-card ' + (isCompleted ? 'is-completed' : '') + '" id="chapterCompleteCard">';
+    content += '  <div class="complete-card-info">';
+    content += '    <div class="complete-card-badge">CHAPTER PROGRESS</div>';
+    content += '    <div class="complete-card-title">' + (lesson.title || '') + '</div>';
+    content += '    <div class="complete-card-status-text" id="completeStatusText">' + (isCompleted ? '✓ Completed and tracked in local SQLite database' : 'Mark this chapter as complete to record your progress in SQLite.') + '</div>';
+    content += '    <div class="complete-card-timestamp" id="completeCardTimestamp">' + completionDateStr + '</div>';
+    content += '  </div>';
+    content += '  <button class="chapter-complete-btn ' + (isCompleted ? 'completed' : '') + '" id="markCompleteBtn" data-lesson-id="' + lesson.id + '">';
+    content += '    <span class="complete-icon">' + (isCompleted ? '✓' : '○') + '</span>';
+    content += '    <span class="complete-text">' + (isCompleted ? 'Chapter Completed' : 'Mark Chapter as Complete') + '</span>';
+    content += '  </button>';
+    content += '</div>';
+
+    // Dedicated Per-Page SQLite Notes Section
+    content += '<div class="page-notes-card" id="pageNotesCard">';
+    content += '  <div class="page-notes-header">';
+    content += '    <div class="page-notes-title">';
+    content += '      <span class="page-notes-icon">📝</span>';
+    content += '      <span>Chapter Notes</span>';
+    content += '      <span class="page-notes-db-badge">🗄️ SQLite Table: page_notes</span>';
+    content += '    </div>';
+    content += '    <span class="page-notes-status" id="pageNotesStatus">' + (existingNoteText ? 'Saved to SQLite Database (page_notes)' : 'Ready') + '</span>';
+    content += '  </div>';
+    content += '  <textarea class="page-notes-textarea" id="pageNotesTextarea" placeholder="Take personal study notes for this chapter... auto-saved to local SQLite database.">' + existingNoteText.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</textarea>';
+    content += '  <div class="page-notes-footer">';
+    content += '    <span class="page-notes-char-count" id="pageNotesCharCount">' + existingNoteText.length + ' characters</span>';
+    content += '    <span class="page-notes-hint">Synced with top-bar Notes panel</span>';
+    content += '  </div>';
+    content += '</div>';
+
     // Previous / Next Lesson Navigation Footer
     content += '<div class="lesson-nav-footer">';
     if (prevLesson) {
@@ -3278,6 +3580,63 @@ function generateOfflineShell() {
     // Setup interactive hooks
     setupQuizListeners(lesson.quiz, lesson.id);
     setupNavButtonListeners(prevLesson, nextLesson);
+
+    // Wire up Chapter Completion Button
+    const markCompleteBtn = document.getElementById('markCompleteBtn');
+    if (markCompleteBtn) {
+      markCompleteBtn.addEventListener('click', () => {
+        let nowCompleted = false;
+        if (sqliteDb) {
+          nowCompleted = sqliteDb.toggleChapterCompletion(lesson.id, lesson.phaseId, lesson.title);
+        } else {
+          nowCompleted = !completedLessons.has(lesson.id);
+        }
+
+        if (nowCompleted) {
+          completedLessons.add(lesson.id);
+        } else {
+          completedLessons.delete(lesson.id);
+        }
+        localStorage.setItem('completed_lessons', JSON.stringify(Array.from(completedLessons)));
+
+        const compRec = sqliteDb ? sqliteDb.getChapterCompletion(lesson.id) : null;
+        updateCompletionButtonUI(lesson.id, nowCompleted, compRec ? compRec.completed_at : Date.now());
+        if (curriculum) renderSidebar(curriculum.phases);
+        updateProgress();
+      });
+    }
+
+    // Wire up In-Page SQLite Notes Textarea
+    const pageNotesTextarea = document.getElementById('pageNotesTextarea');
+    const pageNotesStatus = document.getElementById('pageNotesStatus');
+    const pageNotesCharCount = document.getElementById('pageNotesCharCount');
+
+    if (pageNotesTextarea) {
+      pageNotesTextarea.addEventListener('input', () => {
+        const text = pageNotesTextarea.value;
+        if (pageNotesStatus) pageNotesStatus.textContent = 'Saving to SQLite...';
+        if (pageNotesCharCount) pageNotesCharCount.textContent = text.length + ' characters';
+        if (noteTextarea && noteTextarea.value !== text) noteTextarea.value = text;
+        if (noteSaveStatus) noteSaveStatus.textContent = 'Saving...';
+
+        clearTimeout(noteSaveTimeout);
+        noteSaveTimeout = setTimeout(() => {
+          if (!currentLoadedLesson) return;
+          if (sqliteDb) {
+            sqliteDb.savePageNote(currentLoadedLesson.id, currentLoadedLesson.phaseId, currentLoadedLesson.title, text);
+          }
+          if (typeof saveNote === 'function') {
+            userNotes = saveNote(userNotes, currentLoadedLesson, text);
+            localStorage.setItem('user_notes', JSON.stringify(userNotes));
+          }
+          const savedLabel = text.trim() ? 'Saved to SQLite Database (page_notes)' : 'Ready';
+          if (pageNotesStatus) pageNotesStatus.textContent = savedLabel;
+          if (noteSaveStatus) noteSaveStatus.textContent = text.trim() ? 'Saved to SQLite' : '';
+          updateLessonUserTools(currentLoadedLesson);
+          updateProgress();
+        }, 350);
+      });
+    }
   }
 
   function wireFigureZoomModal() {
@@ -3498,7 +3857,11 @@ function generateOfflineShell() {
 
       if (grading.passed) {
         completedLessons.add(lessonId);
+        if (sqliteDb) {
+          sqliteDb.markChapterComplete(lessonId, currentLoadedLesson ? currentLoadedLesson.phaseId : '', currentLoadedLesson ? currentLoadedLesson.title : lessonId);
+        }
         localStorage.setItem('completed_lessons', JSON.stringify(Array.from(completedLessons)));
+        updateCompletionButtonUI(lessonId, true, Date.now());
         if (curriculum) renderSidebar(curriculum.phases);
         updateProgress();
       }

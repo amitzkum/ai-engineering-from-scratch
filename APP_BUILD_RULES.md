@@ -159,6 +159,30 @@ grep -rn "https://" offline-app/dist/*.html offline-app/dist/*.js | grep -v "ai-
 
 ---
 
+## 5.1 Local SQLite3 Persistence Architecture
+
+Starting with Phase 9 / v1.3.0, user study progress and per-page notes are managed through a local, relational SQLite3 database layer (`sqlite-db.js`):
+
+1. **Relational Database Schema:**
+   - **`chapter_completions`**: `(lesson_id TEXT PRIMARY KEY, phase_id TEXT, title TEXT, completed_at INTEGER)`  
+     Tracks explicit chapter completions from the in-article completion button (`#markCompleteBtn`) and passing quiz scores.
+   - **`page_notes`**: `(lesson_id TEXT PRIMARY KEY, phase_id TEXT, title TEXT, note_text TEXT, updated_at INTEGER)`  
+     Stores rich per-page notes captured directly from the in-article notes editor (`#pageNotesTextarea`) and header drawer (`#noteTextarea`).
+   - **`schema_meta`**: `(key TEXT PRIMARY KEY, value TEXT)`  
+     Maintains schema version and database migration metadata.
+
+2. **Database Engine & Standards Compliance:**
+   - Evaluates standard SQL queries (`CREATE TABLE`, `INSERT OR REPLACE`, `SELECT`, `DELETE`).
+   - Ensures zero-network local persistence with atomic updates.
+   - Tested directly against Node 22+ built-in `node:sqlite` (`DatabaseSync`) to ensure full SQLite3 syntax compliance.
+   - Provides `exportSqlDump()` for standard SQL export.
+
+3. **In-Article Completion & Notes UI Contract:**
+   - Every lesson ends with a dedicated completion card containing `#markCompleteBtn` that toggles completion in SQLite and updates the sidebar checkmark (`✓`) and progress meters.
+   - Every lesson ends with a per-page notes card containing `#pageNotesTextarea` that auto-saves debounced edits directly into the `page_notes` SQLite table with live status indicators.
+
+---
+
 ## 6. Environment Setup & Canonical Commands
 
 ### Required Environment Variables

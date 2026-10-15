@@ -259,7 +259,7 @@ adb install -r ${targetApkName}
     let readme = fs.readFileSync(readmePath, 'utf8');
     const tableHeader = '|:-------:|:------------:|:--------:|:----------------:|:-------------:|';
     const newRow = `| **v${vInfo.nextVersion}** | ${today} | [\`${targetApkName}\`](v${vInfo.nextVersion}/${targetApkName}) | \`${checksum}\` | [Notes](v${vInfo.nextVersion}/RELEASE_NOTES.md) |`;
-    if (!readme.includes(`v${vInfo.nextVersion}`)) {
+    if (!readme.includes(`| **v${vInfo.nextVersion}**`)) {
       readme = readme.replace(tableHeader, `${tableHeader}\n${newRow}`);
       fs.writeFileSync(readmePath, readme, 'utf8');
       console.log('   ✓ Updated releases/README.md registry table');
