@@ -189,6 +189,12 @@ function copyStaticAssets() {
   if (fs.existsSync(figuresJs)) {
     fs.copyFileSync(figuresJs, path.join(DIST_DIR, 'figures.js'));
   }
+
+  // Copy search-engine.js
+  const searchEngineJs = path.join(REPO_ROOT, 'offline-app', 'search-engine.js');
+  if (fs.existsSync(searchEngineJs)) {
+    fs.copyFileSync(searchEngineJs, path.join(DIST_DIR, 'search-engine.js'));
+  }
 }
 
 async function buildCurriculum() {
@@ -458,6 +464,57 @@ function generateOfflineShell() {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.85rem;
     }
+    .filter-chips {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 8px 0 4px;
+      scrollbar-width: none;
+    }
+    .filter-chips::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 12px;
+      padding: 3px 10px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-chip:hover { border-color: var(--accent); color: var(--text); }
+    .filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: bold; }
+    .filter-subbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+    }
+    .lang-select {
+      background: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .match-count-badge { color: var(--text-muted); font-size: 0.75rem; }
+    mark { background: rgba(255, 215, 0, 0.35); color: inherit; padding: 1px 3px; border-radius: 2px; }
+    .search-result-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .search-result-item:hover, .search-result-item.active { background: var(--bg-card); }
+    .search-result-title { font-size: 0.92rem; font-weight: 600; color: var(--text); }
+    .search-result-hook { font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .search-result-tags { display: flex; gap: 6px; margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); }
     .phase-list { list-style: none; padding: 0; margin: 0; }
     .phase-item { border-bottom: 1px solid var(--border); }
     .phase-header {
@@ -680,6 +737,25 @@ function generateOfflineShell() {
       </div>
       <div class="search-box">
         <input type="text" class="search-input" id="searchInput" placeholder="Search 542 lessons...">
+        <div class="filter-chips" id="filterChips">
+          <button class="filter-chip active" data-category="all">All</button>
+          <button class="filter-chip" data-category="Foundations & ML">Foundations</button>
+          <button class="filter-chip" data-category="Deep Learning & Vision">Deep Learning</button>
+          <button class="filter-chip" data-category="NLP & Transformers">NLP</button>
+          <button class="filter-chip" data-category="LLMs & GenAI">LLMs</button>
+          <button class="filter-chip" data-category="Agents & Protocols">Agents</button>
+          <button class="filter-chip" data-category="Production & Capstones">Production</button>
+        </div>
+        <div class="filter-subbar">
+          <select class="lang-select" id="langSelect">
+            <option value="all">All Languages</option>
+            <option value="python">Python</option>
+            <option value="typescript">TypeScript</option>
+            <option value="rust">Rust</option>
+            <option value="julia">Julia</option>
+          </select>
+          <span class="match-count-badge" id="matchCountBadge">542 Lessons</span>
+        </div>
       </div>
       <ul class="phase-list" id="phaseList"></ul>
     </aside>
@@ -692,6 +768,7 @@ function generateOfflineShell() {
     </main>
   </div>
 
+  <script src="search-engine.js"></script>
   <script src="app.js"></script>
 </body>
 </html>`;
@@ -775,6 +852,7 @@ function generateOfflineShell() {
         });
       });
 
+      searchIndex = buildSearchIndex(curriculum);
       renderSidebar(curriculum.phases);
       updateProgress();
 
@@ -785,17 +863,83 @@ function generateOfflineShell() {
       articleWrap.innerHTML = '<h1>Error Loading Curriculum</h1><p>' + err.message + '</p>';
     });
 
-  function renderSidebar(phases, filterText = '') {
+  let searchIndex = [];
+  let currentFilters = { category: 'all', language: 'all' };
+  const filterChips = document.getElementById('filterChips');
+  const langSelect = document.getElementById('langSelect');
+  const matchCountBadge = document.getElementById('matchCountBadge');
+
+  if (filterChips) {
+    filterChips.querySelectorAll('.filter-chip').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        filterChips.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentFilters.category = e.target.getAttribute('data-category');
+        applySearchAndFilter();
+      });
+    });
+  }
+
+  if (langSelect) {
+    langSelect.addEventListener('change', (e) => {
+      currentFilters.language = e.target.value;
+      applySearchAndFilter();
+    });
+  }
+
+  searchInput.addEventListener('input', () => {
+    applySearchAndFilter();
+  });
+
+  function applySearchAndFilter() {
+    const query = searchInput.value.trim();
+    if (!query && currentFilters.category === 'all' && currentFilters.language === 'all') {
+      renderSidebar(curriculum.phases);
+      if (matchCountBadge) matchCountBadge.textContent = \`\${allLessonsInOrder.length} Lessons\`;
+      return;
+    }
+
+    const matches = search(searchIndex, query, currentFilters);
+    if (matchCountBadge) matchCountBadge.textContent = \`\${matches.length} Found\`;
+    renderSearchResults(matches, query);
+  }
+
+  function renderSearchResults(results, query) {
     phaseList.innerHTML = '';
-    const query = filterText.toLowerCase().trim();
+    if (results.length === 0) {
+      phaseList.innerHTML = '<li style="padding:28px 16px;text-align:center;color:var(--text-muted);font-family:JetBrains Mono, monospace;font-size:0.85rem;">No lessons found matching filters</li>';
+      return;
+    }
+
+    results.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'search-result-item' + (activeLessonId === item.id ? ' active' : '');
+      const highlightedTitle = highlightMatches(item.title, query);
+      const highlightedHook = highlightMatches(item.hook, query);
+
+      li.innerHTML = \`
+        <div class="search-result-title">\${highlightedTitle}</div>
+        <div class="search-result-tags">
+          <span>\${item.category}</span> · <span>\${item.type}</span> · <span>\${item.languages}</span>
+        </div>
+        \${highlightedHook ? \`<div class="search-result-hook">\${highlightedHook}</div>\` : ''}
+      \`;
+
+      li.addEventListener('click', () => {
+        loadLesson(item.id);
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('open');
+          drawerBackdrop.classList.remove('open');
+        }
+      });
+      phaseList.appendChild(li);
+    });
+  }
+
+  function renderSidebar(phases) {
+    phaseList.innerHTML = '';
 
     phases.forEach(phase => {
-      const filteredLessons = phase.lessons.filter(l => 
-        !query || l.title.toLowerCase().includes(query) || l.hook.toLowerCase().includes(query)
-      );
-
-      if (query && filteredLessons.length === 0) return;
-
       const phaseCompletedCount = phase.lessons.filter(l => completedLessons.has(l.id)).length;
       const li = document.createElement('li');
       li.className = 'phase-item';
@@ -815,7 +959,7 @@ function generateOfflineShell() {
       ul.style.padding = '0';
       ul.style.margin = '0';
 
-      filteredLessons.forEach(lesson => {
+      phase.lessons.forEach(lesson => {
         const item = document.createElement('li');
         item.className = 'lesson-item' + 
           (activeLessonId === lesson.id ? ' active' : '') + 
@@ -835,11 +979,6 @@ function generateOfflineShell() {
       phaseList.appendChild(li);
     });
   }
-
-  // Search input handler
-  searchInput.addEventListener('input', (e) => {
-    if (curriculum) renderSidebar(curriculum.phases, e.target.value);
-  });
 
   function loadLesson(lessonId) {
     activeLessonId = lessonId;
