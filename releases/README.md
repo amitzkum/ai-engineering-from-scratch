@@ -36,3 +36,10 @@ To install the latest release on your Android device:
 ```bash
 adb install -r releases/ai-engineering-latest.apk
 ```
+
+---
+
+## 🛠️ Rebuilding & Cutting New Releases
+
+For step-by-step instructions on merging upstream commits and releasing new versions, see [RELEASE_NEW_BUILD.md](../RELEASE_NEW_BUILD.md).
+

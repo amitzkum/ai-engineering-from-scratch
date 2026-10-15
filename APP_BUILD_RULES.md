@@ -170,7 +170,7 @@ export PATH=$JAVA_HOME/bin:$PATH
 ```
 
 ### One-Click Automated Rebuild Command (Recommended)
-Run the automated release pipeline with a single command:
+Run the automated release pipeline with a single command (see [RELEASE_NEW_BUILD.md](RELEASE_NEW_BUILD.md) for the complete developer runbook):
 ```bash
 # Auto-increments minor version (e.g. v1.1.0 -> v1.2.0), runs tests, builds, signs, and archives
 ./scripts/rebuild-app.sh
