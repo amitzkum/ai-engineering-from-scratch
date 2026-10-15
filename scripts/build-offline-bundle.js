@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const { execSync } = require('child_process');
 const { parseMd } = require('../site/lesson-markdown');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
@@ -237,6 +238,13 @@ function copyStaticAssets() {
   const viewerControllerJs = path.join(REPO_ROOT, 'offline-app', 'viewer-controller.js');
   if (fs.existsSync(viewerControllerJs)) {
     fs.copyFileSync(viewerControllerJs, path.join(DIST_DIR, 'viewer-controller.js'));
+  }
+
+  // Copy library-controller.js
+  const libraryControllerJs = path.join(REPO_ROOT, 'offline-app', 'library-controller.js');
+  if (fs.existsSync(libraryControllerJs)) {
+    fs.copyFileSync(libraryControllerJs, path.join(DIST_DIR, 'library-controller.js'));
+    console.log('   copied dist/library-controller.js');
   }
 }
 
@@ -1116,6 +1124,254 @@ function generateOfflineShell() {
     .nav-btn-title { font-size: 0.95rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .nav-btn.next { text-align: right; margin-left: auto; }
 
+    /* Header View Switcher */
+    .view-switcher {
+      display: inline-flex;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .view-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .view-btn:hover { color: var(--ink); }
+    .view-btn.active {
+      background: var(--blueprint);
+      color: #ffffff;
+    }
+
+    /* Library Screen Styling */
+    .library-header {
+      padding: 32px 32px 20px;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    .library-header-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: var(--blueprint);
+      margin-bottom: 8px;
+    }
+    .library-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 2.1rem;
+      margin: 0 0 10px 0;
+      color: var(--ink);
+    }
+    .library-desc {
+      font-size: 1.02rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      max-width: 800px;
+    }
+    .library-search-bar {
+      max-width: 480px;
+      margin-bottom: 8px;
+    }
+    .library-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 24px;
+      padding: 0 32px 48px;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    .library-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .library-card:hover {
+      border-color: var(--blueprint);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .card-cover-bar {
+      background: var(--bg-card);
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-vol-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      color: var(--blueprint);
+    }
+    .card-size-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      background: var(--bg-surface);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    .card-body {
+      padding: 20px 18px 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.35rem;
+      margin: 0 0 6px 0;
+      color: var(--ink);
+    }
+    .card-subtitle {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin: 0 0 16px 0;
+      line-height: 1.45;
+    }
+    .card-meta {
+      display: flex;
+      gap: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      margin-bottom: 12px;
+    }
+    .card-phases {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--ink-mute);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+    }
+    .lib-action-btn {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .lib-action-btn:hover {
+      border-color: var(--blueprint);
+      color: var(--blueprint);
+    }
+    .lib-action-btn.primary {
+      background: var(--blueprint);
+      border-color: var(--blueprint);
+      color: #ffffff;
+      flex: 1.4;
+    }
+
+    /* Standalone Book Reader Pane */
+    .book-reader-view {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+    .reader-toolbar {
+      padding: 10px 20px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .reader-tool-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .reader-tool-btn:hover {
+      border-color: var(--blueprint);
+      color: var(--blueprint);
+    }
+    .reader-tool-btn.primary {
+      background: var(--blueprint);
+      color: #ffffff;
+      border-color: var(--blueprint);
+    }
+    .reader-vol-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--blueprint);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .reader-tool-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .book-reader-container {
+      flex: 1;
+      height: calc(100vh - 114px);
+      width: 100%;
+      background: #fafaf5;
+    }
+    .book-reader-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
     /* Mobile Backdrop & Layout (< 768px) */
     .drawer-backdrop {
       display: none;
@@ -1138,6 +1394,9 @@ function generateOfflineShell() {
       .article-wrap { padding: 20px 16px; }
       .lesson-nav-footer { flex-direction: column; }
       .nav-btn { max-width: 100%; }
+      .header-title { display: none; }
+      .library-header { padding: 20px 16px; }
+      .library-grid { padding: 0 16px 32px; grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -1146,6 +1405,10 @@ function generateOfflineShell() {
     <div class="header-left">
       <button class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Toggle Sidebar">☰</button>
       <div class="header-title">AI / FROM SCRATCH</div>
+      <div class="view-switcher" id="viewSwitcher">
+        <button class="view-btn active" id="viewLessonsBtn" data-view="lessons">📖 Lessons</button>
+        <button class="view-btn" id="viewLibraryBtn" data-view="library">📚 Books</button>
+      </div>
     </div>
     <div class="header-actions">
       <button class="font-btn" id="fontDecBtn" title="Decrease font size">A-</button>
@@ -1198,9 +1461,40 @@ function generateOfflineShell() {
     </aside>
 
     <main class="content-area" id="contentArea">
-      <div class="breadcrumbs-bar" id="breadcrumbsBar">Phase · Lesson</div>
-      <div class="lesson-article article-wrap" id="articleWrap">
-        <h1>Loading Curriculum...</h1>
+      <!-- 1. Interactive Lesson View -->
+      <div id="lessonView" class="view-pane" style="display: block;">
+        <div class="breadcrumbs-bar" id="breadcrumbsBar">Phase · Lesson</div>
+        <div class="lesson-article article-wrap" id="articleWrap">
+          <h1>Loading Curriculum...</h1>
+        </div>
+      </div>
+
+      <!-- 2. Book Library View -->
+      <div id="libraryView" class="view-pane" style="display: none;">
+        <div class="library-header">
+          <div class="library-header-badge">6 VOLUMES · 542 CHAPTERS · OFFLINE EDITIONS</div>
+          <h1 class="library-title">Curriculum Book Library</h1>
+          <p class="library-desc">Pre-compiled standalone volumes of the entire AI Engineering from Scratch curriculum. Read offline in-app, export full EPUB 3 archives to device storage, or generate clean print/PDF versions.</p>
+          <div class="library-search-bar">
+            <input type="text" class="search-input" id="librarySearchInput" placeholder="Filter book volumes by title, phase, or topic...">
+          </div>
+        </div>
+        <div class="library-grid" id="libraryGrid"></div>
+      </div>
+
+      <!-- 3. Standalone Book Reader View -->
+      <div id="bookReaderView" class="view-pane book-reader-view" style="display: none;">
+        <div class="reader-toolbar">
+          <button class="reader-tool-btn" id="readerBackBtn">← Back to Library</button>
+          <div class="reader-vol-title" id="readerVolTitle">Volume Reader</div>
+          <div class="reader-tool-actions">
+            <a class="reader-tool-btn" id="readerExportEpubBtn" href="#" download title="Save EPUB to device">📥 Save EPUB</a>
+            <button class="reader-tool-btn primary" id="readerPrintBtn" title="Print or save as PDF">🖨️ Print / PDF</button>
+          </div>
+        </div>
+        <div class="book-reader-container">
+          <iframe id="bookReaderFrame" class="book-reader-frame" src="about:blank" title="Book Volume Reader"></iframe>
+        </div>
       </div>
     </main>
   </div>
@@ -1229,6 +1523,7 @@ function generateOfflineShell() {
   <script src="lesson-figures.js"></script>
   <script src="mermaid.min.js"></script>
   <script src="viewer-controller.js"></script>
+  <script src="library-controller.js"></script>
   <script src="search-engine.js"></script>
   <script src="app.js"></script>
 </body>
@@ -1255,6 +1550,137 @@ function generateOfflineShell() {
   const fontIncBtn = document.getElementById('fontIncBtn');
   const progressText = document.getElementById('progressText');
   const progressBarFill = document.getElementById('progressBarFill');
+
+  // View Switcher & Screen Management
+  const viewLessonsBtn = document.getElementById('viewLessonsBtn');
+  const viewLibraryBtn = document.getElementById('viewLibraryBtn');
+  const lessonView = document.getElementById('lessonView');
+  const libraryView = document.getElementById('libraryView');
+  const bookReaderView = document.getElementById('bookReaderView');
+  const libraryGrid = document.getElementById('libraryGrid');
+  const librarySearchInput = document.getElementById('librarySearchInput');
+  const readerBackBtn = document.getElementById('readerBackBtn');
+  const readerPrintBtn = document.getElementById('readerPrintBtn');
+  const readerExportEpubBtn = document.getElementById('readerExportEpubBtn');
+  const readerVolTitle = document.getElementById('readerVolTitle');
+  const bookReaderFrame = document.getElementById('bookReaderFrame');
+
+  let libraryManifest = [];
+
+  function switchView(viewName) {
+    if (viewName === 'lessons') {
+      if (lessonView) lessonView.style.display = 'block';
+      if (libraryView) libraryView.style.display = 'none';
+      if (bookReaderView) bookReaderView.style.display = 'none';
+      if (viewLessonsBtn) viewLessonsBtn.classList.add('active');
+      if (viewLibraryBtn) viewLibraryBtn.classList.remove('active');
+    } else if (viewName === 'library') {
+      if (lessonView) lessonView.style.display = 'none';
+      if (libraryView) libraryView.style.display = 'block';
+      if (bookReaderView) bookReaderView.style.display = 'none';
+      if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
+      if (viewLibraryBtn) viewLibraryBtn.classList.add('active');
+      if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
+      if (drawerBackdrop) drawerBackdrop.classList.remove('open');
+    } else if (viewName === 'reader') {
+      if (lessonView) lessonView.style.display = 'none';
+      if (libraryView) libraryView.style.display = 'none';
+      if (bookReaderView) bookReaderView.style.display = 'flex';
+      if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
+      if (viewLibraryBtn) viewLibraryBtn.classList.add('active');
+      if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
+      if (drawerBackdrop) drawerBackdrop.classList.remove('open');
+    }
+  }
+
+  if (viewLessonsBtn) viewLessonsBtn.addEventListener('click', () => switchView('lessons'));
+  if (viewLibraryBtn) viewLibraryBtn.addEventListener('click', () => switchView('library'));
+  if (readerBackBtn) readerBackBtn.addEventListener('click', () => switchView('library'));
+
+  // Load 6-Volume Book Library
+  fetch('books/library.json')
+    .then(res => res.json())
+    .then(manifest => {
+      libraryManifest = manifest;
+      renderLibraryGrid(manifest);
+    })
+    .catch(err => {
+      console.warn('Could not load library.json:', err);
+      if (libraryGrid) {
+        libraryGrid.innerHTML = '<p style="color:var(--text-muted);font-family:JetBrains Mono,monospace;padding:24px;">Could not load book library: ' + err.message + '</p>';
+      }
+    });
+
+  function renderLibraryGrid(volumes) {
+    if (!libraryGrid) return;
+    if (!volumes || volumes.length === 0) {
+      libraryGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-family: JetBrains Mono, monospace; padding: 40px;">No volumes found matching search</p>';
+      return;
+    }
+    libraryGrid.innerHTML = volumes.map(vol => {
+      return typeof renderVolumeCardHtml === 'function' ? renderVolumeCardHtml(vol) : '';
+    }).join('');
+
+    // Wire action buttons
+    libraryGrid.querySelectorAll('.read-vol-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = btn.getAttribute('data-url');
+        const volNum = parseInt(btn.getAttribute('data-vol'), 10);
+        openBookReader(volNum, url);
+      });
+    });
+
+    libraryGrid.querySelectorAll('.print-vol-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = btn.getAttribute('data-url');
+        const card = btn.closest('.library-card');
+        const volNum = card ? parseInt(card.getAttribute('data-volume-num'), 10) : 1;
+        openBookReader(volNum, url, true);
+      });
+    });
+  }
+
+  function openBookReader(volNum, url, autoPrint = false) {
+    const vol = libraryManifest.find(v => v.number === volNum) || { title: \`Volume \${volNum}\` };
+    if (readerVolTitle) readerVolTitle.textContent = \`Volume \${vol.roman || volNum}: \${vol.title}\`;
+    if (readerExportEpubBtn && vol.epubFile) {
+      readerExportEpubBtn.href = \`books/\${vol.epubFile}\`;
+      readerExportEpubBtn.setAttribute('download', vol.epubFile);
+    }
+    if (bookReaderFrame) {
+      bookReaderFrame.src = url;
+      if (autoPrint) {
+        bookReaderFrame.onload = () => {
+          try {
+            bookReaderFrame.contentWindow.print();
+          } catch (_) {}
+        };
+      } else {
+        bookReaderFrame.onload = null;
+      }
+    }
+    switchView('reader');
+  }
+
+  if (readerPrintBtn) {
+    readerPrintBtn.addEventListener('click', () => {
+      if (bookReaderFrame && bookReaderFrame.contentWindow) {
+        try {
+          bookReaderFrame.contentWindow.print();
+        } catch (err) {
+          console.warn('Print error:', err);
+        }
+      }
+    });
+  }
+
+  if (librarySearchInput) {
+    librarySearchInput.addEventListener('input', () => {
+      const q = librarySearchInput.value.trim();
+      const filtered = typeof filterVolumes === 'function' ? filterVolumes(libraryManifest, q) : libraryManifest;
+      renderLibraryGrid(filtered);
+    });
+  }
 
   // Font sizing
   let currentFontSize = parseFloat(localStorage.getItem('app_font_size') || '1.05');
@@ -1442,6 +1868,7 @@ function generateOfflineShell() {
   }
 
   function loadLesson(lessonId) {
+    switchView('lessons');
     activeLessonId = lessonId;
     localStorage.setItem('last_lesson', lessonId);
 
@@ -1797,6 +2224,10 @@ async function main() {
   await bundleFonts();
   await bundleMermaid();
   copyStaticAssets();
+
+  console.log('📚 Building 6 Curriculum Book Volumes (EPUB & HTML)...');
+  execSync('python3 scripts/build_offline_books.py', { cwd: REPO_ROOT, stdio: 'inherit' });
+
   const curriculum = await buildCurriculum();
   generateOfflineShell();
   console.log(`🎉 Offline bundle ready at: ${DIST_DIR}`);
