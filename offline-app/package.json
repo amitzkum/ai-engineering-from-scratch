@@ -1,13 +1,18 @@
 {
   "name": "offline-app",
   "version": "1.0.0",
-  "description": "",
+  "description": "Offline Android Tablet and Mobile edition of AI Engineering from Scratch.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "ai",
+    "machine-learning",
+    "android",
+    "offline-first"
+  ],
+  "author": "Amit Kumar",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {

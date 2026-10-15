@@ -912,6 +912,145 @@ function generateOfflineShell() {
       max-height: 100%;
     }
 
+    /* Sidebar Footer Attribution */
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px 14px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      flex-shrink: 0;
+    }
+    .sidebar-release-tag {
+      display: inline-block;
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--accent);
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      font-size: 0.68rem;
+      letter-spacing: 0.5px;
+    }
+    .sidebar-author {
+      color: var(--text);
+      margin-top: 2px;
+    }
+    .sidebar-author strong {
+      color: var(--accent);
+    }
+    .sidebar-source {
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      margin-top: 2px;
+    }
+
+    /* About & Attribution Modal */
+    .about-modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 210;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .about-modal-backdrop.open { display: flex; }
+    .about-modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+    }
+    .about-modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .about-title-wrap { display: flex; flex-direction: column; gap: 4px; }
+    .about-title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+    }
+    .about-badge {
+      display: inline-block;
+      align-self: flex-start;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(63, 185, 80, 0.15);
+      color: var(--success);
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(63, 185, 80, 0.3);
+    }
+    .about-modal-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+    .about-section-heading {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .about-section-lead {
+      font-size: 0.95rem;
+      color: var(--text);
+      margin: 0 0 6px 0;
+    }
+    .about-section-lead strong {
+      color: var(--accent);
+    }
+    .about-text {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+    .about-divider {
+      height: 1px;
+      background: var(--border);
+      border: none;
+      margin: 0;
+    }
+    .about-mono {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+    }
+    .about-modal-footer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: var(--bg-card);
+      padding: 12px;
+      border-radius: 8px;
+    }
+
     /* Interactive Quiz Container */
     .quiz-container {
       border: 1px solid var(--blueprint);
@@ -1795,6 +1934,7 @@ function generateOfflineShell() {
         <option value="light">Light Theme</option>
         <option value="sepia">Sepia Theme</option>
       </select>
+      <button class="font-btn" id="aboutBtn" title="About & Attribution">ℹ️</button>
     </div>
   </header>
 
@@ -1834,6 +1974,13 @@ function generateOfflineShell() {
         </div>
       </div>
       <ul class="phase-list" id="phaseList"></ul>
+      <div class="sidebar-footer" id="sidebarFooter">
+        <div class="sidebar-attribution">
+          <span class="sidebar-release-tag">v1.0.0 Release</span>
+          <div class="sidebar-author">App: <strong>Amit Kumar</strong></div>
+          <div class="sidebar-source">Curriculum: <strong>AI Engineering from Scratch</strong></div>
+        </div>
+      </div>
     </aside>
 
     <main class="content-area" id="contentArea">
@@ -1900,6 +2047,14 @@ function generateOfflineShell() {
             </div>
             <div id="backupFeedback" class="backup-feedback" style="display: none;"></div>
           </div>
+
+          <div class="backup-card" style="margin-top: 16px;">
+            <h3>Official Release & Attribution</h3>
+            <p><strong>App Version:</strong> 1.0.0 (Release Edition)</p>
+            <p><strong>Offline App Architecture & Packaging:</strong> Amit Kumar</p>
+            <p><strong>Curriculum & Pedagogical Source:</strong> AI Engineering from Scratch Contributors</p>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 8px;">Standalone offline edition featuring 542 lessons, 6 complete volumes, interactive quizzes, and local progress tracking.</p>
+          </div>
         </div>
       </div>
 
@@ -1949,6 +2104,38 @@ function generateOfflineShell() {
     </div>
   </div>
 
+  <!-- About & Attribution Modal -->
+  <div class="about-modal-backdrop" id="aboutModal">
+    <div class="about-modal-card">
+      <div class="about-modal-header">
+        <div class="about-title-wrap">
+          <h2 class="about-title">AI Engineering from Scratch</h2>
+          <span class="about-badge">v1.0.0 Official Release</span>
+        </div>
+        <button class="figure-tool-btn close" id="closeAboutBtn" title="Close">✕</button>
+      </div>
+      <div class="about-modal-body">
+        <div class="about-section">
+          <div class="about-section-heading">📱 App Architecture & Packaging</div>
+          <p class="about-section-lead">Packaged & Engineered for Android Tablets and Mobiles by <strong>Amit Kumar</strong></p>
+          <p class="about-text">Engineered as a standalone, 100% offline-first Android learning experience with pre-rendered DOM caching, local font packaging, touch-optimized dual-pane responsive layout, interactive quiz grader, 6-volume offline book library, client-side search engine, and device study backup.</p>
+        </div>
+        <hr class="about-divider">
+        <div class="about-section">
+          <div class="about-section-heading">📚 Curriculum & Pedagogical Content</div>
+          <p class="about-section-lead">Curriculum Source: <strong>AI Engineering from Scratch Contributors</strong></p>
+          <p class="about-text">All 542 lessons across 20 phases, original algorithm implementations, tests, and deep-dive explanations are authored and maintained by the AI Engineering from Scratch curriculum repository contributors.</p>
+          <p class="about-text" style="margin-top: 6px;">Source Repository: <span class="about-mono">github.com/ai-engineering-from-scratch</span> · Open Source Curriculum</p>
+        </div>
+        <hr class="about-divider">
+        <div class="about-modal-footer">
+          <div>Build: <strong>1.0.0 (Signed Release APK)</strong> · Local Database: <strong>542 Lessons / 6 Volumes</strong></div>
+          <div>Zero External Network Dependencies · 100% On-Device Storage</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     window.AIFS_FIGURE_PROVIDER_VERSIONS = {};
   </script>
@@ -1985,6 +2172,9 @@ function generateOfflineShell() {
   const fontIncBtn = document.getElementById('fontIncBtn');
   const progressText = document.getElementById('progressText');
   const progressBarFill = document.getElementById('progressBarFill');
+  const aboutBtn = document.getElementById('aboutBtn');
+  const aboutModal = document.getElementById('aboutModal');
+  const closeAboutBtn = document.getElementById('closeAboutBtn');
 
   // View Switcher & Screen Management
   const viewLessonsBtn = document.getElementById('viewLessonsBtn');
@@ -2827,6 +3017,20 @@ function generateOfflineShell() {
       if (e.target === figureModal || e.target.id === 'figureViewport') {
         closeFigureModal();
       }
+    });
+  }
+
+  function openAboutModal() {
+    if (aboutModal) aboutModal.classList.add('open');
+  }
+  function closeAboutModal() {
+    if (aboutModal) aboutModal.classList.remove('open');
+  }
+  if (aboutBtn) aboutBtn.addEventListener('click', openAboutModal);
+  if (closeAboutBtn) closeAboutBtn.addEventListener('click', closeAboutModal);
+  if (aboutModal) {
+    aboutModal.addEventListener('click', (e) => {
+      if (e.target === aboutModal) closeAboutModal();
     });
   }
 
