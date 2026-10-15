@@ -156,6 +156,26 @@ async function bundleFonts() {
   console.log('   wrote dist/fonts.css');
 }
 
+async function bundleMermaid() {
+  console.log('📊 Bundling offline Mermaid diagram renderer...');
+  const dest = path.join(DIST_DIR, 'mermaid.min.js');
+  if (fs.existsSync(dest) && fs.statSync(dest).size > 1000000) {
+    return;
+  }
+  const tmpPath = '/tmp/mermaid.min.js';
+  if (fs.existsSync(tmpPath) && fs.statSync(tmpPath).size > 1000000) {
+    fs.copyFileSync(tmpPath, dest);
+    console.log('   bundled dist/mermaid.min.js from cache');
+    return;
+  }
+  try {
+    await downloadFile('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js', dest);
+    console.log('   downloaded dist/mermaid.min.js');
+  } catch (err) {
+    console.warn('Could not bundle mermaid.min.js:', err.message);
+  }
+}
+
 function copyStaticAssets() {
   console.log('🎨 Copying CSS and SVG diagram assets...');
   ensureDir(ASSETS_DIR);
@@ -172,6 +192,19 @@ function copyStaticAssets() {
     }
   }
 
+  // Extract lesson CSS from site/lesson.html
+  const lessonHtmlPath = path.join(REPO_ROOT, 'site', 'lesson.html');
+  if (fs.existsSync(lessonHtmlPath)) {
+    const lessonHtml = fs.readFileSync(lessonHtmlPath, 'utf8');
+    const match = lessonHtml.match(/<style>([\s\S]*?)<\/style>/);
+    if (match) {
+      let lessonCss = match[1];
+      lessonCss = lessonCss.replace(/@import\s+url\([^)]*fonts\.googleapis\.com[^)]*\);?/g, '');
+      fs.writeFileSync(path.join(DIST_DIR, 'lesson.css'), lessonCss, 'utf8');
+      console.log('   wrote dist/lesson.css');
+    }
+  }
+
   // Copy site/assets/figures
   const figuresSrc = path.join(REPO_ROOT, 'site', 'assets', 'figures');
   const figuresDest = path.join(ASSETS_DIR, 'figures');
@@ -184,10 +217,14 @@ function copyStaticAssets() {
     }
   }
 
-  // Copy figures.js
-  const figuresJs = path.join(REPO_ROOT, 'site', 'figures.js');
-  if (fs.existsSync(figuresJs)) {
-    fs.copyFileSync(figuresJs, path.join(DIST_DIR, 'figures.js'));
+  // Copy all interactive figure scripts from site/
+  const siteDir = path.join(REPO_ROOT, 'site');
+  if (fs.existsSync(siteDir)) {
+    for (const f of fs.readdirSync(siteDir)) {
+      if ((f.startsWith('figures') && f.endsWith('.js')) || f === 'lesson-figures.js' || f === 'figure-manifest.js') {
+        fs.copyFileSync(path.join(siteDir, f), path.join(DIST_DIR, f));
+      }
+    }
   }
 
   // Copy search-engine.js
@@ -325,6 +362,7 @@ function generateOfflineShell() {
   <title>AI Engineering from Scratch</title>
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="lesson.css">
   <link rel="stylesheet" href="certifications.css">
   <style>
     :root {
@@ -332,166 +370,94 @@ function generateOfflineShell() {
       --bg-surface: #161b22;
       --bg-card: #21262d;
       --bg-card-hover: #292e36;
+      --code-bg: #161b22;
       --text: #c9d1d9;
       --text-muted: #8b949e;
       --accent: #58a6ff;
       --border: #30363d;
       --success: #3fb950;
       --danger: #f85149;
+      --warn: #d29922;
+
+      /* Compatible variables for figures and site components */
+      --ink: #c9d1d9;
+      --ink-soft: #8b949e;
+      --ink-mute: #6e7681;
+      --blueprint: #58a6ff;
+      --blueprint-tint: rgba(88, 166, 255, 0.1);
+      --blueprint-tint-strong: rgba(88, 166, 255, 0.2);
+      --rule-soft: #30363d;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Source Serif 4', Georgia, serif;
       --sidebar-width: 340px;
       --reader-font-size: 1.05rem;
       --reader-line-height: 1.75;
+    }
+    [data-theme="amoled"] {
+      --bg: #000000;
+      --bg-surface: #0a0a0a;
+      --bg-card: #121212;
+      --bg-card-hover: #1a1a1a;
+      --code-bg: #0a0a0a;
+      --text: #f0f6fc;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --border: #222222;
+      --success: #3fb950;
+      --danger: #f85149;
+      --warn: #d29922;
+
+      --ink: #f0f6fc;
+      --ink-soft: #9da7b3;
+      --ink-mute: #6e7681;
+      --blueprint: #58a6ff;
+      --blueprint-tint: rgba(88, 166, 255, 0.12);
+      --blueprint-tint-strong: rgba(88, 166, 255, 0.25);
+      --rule-soft: #222222;
     }
     [data-theme="light"] {
       --bg: #ffffff;
       --bg-surface: #f6f8fa;
       --bg-card: #f0f2f5;
       --bg-card-hover: #e6e8eb;
+      --code-bg: #f4f6f8;
       --text: #24292f;
       --text-muted: #57606a;
       --accent: #0969da;
       --border: #d0d7de;
       --success: #1a7f37;
       --danger: #cf222e;
+      --warn: #9a6700;
+
+      --ink: #1a1a1a;
+      --ink-soft: #555555;
+      --ink-mute: #777777;
+      --blueprint: #0969da;
+      --blueprint-tint: rgba(9, 105, 218, 0.08);
+      --blueprint-tint-strong: rgba(9, 105, 218, 0.16);
+      --rule-soft: #d0d7de;
     }
     [data-theme="sepia"] {
       --bg: #fbf0d9;
       --bg-surface: #f4e3c1;
       --bg-card: #ecdcbb;
       --bg-card-hover: #e4d3b0;
+      --code-bg: #f2e1bd;
       --text: #433422;
       --text-muted: #705e46;
       --accent: #9e4a1a;
       --border: #dac4a5;
       --success: #2d7a47;
       --danger: #b33927;
-    }
-    [data-theme="amoled"] {
-      --bg: #000000;
-      --bg-surface: #0a0a0a;
-      --bg-card: #141414;
-      --bg-card-hover: #1f1f1f;
-      --text: #e6edf3;
-      --text-muted: #7d8590;
-      --accent: #58a6ff;
-      --border: #21262d;
-      --success: #3fb950;
-      --danger: #f85149;
-    }
+      --warn: #a36209;
 
-    /* Code block with copy button */
-    .article-wrap pre {
-      position: relative;
-    }
-    .copy-code-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      border-radius: 4px;
-      padding: 3px 8px;
-      font-size: 0.72rem;
-      font-family: 'JetBrains Mono', monospace;
-      cursor: pointer;
-      opacity: 0.85;
-      transition: all 0.15s;
-    }
-    .copy-code-btn:hover {
-      opacity: 1;
-      color: var(--text);
-      border-color: var(--accent);
-    }
-    .copy-code-btn.copied {
-      color: var(--success);
-      border-color: var(--success);
-    }
-
-    /* SVG Zoom Modal */
-    .figure-modal-backdrop {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.88);
-      z-index: 200;
-      flex-direction: column;
-    }
-    .figure-modal-backdrop.open { display: flex; }
-    .figure-modal-toolbar {
-      height: 52px;
-      padding: 0 16px;
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .figure-modal-title { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); font-weight: bold; }
-    .figure-modal-btns { display: flex; gap: 8px; }
-    .figure-tool-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 6px;
-      padding: 6px 12px;
-      font-size: 0.85rem;
-      font-family: 'JetBrains Mono', monospace;
-      cursor: pointer;
-    }
-    .figure-tool-btn.close { color: var(--danger); font-weight: bold; }
-    .figure-viewport {
-      flex: 1;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-    }
-    .figure-container {
-      transition: transform 0.05s ease-out;
-      transform-origin: center center;
-      max-width: 90vw;
-      max-height: 80vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .figure-container svg, .figure-container img {
-      max-width: 100%;
-      max-height: 100%;
-    }
-
-    /* Quiz Enhancements */
-    .quiz-stage-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: bold;
-      color: #fff;
-      margin-bottom: 8px;
-    }
-    .quiz-result-banner {
-      margin-top: 20px;
-      padding: 16px;
-      border-radius: 8px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.92rem;
-      font-weight: bold;
-      text-align: center;
-      border: 1px solid var(--border);
-    }
-    .quiz-result-banner.passed {
-      background: rgba(63, 185, 80, 0.15);
-      border-color: var(--success);
-      color: var(--success);
-    }
-    .quiz-result-banner.failed {
-      background: rgba(248, 81, 73, 0.15);
-      border-color: var(--danger);
-      color: var(--danger);
+      --ink: #382b1b;
+      --ink-soft: #63503b;
+      --ink-mute: #826e57;
+      --blueprint: #9e4a1a;
+      --blueprint-tint: rgba(158, 74, 26, 0.1);
+      --blueprint-tint-strong: rgba(158, 74, 26, 0.2);
+      --rule-soft: #dac4a5;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -717,23 +683,6 @@ function generateOfflineShell() {
     .article-wrap h2 { font-size: 1.5rem; margin-top: 36px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
     .article-wrap h3 { font-size: 1.2rem; margin-top: 24px; }
     .article-wrap p { margin: 16px 0; }
-    .article-wrap pre {
-      background: var(--bg-card);
-      padding: 16px;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
-      border: 1px solid var(--border);
-      position: relative;
-    }
-    .article-wrap code {
-      font-family: 'JetBrains Mono', monospace;
-      background: var(--bg-card);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.9em;
-    }
     .article-wrap blockquote {
       border-left: 4px solid var(--accent);
       margin: 20px 0;
@@ -742,6 +691,401 @@ function generateOfflineShell() {
       border-radius: 0 8px 8px 0;
       font-style: italic;
     }
+
+    /* Code Blocks */
+    .article-wrap pre {
+      position: relative;
+      margin: 24px 0;
+      padding-top: 42px;
+      padding-bottom: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--code-bg);
+      border-radius: 8px;
+    }
+    .article-wrap pre code {
+      display: block;
+      background: transparent;
+      color: var(--ink);
+      padding: 16px 20px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      border: none;
+    }
+    .code-lang {
+      position: absolute;
+      top: 0;
+      left: 0;
+      max-width: calc(100% - 88px);
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      padding: 0 14px;
+      background: var(--blueprint);
+      color: #ffffff;
+      border-bottom-right-radius: 6px;
+      z-index: 2;
+    }
+    .code-copy {
+      position: absolute;
+      top: 0;
+      right: 0;
+      min-width: 76px;
+      height: 38px;
+      background: var(--bg-surface);
+      border: none;
+      border-left: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      border-bottom-left-radius: 6px;
+      padding: 0 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      cursor: pointer;
+      z-index: 2;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .code-copy:hover {
+      color: var(--blueprint);
+      background: var(--bg-card);
+    }
+    .code-copy.copied {
+      color: var(--success);
+    }
+
+    /* Syntax Highlighting */
+    .syn-keyword { color: var(--blueprint); font-weight: 600; }
+    .syn-string { color: #a5d6ff; }
+    [data-theme="light"] .syn-string { color: #0a3069; }
+    [data-theme="sepia"] .syn-string { color: #2e6030; }
+    .syn-number { color: #79c0ff; }
+    [data-theme="light"] .syn-number { color: #0550ae; }
+    [data-theme="sepia"] .syn-number { color: #b33927; }
+    .syn-comment { color: var(--text-muted); font-style: italic; }
+    .syn-function { color: #d2a8ff; font-weight: 500; }
+    [data-theme="light"] .syn-function { color: #8250df; }
+    [data-theme="sepia"] .syn-function { color: #8a3b14; }
+    .syn-operator { color: var(--text-muted); }
+
+    /* Mermaid & Diagram Containers */
+    .mermaid-container {
+      margin: 28px 0;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .mermaid-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .mermaid-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      cursor: pointer;
+    }
+    .mermaid-btn:hover { color: var(--blueprint); border-color: var(--blueprint); }
+    .mermaid-render {
+      padding: 20px;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .mermaid-render svg {
+      max-width: 100%;
+      height: auto;
+      cursor: zoom-in;
+    }
+    .mermaid-source { display: none; }
+
+    /* Interactive Lesson Figures */
+    .lesson-figure {
+      margin: 28px 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-surface);
+      overflow: hidden;
+    }
+    .lesson-figure svg {
+      cursor: zoom-in;
+    }
+    .lesson-figure.lf-animated {
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      margin: 28px 0;
+      padding: 14px;
+      border-radius: 8px;
+    }
+
+    /* SVG Zoom Modal */
+    .figure-modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 200;
+      flex-direction: column;
+    }
+    .figure-modal-backdrop.open { display: flex; }
+    .figure-modal-toolbar {
+      height: 52px;
+      padding: 0 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .figure-modal-title { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); font-weight: bold; }
+    .figure-modal-btns { display: flex; gap: 8px; }
+    .figure-tool-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+    }
+    .figure-tool-btn.close { color: var(--danger); font-weight: bold; }
+    .figure-viewport {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    .figure-container {
+      transition: transform 0.05s ease-out;
+      transform-origin: center center;
+      max-width: 90vw;
+      max-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .figure-container svg, .figure-container img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* Interactive Quiz Container */
+    .quiz-container {
+      border: 1px solid var(--blueprint);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 44px 0 20px;
+      background: var(--bg-surface);
+    }
+    .quiz-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--blueprint);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .quiz-question {
+      margin-bottom: 28px;
+      padding-bottom: 24px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .quiz-question:last-of-type {
+      border-bottom: none;
+      margin-bottom: 16px;
+      padding-bottom: 0;
+    }
+    .quiz-question-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .quiz-stage-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: bold;
+      color: #fff;
+    }
+    .quiz-question-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .quiz-question-text {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 0.96rem;
+      transition: all 0.15s ease;
+      width: 100%;
+      appearance: none;
+    }
+    .quiz-option:hover {
+      border-color: var(--blueprint);
+      background: var(--bg-card-hover);
+    }
+    .quiz-option.selected {
+      border-color: var(--blueprint);
+      background: rgba(88, 166, 255, 0.14);
+    }
+    .quiz-option .opt-letter {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+    .quiz-option.selected .opt-letter {
+      background: var(--blueprint);
+      border-color: var(--blueprint);
+      color: #ffffff;
+    }
+    .quiz-option.correct {
+      border-color: var(--success) !important;
+      background: rgba(63, 185, 80, 0.16) !important;
+      color: var(--success) !important;
+    }
+    .quiz-option.correct .opt-letter {
+      background: var(--success) !important;
+      border-color: var(--success) !important;
+      color: #ffffff !important;
+    }
+    .quiz-option.incorrect {
+      border-color: var(--danger) !important;
+      background: rgba(248, 81, 73, 0.16) !important;
+      color: var(--danger) !important;
+    }
+    .quiz-option.incorrect .opt-letter {
+      background: var(--danger) !important;
+      border-color: var(--danger) !important;
+      color: #ffffff !important;
+    }
+    .quiz-explanation {
+      margin-top: 12px;
+      padding: 12px 16px;
+      border-left: 3px solid var(--blueprint);
+      background: var(--bg-card);
+      border-radius: 0 6px 6px 0;
+      display: none;
+    }
+    .quiz-explanation.visible { display: block; }
+    .quiz-explanation-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      color: var(--blueprint);
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .quiz-explanation-body {
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: var(--text-muted);
+    }
+    .quiz-result-banner {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      font-weight: bold;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .quiz-result-banner.passed {
+      background: rgba(63, 185, 80, 0.15);
+      border-color: var(--success);
+      color: var(--success);
+    }
+    .quiz-result-banner.failed {
+      background: rgba(248, 81, 73, 0.15);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+    .quiz-submit-btn {
+      margin-top: 16px;
+      padding: 12px 24px;
+      background: var(--blueprint);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      transition: opacity 0.15s;
+    }
+    .quiz-submit-btn:hover { opacity: 0.9; }
 
     /* Lesson Navigation Footer */
     .lesson-nav-footer {
@@ -771,47 +1115,6 @@ function generateOfflineShell() {
     .nav-btn-label { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--accent); text-transform: uppercase; }
     .nav-btn-title { font-size: 0.95rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .nav-btn.next { text-align: right; margin-left: auto; }
-
-    /* Interactive Quiz Card */
-    .quiz-card {
-      margin-top: 50px;
-      padding: 28px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-    }
-    .quiz-title { font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; color: var(--accent); margin-bottom: 20px; font-weight: bold; }
-    .quiz-q { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-    .quiz-q p { font-weight: bold; margin-bottom: 12px; }
-    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
-    .quiz-option {
-      padding: 12px 16px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.95rem;
-      transition: all 0.15s;
-    }
-    .quiz-option:hover { border-color: var(--accent); background: var(--bg-card-hover); }
-    .quiz-option.selected { border-color: var(--accent); background: rgba(88, 166, 255, 0.12); }
-    .quiz-option.correct { border-color: var(--success) !important; background: rgba(63, 185, 80, 0.18) !important; }
-    .quiz-option.incorrect { border-color: var(--danger) !important; background: rgba(248, 81, 73, 0.18) !important; }
-    .quiz-explain { margin-top: 10px; font-size: 0.9rem; color: var(--text-muted); display: none; line-height: 1.5; padding: 10px; background: var(--bg-card); border-radius: 6px; }
-    .quiz-submit-btn {
-      margin-top: 16px;
-      padding: 12px 24px;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.95rem;
-      transition: opacity 0.15s;
-    }
-    .quiz-submit-btn:hover { opacity: 0.9; }
 
     /* Mobile Backdrop & Layout (< 768px) */
     .drawer-backdrop {
@@ -896,7 +1199,7 @@ function generateOfflineShell() {
 
     <main class="content-area" id="contentArea">
       <div class="breadcrumbs-bar" id="breadcrumbsBar">Phase · Lesson</div>
-      <div class="article-wrap" id="articleWrap">
+      <div class="lesson-article article-wrap" id="articleWrap">
         <h1>Loading Curriculum...</h1>
       </div>
     </main>
@@ -918,6 +1221,13 @@ function generateOfflineShell() {
     </div>
   </div>
 
+  <script>
+    window.AIFS_FIGURE_PROVIDER_VERSIONS = {};
+  </script>
+  <script src="figure-manifest.js"></script>
+  <script src="figures.js"></script>
+  <script src="lesson-figures.js"></script>
+  <script src="mermaid.min.js"></script>
   <script src="viewer-controller.js"></script>
   <script src="search-engine.js"></script>
   <script src="app.js"></script>
@@ -1194,16 +1504,11 @@ function generateOfflineShell() {
     articleWrap.innerHTML = content;
     document.getElementById('contentArea').scrollTop = 0;
 
-    // Attach Copy buttons to code blocks
-    articleWrap.querySelectorAll('pre').forEach(pre => {
-      if (pre.querySelector('.copy-code-btn')) return;
-      const btn = document.createElement('button');
-      btn.className = 'copy-code-btn';
-      btn.textContent = 'Copy';
-      btn.setAttribute('aria-label', 'Copy code to clipboard');
+    // Wire up built-in code block copy buttons
+    articleWrap.querySelectorAll('.code-copy').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const code = pre.querySelector('code') ? pre.querySelector('code').innerText : pre.innerText;
+        const code = btn.getAttribute('data-code') || (btn.closest('pre') ? btn.closest('pre').querySelector('code').innerText : '');
         navigator.clipboard.writeText(code).then(() => {
           btn.textContent = 'Copied!';
           btn.classList.add('copied');
@@ -1216,23 +1521,80 @@ function generateOfflineShell() {
           setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
         });
       });
-      pre.appendChild(btn);
     });
 
-    // Attach Figure Zoom handler on SVG diagrams and figure frames
-    articleWrap.querySelectorAll('figure, .figure-frame, svg').forEach(el => {
-      if (el.closest('button') || el.closest('header') || el.closest('.copy-code-btn')) return;
-      el.style.cursor = 'zoom-in';
-      el.title = 'Click to enlarge diagram';
-      el.addEventListener('click', (e) => {
-        if (e.target.closest('button') || e.target.closest('a')) return;
-        openFigureModal(el);
+    // Render Mermaid diagrams offline
+    if (window.mermaid) {
+      const curTheme = document.documentElement.getAttribute('data-theme');
+      const mermaidTheme = curTheme === 'light' ? 'default' : (curTheme === 'sepia' ? 'neutral' : 'dark');
+      try {
+        window.mermaid.initialize({
+          startOnLoad: false,
+          theme: mermaidTheme,
+          securityLevel: 'loose'
+        });
+      } catch (_) {}
+
+      articleWrap.querySelectorAll('.mermaid-block').forEach((block, bIdx) => {
+        const sourcePre = block.querySelector('pre.mermaid-source');
+        const renderDiv = block.querySelector('.mermaid-render');
+        if (sourcePre && renderDiv) {
+          const graphDef = sourcePre.textContent.trim();
+          const graphId = 'mermaid-svg-' + Date.now() + '-' + bIdx;
+          window.mermaid.render(graphId, graphDef).then(res => {
+            renderDiv.innerHTML = res.svg;
+            sourcePre.style.display = 'none';
+            const expandBtn = block.querySelector('.mermaid-expand');
+            if (expandBtn) {
+              expandBtn.addEventListener('click', () => {
+                const svg = renderDiv.querySelector('svg');
+                if (svg) openFigureModal(svg);
+              });
+            }
+            wireFigureZoomModal();
+          }).catch(err => {
+            console.warn('Mermaid render error:', err);
+            sourcePre.style.display = 'block';
+          });
+        }
       });
-    });
+    } else {
+      articleWrap.querySelectorAll('pre.mermaid-source').forEach(p => p.style.display = 'block');
+    }
+
+    // Mount interactive lesson figures
+    if (window.AIFS_loadFigureProviders) {
+      window.AIFS_loadFigureProviders(articleWrap).then(() => {
+        if (window.mountLessonFigures) window.mountLessonFigures(articleWrap);
+        wireFigureZoomModal();
+      }).catch(() => {
+        if (window.mountLessonFigures) window.mountLessonFigures(articleWrap);
+        wireFigureZoomModal();
+      });
+    } else if (window.mountLessonFigures) {
+      window.mountLessonFigures(articleWrap);
+      wireFigureZoomModal();
+    } else {
+      wireFigureZoomModal();
+    }
 
     // Setup interactive hooks
     setupQuizListeners(lesson.quiz, lesson.id);
     setupNavButtonListeners(prevLesson, nextLesson);
+  }
+
+  function wireFigureZoomModal() {
+    articleWrap.querySelectorAll('.mermaid-render svg, .lesson-figure svg, figure svg, .figure-frame svg').forEach(svg => {
+      if (svg.getAttribute('data-zoom-wired')) return;
+      svg.setAttribute('data-zoom-wired', '1');
+      svg.style.cursor = 'zoom-in';
+      svg.setAttribute('title', 'Click to enlarge diagram');
+      svg.addEventListener('click', (e) => {
+        if (e.target.closest('input') || e.target.closest('button') || e.target.closest('select')) return;
+        e.stopPropagation();
+        openFigureModal(svg);
+      });
+    });
   }
 
   // Diagram Zoom & Pan Modal
@@ -1321,23 +1683,36 @@ function generateOfflineShell() {
 
   function renderQuiz(quiz, lessonId) {
     const isCompleted = completedLessons.has(lessonId);
-    let html = \`<div class="quiz-card" id="quizContainer">
-      <div class="quiz-title">Interactive Knowledge Check (\${quiz.questions.length} Questions)</div>\`;
+    let html = \`<div class="quiz-container" id="quizContainer">
+      <div class="quiz-title">
+        <span>INTERACTIVE KNOWLEDGE CHECK</span>
+        <span>(\${quiz.questions.length} QUESTIONS)</span>
+      </div>\`;
 
     quiz.questions.forEach((q, idx) => {
       const stageInfo = typeof formatQuizStage === 'function' 
         ? formatQuizStage(q.stage) 
         : { label: (q.stage || 'check').toUpperCase(), color: '#58a6ff' };
 
-      html += \`<div class="quiz-q" data-q="\${idx}">
-        <div class="quiz-stage-badge" style="background:\${stageInfo.color}">\${stageInfo.label}</div>
-        <p>\${idx + 1}. \${q.question}</p>
+      html += \`<div class="quiz-question" data-q="\${idx}">
+        <div class="quiz-question-header">
+          <span class="quiz-stage-badge" style="background:\${stageInfo.color}">\${stageInfo.label}</span>
+          <span class="quiz-question-num">QUESTION \${idx + 1} OF \${quiz.questions.length}</span>
+        </div>
+        <div class="quiz-question-text">\${q.question}</div>
         <div class="quiz-options">\`;
       q.options.forEach((opt, optIdx) => {
-        html += \`<div class="quiz-option" data-opt="\${optIdx}">\${opt}</div>\`;
+        const letter = ['A', 'B', 'C', 'D', 'E'][optIdx] || (optIdx + 1);
+        html += \`<button type="button" class="quiz-option" data-opt="\${optIdx}">
+          <span class="opt-letter">\${letter}</span>
+          <span class="quiz-option-text">\${opt}</span>
+        </button>\`;
       });
       html += \`</div>
-        <div class="quiz-explain" id="explain-\${idx}">\${q.explanation || ''}</div>
+        <div class="quiz-explanation" id="explain-\${idx}">
+          <div class="quiz-explanation-title">EXPLANATION</div>
+          <div class="quiz-explanation-body">\${q.explanation || ''}</div>
+        </div>
       </div>\`;
     });
 
@@ -1354,11 +1729,15 @@ function generateOfflineShell() {
 
     container.querySelectorAll('.quiz-option').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const qDiv = e.target.closest('.quiz-q');
+        const optBtn = e.target.closest('.quiz-option');
+        if (!optBtn) return;
+        const qDiv = optBtn.closest('.quiz-question');
+        if (!qDiv) return;
         const qIdx = qDiv.getAttribute('data-q');
-        const optIdx = parseInt(e.target.getAttribute('data-opt'), 10);
+        const optIdx = parseInt(optBtn.getAttribute('data-opt'), 10);
+
         qDiv.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
-        e.target.classList.add('selected');
+        optBtn.classList.add('selected');
         selectedAnswers[qIdx] = optIdx;
       });
     });
@@ -1372,10 +1751,13 @@ function generateOfflineShell() {
       quiz.questions.forEach((q, idx) => {
         const selected = selectedAnswers[idx];
         const qDiv = container.querySelector(\`[data-q="\${idx}"]\`);
+        if (!qDiv) return;
         const explain = document.getElementById(\`explain-\${idx}\`);
-        if (explain) explain.style.display = 'block';
+        if (explain) explain.classList.add('visible');
 
-        qDiv.querySelectorAll('.quiz-option').forEach((optBtn, optIdx) => {
+        qDiv.querySelectorAll('.quiz-option').forEach((optBtn) => {
+          const optIdx = parseInt(optBtn.getAttribute('data-opt'), 10);
+          optBtn.classList.remove('correct', 'incorrect');
           if (optIdx === q.correct) {
             optBtn.classList.add('correct');
           } else if (optIdx === selected) {
@@ -1401,7 +1783,6 @@ function generateOfflineShell() {
 
       submitBtn.textContent = 'Retake Quiz';
     });
-  }
 })();
 `;
 
@@ -1414,6 +1795,7 @@ async function main() {
   console.log('🚀 Starting Offline Bundle Pre-rendering...');
   ensureDir(DIST_DIR);
   await bundleFonts();
+  await bundleMermaid();
   copyStaticAssets();
   const curriculum = await buildCurriculum();
   generateOfflineShell();
@@ -1429,3 +1811,4 @@ if (require.main === module) {
 }
 
 module.exports = { main, extractMetadata, buildCurriculum };
+

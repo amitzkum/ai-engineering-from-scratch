@@ -85,3 +85,60 @@ test('calculateZoomTransform handles zoomIn, zoomOut, pan, and reset within boun
   assert.equal(state.y, 0);
   assert.equal(state.transformStyle, 'matrix(1.000, 0, 0, 1.000, 0, 0)');
 });
+
+test('offline diagram assets and syntax highlighting stylesheets are bundled locally', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const distDir = path.join(__dirname, 'dist');
+
+  // Verify mermaid.min.js
+  const mermaidPath = path.join(distDir, 'mermaid.min.js');
+  assert.ok(fs.existsSync(mermaidPath), 'mermaid.min.js must exist locally');
+  assert.ok(fs.statSync(mermaidPath).size > 1000000, 'mermaid.min.js must be a full offline bundle (>1MB)');
+
+  // Verify lesson.css
+  const lessonCssPath = path.join(distDir, 'lesson.css');
+  assert.ok(fs.existsSync(lessonCssPath), 'lesson.css must exist');
+  const lessonCss = fs.readFileSync(lessonCssPath, 'utf8');
+  assert.doesNotMatch(lessonCss, /fonts\.googleapis\.com/, 'lesson.css must not have external Google font imports');
+  assert.match(lessonCss, /\.syn-keyword/, 'lesson.css must define syntax highlighting rules');
+
+  // Verify figure-manifest.js and lesson-figures.js
+  assert.ok(fs.existsSync(path.join(distDir, 'figure-manifest.js')), 'figure-manifest.js must exist');
+  assert.ok(fs.existsSync(path.join(distDir, 'lesson-figures.js')), 'lesson-figures.js must exist');
+});
+
+test('quiz option button target resolution handles inner letter badges and text spans', () => {
+  // Mock DOM event target hierarchy
+  function resolveQuizOptionClick(target) {
+    const optBtn = target.closest('.quiz-option');
+    if (!optBtn) return null;
+    const qDiv = optBtn.closest('.quiz-question');
+    if (!qDiv) return null;
+    return {
+      qIdx: parseInt(qDiv.dataset.q, 10),
+      optIdx: parseInt(optBtn.dataset.opt, 10),
+    };
+  }
+
+  const qDivMock = {
+    dataset: { q: '2' },
+    closest: (sel) => (sel === '.quiz-question' ? qDivMock : null),
+  };
+  const optBtnMock = {
+    dataset: { opt: '1' },
+    closest: (sel) => (sel === '.quiz-option' ? optBtnMock : (sel === '.quiz-question' ? qDivMock : null)),
+  };
+  const innerLetterSpan = {
+    closest: (sel) => optBtnMock.closest(sel),
+  };
+
+  // Direct click on option button
+  const direct = resolveQuizOptionClick(optBtnMock);
+  assert.deepEqual(direct, { qIdx: 2, optIdx: 1 });
+
+  // Nested click on inner <span class="opt-letter">
+  const nested = resolveQuizOptionClick(innerLetterSpan);
+  assert.deepEqual(nested, { qIdx: 2, optIdx: 1 });
+});
+
