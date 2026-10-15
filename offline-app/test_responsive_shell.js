@@ -166,6 +166,12 @@ test('dist/app.js and dist/index.html are syntactically valid and contain all re
     'aboutModal',
     'closeAboutBtn',
     'sidebarFooter',
+    'viewPlaygroundBtn',
+    'playgroundView',
+    'playgroundCode',
+    'snippetSelect',
+    'runCodeBtn',
+    'playgroundOutput',
   ];
 
   for (const id of requiredIds) {
@@ -178,6 +184,6 @@ test('dist/app.js and dist/index.html are syntactically valid and contain all re
   // Verify attribution content in index.html
   assert.ok(indexHtml.includes('Amit Kumar'), 'index.html must include author attribution to Amit Kumar');
   assert.ok(indexHtml.includes('AI Engineering from Scratch'), 'index.html must include curriculum source attribution');
-  assert.ok(indexHtml.includes('v1.0.0'), 'index.html must display version 1.0.0');
+  assert.ok(indexHtml.includes('v1.1.0'), 'index.html must display version 1.1.0');
 });
 

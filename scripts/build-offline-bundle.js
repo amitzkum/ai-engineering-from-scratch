@@ -253,6 +253,13 @@ function copyStaticAssets() {
     fs.copyFileSync(studyControllerJs, path.join(DIST_DIR, 'study-controller.js'));
     console.log('   copied dist/study-controller.js');
   }
+
+  // Copy playground-controller.js
+  const playgroundControllerJs = path.join(REPO_ROOT, 'offline-app', 'playground-controller.js');
+  if (fs.existsSync(playgroundControllerJs)) {
+    fs.copyFileSync(playgroundControllerJs, path.join(DIST_DIR, 'playground-controller.js'));
+    console.log('   copied dist/playground-controller.js');
+  }
 }
 
 async function buildCurriculum() {
@@ -1911,7 +1918,207 @@ function generateOfflineShell() {
       .dashboard-tab-content { padding: 0 16px 32px; }
       .phase-progress-grid { grid-template-columns: 1fr; }
       .lesson-note-panel { margin: 12px 16px 0; }
+      .playground-header { padding: 16px; }
+      .playground-body { grid-template-columns: 1fr; height: auto; }
+      .playground-editor-pane { min-height: 320px; border-right: none; border-bottom: 1px solid var(--border); }
+      .playground-terminal-pane { min-height: 240px; }
     }
+
+    /* In-Lesson Playground Action Button */
+    .code-playground-btn {
+      position: absolute;
+      top: 0;
+      right: 80px;
+      min-width: 96px;
+      height: 38px;
+      padding: 0 10px;
+      border: none;
+      border-left: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-bottom-left-radius: 6px;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      z-index: 2;
+    }
+    .code-playground-btn:hover {
+      background: var(--bg-surface);
+      color: var(--success);
+    }
+
+    /* Code Playground View Styles */
+    .playground-header {
+      padding: 24px 28px 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .playground-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(88, 166, 255, 0.12);
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    .playground-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.6rem;
+      color: var(--ink);
+      margin: 0 0 6px 0;
+    }
+    .playground-desc {
+      margin: 0 0 16px 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      max-width: 900px;
+    }
+    .playground-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .preset-selector-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .preset-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .playground-select {
+      background: var(--bg-card);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .playground-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .play-action {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+    .playground-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: calc(100vh - 210px);
+      min-height: 480px;
+      overflow: hidden;
+    }
+    .playground-editor-pane {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      background: var(--code-bg);
+    }
+    .editor-header, .terminal-header {
+      padding: 10px 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+    .editor-title { color: var(--accent); }
+    .editor-save-status { font-weight: normal; font-size: 0.72rem; color: var(--text-muted); }
+    .editor-textarea-wrap {
+      flex: 1;
+      display: flex;
+      position: relative;
+    }
+    .playground-textarea {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      padding: 16px;
+      resize: none;
+      outline: none;
+      white-space: pre;
+      tab-size: 2;
+    }
+    .playground-terminal-pane {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-card);
+    }
+    .terminal-badge {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--accent);
+    }
+    .terminal-badge.success {
+      background: rgba(63, 185, 80, 0.15);
+      color: var(--success);
+    }
+    .terminal-badge.error {
+      background: rgba(248, 81, 73, 0.15);
+      color: var(--danger);
+    }
+    .terminal-viewport {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      background: #0a0e14;
+      color: #e6edf3;
+    }
+    .terminal-meta {
+      display: flex;
+      gap: 12px;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #21262d;
+      font-size: 0.78rem;
+    }
+    .meta-status.status-ok { color: var(--success); font-weight: bold; }
+    .meta-status.status-err { color: var(--danger); font-weight: bold; }
+    .meta-time { color: var(--text-muted); }
+    .meta-count { color: var(--text-muted); }
+    .log-line { margin: 2px 0; word-break: break-all; white-space: pre-wrap; }
+    .log-line.log-info { color: #c9d1d9; }
+    .log-line.log-warn { color: var(--warn); }
+    .log-line.log-err { color: var(--danger); }
+    .log-line.log-empty { color: var(--text-muted); font-style: italic; }
   </style>
 </head>
 <body>
@@ -1923,6 +2130,7 @@ function generateOfflineShell() {
         <button class="view-btn active" id="viewLessonsBtn" data-view="lessons">📖 Lessons</button>
         <button class="view-btn" id="viewDashboardBtn" data-view="dashboard">📊 Study</button>
         <button class="view-btn" id="viewLibraryBtn" data-view="library">📚 Books</button>
+        <button class="view-btn" id="viewPlaygroundBtn" data-view="playground">💻 Playground</button>
       </div>
     </div>
     <div class="header-actions">
@@ -1976,7 +2184,7 @@ function generateOfflineShell() {
       <ul class="phase-list" id="phaseList"></ul>
       <div class="sidebar-footer" id="sidebarFooter">
         <div class="sidebar-attribution">
-          <span class="sidebar-release-tag">v1.0.0 Release</span>
+          <span class="sidebar-release-tag">v1.1.0 Release</span>
           <div class="sidebar-author">App: <strong>Amit Kumar</strong></div>
           <div class="sidebar-source">Curriculum: <strong>AI Engineering from Scratch</strong></div>
         </div>
@@ -2050,7 +2258,7 @@ function generateOfflineShell() {
 
           <div class="backup-card" style="margin-top: 16px;">
             <h3>Official Release & Attribution</h3>
-            <p><strong>App Version:</strong> 1.0.0 (Release Edition)</p>
+            <p><strong>App Version:</strong> 1.1.0 (Release Edition)</p>
             <p><strong>Offline App Architecture & Packaging:</strong> Amit Kumar</p>
             <p><strong>Curriculum & Pedagogical Source:</strong> AI Engineering from Scratch Contributors</p>
             <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 8px;">Standalone offline edition featuring 542 lessons, 6 complete volumes, interactive quizzes, and local progress tracking.</p>
@@ -2085,6 +2293,57 @@ function generateOfflineShell() {
           <iframe id="bookReaderFrame" class="book-reader-frame" src="about:blank" title="Book Volume Reader"></iframe>
         </div>
       </div>
+
+      <!-- 5. Code Playground View -->
+      <div id="playgroundView" class="view-pane" style="display: none;">
+        <div class="playground-header">
+          <div class="playground-header-info">
+            <div class="playground-badge">INTERACTIVE OFFLINE SANDBOX</div>
+            <h1 class="playground-title">Code Playground</h1>
+            <p class="playground-desc">Experiment with foundational AI engineering algorithms, run raw math operations in JavaScript, or test code snippets directly from lessons.</p>
+          </div>
+          <div class="playground-toolbar">
+            <div class="preset-selector-wrap">
+              <label for="snippetSelect" class="preset-label">Preset Algorithm:</label>
+              <select id="snippetSelect" class="playground-select">
+                <option value="custom">Scratchpad (Custom)</option>
+              </select>
+            </div>
+            <div class="playground-actions">
+              <button id="runCodeBtn" class="dash-action-btn primary play-action" title="Execute Code (Ctrl+Enter)">▶ Run Code</button>
+              <button id="resetCodeBtn" class="dash-action-btn play-action" title="Reset to Preset Default">↺ Reset</button>
+              <button id="copyCodeBtn" class="dash-action-btn play-action" title="Copy Code">📋 Copy</button>
+              <button id="clearOutputBtn" class="dash-action-btn play-action" title="Clear Console">🧹 Clear Output</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="playground-body">
+          <!-- Editor Pane -->
+          <div class="playground-editor-pane">
+            <div class="editor-header">
+              <span class="editor-title" id="playgroundEditorTitle">SCRIPT EDITOR (JAVASCRIPT)</span>
+              <div class="editor-meta">
+                <span class="editor-save-status" id="playgroundSaveStatus">Saved locally</span>
+              </div>
+            </div>
+            <div class="editor-textarea-wrap">
+              <textarea id="playgroundCode" class="playground-textarea" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Write or paste your code here..."></textarea>
+            </div>
+          </div>
+
+          <!-- Terminal Output Pane -->
+          <div class="playground-terminal-pane">
+            <div class="terminal-header">
+              <span class="terminal-title">CONSOLE OUTPUT & EXECUTION LOGS</span>
+              <span class="terminal-badge" id="terminalStatusBadge">IDLE</span>
+            </div>
+            <div id="playgroundOutput" class="terminal-viewport">
+              <div class="log-line log-empty">Click "▶ Run Code" or press Ctrl+Enter to execute.</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 
@@ -2110,7 +2369,7 @@ function generateOfflineShell() {
       <div class="about-modal-header">
         <div class="about-title-wrap">
           <h2 class="about-title">AI Engineering from Scratch</h2>
-          <span class="about-badge">v1.0.0 Official Release</span>
+          <span class="about-badge">v1.1.0 Official Release</span>
         </div>
         <button class="figure-tool-btn close" id="closeAboutBtn" title="Close">✕</button>
       </div>
@@ -2129,7 +2388,7 @@ function generateOfflineShell() {
         </div>
         <hr class="about-divider">
         <div class="about-modal-footer">
-          <div>Build: <strong>1.0.0 (Signed Release APK)</strong> · Local Database: <strong>542 Lessons / 6 Volumes</strong></div>
+          <div>Build: <strong>1.1.0 (Signed Release APK)</strong> · Local Database: <strong>542 Lessons / 6 Volumes</strong></div>
           <div>Zero External Network Dependencies · 100% On-Device Storage</div>
         </div>
       </div>
@@ -2147,6 +2406,7 @@ function generateOfflineShell() {
   <script src="library-controller.js"></script>
   <script src="study-controller.js"></script>
   <script src="search-engine.js"></script>
+  <script src="playground-controller.js"></script>
   <script src="app.js"></script>
 </body>
 </html>`;
@@ -2180,10 +2440,12 @@ function generateOfflineShell() {
   const viewLessonsBtn = document.getElementById('viewLessonsBtn');
   const viewDashboardBtn = document.getElementById('viewDashboardBtn');
   const viewLibraryBtn = document.getElementById('viewLibraryBtn');
+  const viewPlaygroundBtn = document.getElementById('viewPlaygroundBtn');
   const lessonView = document.getElementById('lessonView');
   const studyDashboardView = document.getElementById('studyDashboardView');
   const libraryView = document.getElementById('libraryView');
   const bookReaderView = document.getElementById('bookReaderView');
+  const playgroundView = document.getElementById('playgroundView');
   const libraryGrid = document.getElementById('libraryGrid');
   const librarySearchInput = document.getElementById('librarySearchInput');
   const readerBackBtn = document.getElementById('readerBackBtn');
@@ -2191,6 +2453,18 @@ function generateOfflineShell() {
   const readerExportEpubBtn = document.getElementById('readerExportEpubBtn');
   const readerVolTitle = document.getElementById('readerVolTitle');
   const bookReaderFrame = document.getElementById('bookReaderFrame');
+
+  // Code Playground Elements
+  const playgroundCode = document.getElementById('playgroundCode');
+  const snippetSelect = document.getElementById('snippetSelect');
+  const runCodeBtn = document.getElementById('runCodeBtn');
+  const resetCodeBtn = document.getElementById('resetCodeBtn');
+  const copyCodeBtn = document.getElementById('copyCodeBtn');
+  const clearOutputBtn = document.getElementById('clearOutputBtn');
+  const playgroundOutput = document.getElementById('playgroundOutput');
+  const playgroundSaveStatus = document.getElementById('playgroundSaveStatus');
+  const terminalStatusBadge = document.getElementById('terminalStatusBadge');
+  const playgroundEditorTitle = document.getElementById('playgroundEditorTitle');
 
   // Study Dashboard & Notes Elements
   const bookmarkBtn = document.getElementById('bookmarkBtn');
@@ -2221,17 +2495,21 @@ function generateOfflineShell() {
       if (studyDashboardView) studyDashboardView.style.display = 'none';
       if (libraryView) libraryView.style.display = 'none';
       if (bookReaderView) bookReaderView.style.display = 'none';
+      if (playgroundView) playgroundView.style.display = 'none';
       if (viewLessonsBtn) viewLessonsBtn.classList.add('active');
       if (viewDashboardBtn) viewDashboardBtn.classList.remove('active');
       if (viewLibraryBtn) viewLibraryBtn.classList.remove('active');
+      if (viewPlaygroundBtn) viewPlaygroundBtn.classList.remove('active');
     } else if (viewName === 'dashboard') {
       if (lessonView) lessonView.style.display = 'none';
       if (studyDashboardView) studyDashboardView.style.display = 'block';
       if (libraryView) libraryView.style.display = 'none';
       if (bookReaderView) bookReaderView.style.display = 'none';
+      if (playgroundView) playgroundView.style.display = 'none';
       if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
       if (viewDashboardBtn) viewDashboardBtn.classList.add('active');
       if (viewLibraryBtn) viewLibraryBtn.classList.remove('active');
+      if (viewPlaygroundBtn) viewPlaygroundBtn.classList.remove('active');
       if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
       if (drawerBackdrop) drawerBackdrop.classList.remove('open');
       renderDashboard();
@@ -2240,9 +2518,11 @@ function generateOfflineShell() {
       if (studyDashboardView) studyDashboardView.style.display = 'none';
       if (libraryView) libraryView.style.display = 'block';
       if (bookReaderView) bookReaderView.style.display = 'none';
+      if (playgroundView) playgroundView.style.display = 'none';
       if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
       if (viewDashboardBtn) viewDashboardBtn.classList.remove('active');
       if (viewLibraryBtn) viewLibraryBtn.classList.add('active');
+      if (viewPlaygroundBtn) viewPlaygroundBtn.classList.remove('active');
       if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
       if (drawerBackdrop) drawerBackdrop.classList.remove('open');
     } else if (viewName === 'reader') {
@@ -2250,9 +2530,23 @@ function generateOfflineShell() {
       if (studyDashboardView) studyDashboardView.style.display = 'none';
       if (libraryView) libraryView.style.display = 'none';
       if (bookReaderView) bookReaderView.style.display = 'flex';
+      if (playgroundView) playgroundView.style.display = 'none';
       if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
       if (viewDashboardBtn) viewDashboardBtn.classList.remove('active');
       if (viewLibraryBtn) viewLibraryBtn.classList.add('active');
+      if (viewPlaygroundBtn) viewPlaygroundBtn.classList.remove('active');
+      if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
+      if (drawerBackdrop) drawerBackdrop.classList.remove('open');
+    } else if (viewName === 'playground') {
+      if (lessonView) lessonView.style.display = 'none';
+      if (studyDashboardView) studyDashboardView.style.display = 'none';
+      if (libraryView) libraryView.style.display = 'none';
+      if (bookReaderView) bookReaderView.style.display = 'none';
+      if (playgroundView) playgroundView.style.display = 'block';
+      if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
+      if (viewDashboardBtn) viewDashboardBtn.classList.remove('active');
+      if (viewLibraryBtn) viewLibraryBtn.classList.remove('active');
+      if (viewPlaygroundBtn) viewPlaygroundBtn.classList.add('active');
       if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
       if (drawerBackdrop) drawerBackdrop.classList.remove('open');
     }
@@ -2261,6 +2555,7 @@ function generateOfflineShell() {
   if (viewLessonsBtn) viewLessonsBtn.addEventListener('click', () => switchView('lessons'));
   if (viewDashboardBtn) viewDashboardBtn.addEventListener('click', () => switchView('dashboard'));
   if (viewLibraryBtn) viewLibraryBtn.addEventListener('click', () => switchView('library'));
+  if (viewPlaygroundBtn) viewPlaygroundBtn.addEventListener('click', () => switchView('playground'));
   if (readerBackBtn) readerBackBtn.addEventListener('click', () => switchView('library'));
 
   // User Bookmark & Note controls
@@ -2887,23 +3182,42 @@ function generateOfflineShell() {
     articleWrap.innerHTML = content;
     document.getElementById('contentArea').scrollTop = 0;
 
-    // Wire up built-in code block copy buttons
-    articleWrap.querySelectorAll('.code-copy').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const code = btn.getAttribute('data-code') || (btn.closest('pre') ? btn.closest('pre').querySelector('code').innerText : '');
-        navigator.clipboard.writeText(code).then(() => {
-          btn.textContent = 'Copied!';
-          btn.classList.add('copied');
-          setTimeout(() => {
-            btn.textContent = 'Copy';
-            btn.classList.remove('copied');
-          }, 2000);
-        }).catch(() => {
-          btn.textContent = 'Copied!';
-          setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+    // Wire up built-in code block copy buttons and playground launcher
+    articleWrap.querySelectorAll('pre').forEach(pre => {
+      const codeEl = pre.querySelector('code');
+      if (!codeEl) return;
+      const copyBtn = pre.querySelector('.code-copy');
+      const code = copyBtn?.getAttribute('data-code') || codeEl.innerText;
+
+      if (copyBtn) {
+        copyBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          navigator.clipboard.writeText(code).then(() => {
+            copyBtn.textContent = 'Copied!';
+            copyBtn.classList.add('copied');
+            setTimeout(() => {
+              copyBtn.textContent = 'Copy';
+              copyBtn.classList.remove('copied');
+            }, 2000);
+          }).catch(() => {
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+          });
         });
-      });
+      }
+
+      // Add "▶ Playground" button if not already present
+      if (!pre.querySelector('.code-playground-btn')) {
+        const playBtn = document.createElement('button');
+        playBtn.className = 'code-playground-btn';
+        playBtn.textContent = '▶ Playground';
+        playBtn.title = 'Open and test snippet in offline Playground';
+        playBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openCodeInPlayground(code, 'custom');
+        });
+        pre.appendChild(playBtn);
+      }
     });
 
     // Render Mermaid diagrams offline
@@ -3192,6 +3506,189 @@ function generateOfflineShell() {
       submitBtn.textContent = 'Retake Quiz';
     });
   }
+
+  // -------------------------------------------------------------
+  // Code Playground Engine & Event Handlers
+  // -------------------------------------------------------------
+  function openCodeInPlayground(code, presetId = 'custom') {
+    if (playgroundCode) {
+      playgroundCode.value = code;
+    }
+    if (snippetSelect) {
+      snippetSelect.value = presetId;
+    }
+    if (playgroundEditorTitle) {
+      playgroundEditorTitle.textContent = presetId === 'custom' ? 'SCRIPT EDITOR (CUSTOM SNIPPET)' : ('SCRIPT EDITOR (' + presetId.toUpperCase() + ')');
+    }
+    if (playgroundOutput) {
+      playgroundOutput.innerHTML = '<div class="log-line log-empty">Click "▶ Run Code" or press Ctrl+Enter to execute.</div>';
+    }
+    if (terminalStatusBadge) {
+      terminalStatusBadge.textContent = 'READY';
+      terminalStatusBadge.className = 'terminal-badge';
+    }
+    switchView('playground');
+  }
+
+  function initPlayground() {
+    if (!playgroundCode || !snippetSelect) return;
+
+    // Populate preset dropdown
+    if (typeof CURRICULUM_PRESETS !== 'undefined' && Array.isArray(CURRICULUM_PRESETS)) {
+      snippetSelect.innerHTML = '<option value="custom">Scratchpad (Custom)</option>';
+      CURRICULUM_PRESETS.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.title;
+        snippetSelect.appendChild(opt);
+      });
+    }
+
+    // Load initial code (first preset or saved scratchpad)
+    const initialPreset = (typeof CURRICULUM_PRESETS !== 'undefined' && CURRICULUM_PRESETS[0]) || null;
+    if (initialPreset) {
+      const saved = typeof loadScratchpad === 'function' ? loadScratchpad(initialPreset.id) : null;
+      playgroundCode.value = saved || initialPreset.code;
+      snippetSelect.value = initialPreset.id;
+      if (playgroundEditorTitle) {
+        playgroundEditorTitle.textContent = 'SCRIPT EDITOR (' + initialPreset.id.toUpperCase() + ')';
+      }
+    } else {
+      const savedCustom = typeof loadScratchpad === 'function' ? loadScratchpad('custom') : null;
+      playgroundCode.value = savedCustom || '// Welcome to the Offline Code Playground\\nconsole.log("Hello AI Engineering from Scratch!");\\n';
+    }
+
+    // Handle snippet change
+    snippetSelect.addEventListener('change', (e) => {
+      const selectedId = e.target.value;
+      if (selectedId === 'custom') {
+        const savedCustom = typeof loadScratchpad === 'function' ? loadScratchpad('custom') : null;
+        playgroundCode.value = savedCustom || '// Custom scratchpad\\nconsole.log("Custom code here");\\n';
+        if (playgroundEditorTitle) playgroundEditorTitle.textContent = 'SCRIPT EDITOR (CUSTOM)';
+      } else if (typeof CURRICULUM_PRESETS !== 'undefined') {
+        const preset = CURRICULUM_PRESETS.find(p => p.id === selectedId);
+        if (preset) {
+          const saved = typeof loadScratchpad === 'function' ? loadScratchpad(preset.id) : null;
+          playgroundCode.value = saved || preset.code;
+          if (playgroundEditorTitle) playgroundEditorTitle.textContent = 'SCRIPT EDITOR (' + preset.id.toUpperCase() + ')';
+        }
+      }
+      if (playgroundOutput) {
+        playgroundOutput.innerHTML = '<div class="log-line log-empty">Click "▶ Run Code" or press Ctrl+Enter to execute.</div>';
+      }
+      if (terminalStatusBadge) {
+        terminalStatusBadge.textContent = 'IDLE';
+        terminalStatusBadge.className = 'terminal-badge';
+      }
+    });
+
+    // Run Code
+    function runPlaygroundCode() {
+      if (!playgroundCode) return;
+      const code = playgroundCode.value;
+      if (terminalStatusBadge) {
+        terminalStatusBadge.textContent = 'RUNNING...';
+        terminalStatusBadge.className = 'terminal-badge';
+      }
+      const result = typeof executeSandboxCode === 'function'
+        ? executeSandboxCode(code, 'javascript')
+        : { logs: [{ type: 'log', text: 'Evaluation runner not ready.' }], error: null, durationMs: 0 };
+
+      if (playgroundOutput) {
+        if (typeof formatTerminalHtml === 'function') {
+          playgroundOutput.innerHTML = formatTerminalHtml(result.logs, result.error, result.durationMs);
+        } else {
+          playgroundOutput.innerText = result.logs.map(l => l.text).join('\\n');
+        }
+      }
+      if (terminalStatusBadge) {
+        terminalStatusBadge.textContent = result.error ? 'ERROR' : 'SUCCESS';
+        terminalStatusBadge.className = 'terminal-badge ' + (result.error ? 'error' : 'success');
+      }
+    }
+
+    if (runCodeBtn) {
+      runCodeBtn.addEventListener('click', runPlaygroundCode);
+    }
+
+    // Keyboard shortcut (Ctrl+Enter or Cmd+Enter)
+    playgroundCode.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runPlaygroundCode();
+      }
+      // Tab key support
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = playgroundCode.selectionStart;
+        const end = playgroundCode.selectionEnd;
+        playgroundCode.value = playgroundCode.value.substring(0, start) + '  ' + playgroundCode.value.substring(end);
+        playgroundCode.selectionStart = playgroundCode.selectionEnd = start + 2;
+      }
+    });
+
+    // Reset code
+    if (resetCodeBtn) {
+      resetCodeBtn.addEventListener('click', () => {
+        const curId = snippetSelect ? snippetSelect.value : 'custom';
+        if (curId !== 'custom' && typeof CURRICULUM_PRESETS !== 'undefined') {
+          const preset = CURRICULUM_PRESETS.find(p => p.id === curId);
+          if (preset) {
+            playgroundCode.value = preset.code;
+            if (typeof saveScratchpad === 'function') saveScratchpad(preset.code, preset.id);
+            if (playgroundSaveStatus) playgroundSaveStatus.textContent = 'Reset to preset default';
+            setTimeout(() => { if (playgroundSaveStatus) playgroundSaveStatus.textContent = 'Saved locally'; }, 1500);
+          }
+        } else {
+          playgroundCode.value = '// Custom scratchpad\\nconsole.log("Ready to code");\\n';
+          if (typeof saveScratchpad === 'function') saveScratchpad(playgroundCode.value, 'custom');
+        }
+      });
+    }
+
+    // Copy code
+    if (copyCodeBtn) {
+      copyCodeBtn.addEventListener('click', () => {
+        if (!playgroundCode) return;
+        navigator.clipboard.writeText(playgroundCode.value).then(() => {
+          copyCodeBtn.textContent = 'Copied!';
+          setTimeout(() => { copyCodeBtn.textContent = '📋 Copy'; }, 2000);
+        }).catch(() => {
+          copyCodeBtn.textContent = 'Copied!';
+          setTimeout(() => { copyCodeBtn.textContent = '📋 Copy'; }, 2000);
+        });
+      });
+    }
+
+    // Clear Output
+    if (clearOutputBtn) {
+      clearOutputBtn.addEventListener('click', () => {
+        if (playgroundOutput) {
+          playgroundOutput.innerHTML = '<div class="log-line log-empty">Console output cleared.</div>';
+        }
+        if (terminalStatusBadge) {
+          terminalStatusBadge.textContent = 'CLEARED';
+          terminalStatusBadge.className = 'terminal-badge';
+        }
+      });
+    }
+
+    // Debounced auto-save
+    let autoSaveTimer = null;
+    playgroundCode.addEventListener('input', () => {
+      if (playgroundSaveStatus) playgroundSaveStatus.textContent = 'Typing...';
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(() => {
+        const curId = snippetSelect ? snippetSelect.value : 'custom';
+        if (typeof saveScratchpad === 'function') {
+          saveScratchpad(playgroundCode.value, curId);
+        }
+        if (playgroundSaveStatus) playgroundSaveStatus.textContent = 'Saved locally';
+      }, 500);
+    });
+  }
+
+  initPlayground();
 })();
 `;
 
