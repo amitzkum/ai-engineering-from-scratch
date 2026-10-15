@@ -121,3 +121,54 @@ test('curriculum progress tracking accurately computes percentages', () => {
   }
   assert.equal(shell.calcProgress(completed).percentage, 50);
 });
+
+test('dist/app.js and dist/index.html are syntactically valid and contain all required UI elements', () => {
+  const vm = require('node:vm');
+  const indexHtmlPath = path.join(__dirname, 'dist', 'index.html');
+  const appJsPath = path.join(__dirname, 'dist', 'app.js');
+
+  assert.ok(fs.existsSync(indexHtmlPath), 'dist/index.html must exist');
+  assert.ok(fs.existsSync(appJsPath), 'dist/app.js must exist');
+
+  const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+  const appJs = fs.readFileSync(appJsPath, 'utf8');
+
+  // Verify syntax of app.js with VM script parsing
+  assert.doesNotThrow(() => {
+    new vm.Script(appJs, { filename: 'app.js' });
+  }, 'dist/app.js must parse with zero syntax errors');
+
+  // Verify critical DOM IDs required by app.js
+  const requiredIds = [
+    'sidebarToggle',
+    'sidebar',
+    'drawerBackdrop',
+    'phaseList',
+    'searchInput',
+    'articleWrap',
+    'breadcrumbsBar',
+    'themeSelect',
+    'viewLessonsBtn',
+    'viewDashboardBtn',
+    'viewLibraryBtn',
+    'lessonView',
+    'studyDashboardView',
+    'libraryView',
+    'bookReaderView',
+    'bookmarkBtn',
+    'noteToggleBtn',
+    'lessonNotePanel',
+    'noteTextarea',
+    'dashboardMetricsGrid',
+    'phaseProgressGrid',
+    'libraryGrid',
+  ];
+
+  for (const id of requiredIds) {
+    assert.ok(
+      indexHtml.includes(`id="${id}"`),
+      `dist/index.html missing required element id="${id}"`
+    );
+  }
+});
+

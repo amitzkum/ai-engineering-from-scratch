@@ -2987,6 +2987,7 @@ function generateOfflineShell() {
 
       submitBtn.textContent = 'Retake Quiz';
     });
+  }
 })();
 `;
 
