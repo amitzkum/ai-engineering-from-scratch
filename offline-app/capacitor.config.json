@@ -1,0 +1,8 @@
+{
+  "appId": "com.aiengineering.offline",
+  "appName": "AI Engineering",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

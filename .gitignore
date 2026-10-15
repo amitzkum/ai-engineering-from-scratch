@@ -128,3 +128,20 @@ site/manuals.html
 .project-validation/
 projects/*/solution/output/
 projects/*/solution/demo-output/
+
+# Android & Capacitor build artifacts
+package-lock.json
+*.apk
+*.aab
+.gradle/
+**/android/.gradle/
+**/android/build/
+**/android/app/build/
+**/android/local.properties
+**/android/captures/
+**/android/.cxx/
+**/android/app/.cxx/
+offline-app/dist/
+offline-app/node_modules/
+offline-app/package-lock.json
+
