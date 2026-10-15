@@ -246,6 +246,13 @@ function copyStaticAssets() {
     fs.copyFileSync(libraryControllerJs, path.join(DIST_DIR, 'library-controller.js'));
     console.log('   copied dist/library-controller.js');
   }
+
+  // Copy study-controller.js
+  const studyControllerJs = path.join(REPO_ROOT, 'offline-app', 'study-controller.js');
+  if (fs.existsSync(studyControllerJs)) {
+    fs.copyFileSync(studyControllerJs, path.join(DIST_DIR, 'study-controller.js'));
+    console.log('   copied dist/study-controller.js');
+  }
 }
 
 async function buildCurriculum() {
@@ -1372,6 +1379,368 @@ function generateOfflineShell() {
       display: block;
     }
 
+    /* Lesson Top Bar & User Tools */
+    .lesson-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      padding: 0 16px;
+    }
+    .lesson-top-bar .breadcrumbs-bar {
+      border-bottom: none;
+      padding: 10px 0;
+    }
+    .lesson-user-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lesson-tool-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .lesson-tool-btn:hover {
+      color: var(--blueprint);
+      border-color: var(--blueprint);
+    }
+    .lesson-tool-btn.active {
+      background: rgba(88, 166, 255, 0.15);
+      border-color: var(--blueprint);
+      color: var(--blueprint);
+    }
+    .lesson-note-panel {
+      margin: 16px 32px 0;
+      background: var(--bg-card);
+      border: 1px solid var(--blueprint);
+      border-radius: 8px;
+      padding: 14px 18px;
+    }
+    .note-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .note-panel-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: bold;
+      letter-spacing: 0.12em;
+      color: var(--blueprint);
+    }
+    .note-save-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .note-textarea {
+      width: 100%;
+      min-height: 80px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 0.95rem;
+      padding: 10px 12px;
+      resize: vertical;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .note-textarea:focus {
+      border-color: var(--blueprint);
+    }
+
+    /* Dashboard Header & Metrics */
+    .dashboard-header {
+      padding: 32px 32px 20px;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    .dashboard-header-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: var(--blueprint);
+      margin-bottom: 8px;
+    }
+    .dashboard-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 2.1rem;
+      margin: 0 0 10px 0;
+      color: var(--ink);
+    }
+    .dashboard-desc {
+      font-size: 1.02rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      max-width: 800px;
+    }
+    .dashboard-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      padding: 0 32px 28px;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    .metric-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .metric-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--blueprint);
+      margin-bottom: 4px;
+    }
+    .metric-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Dashboard Tabs */
+    .dashboard-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 0 32px;
+      max-width: 1040px;
+      margin: 0 auto 20px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .dash-tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 10px 16px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .dash-tab-btn:hover {
+      color: var(--ink);
+    }
+    .dash-tab-btn.active {
+      color: var(--blueprint);
+      border-bottom-color: var(--blueprint);
+    }
+    .dashboard-tab-content {
+      padding: 0 32px 48px;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    /* Phase Progress Grid */
+    .phase-progress-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 16px;
+    }
+    .phase-prog-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .phase-prog-card:hover {
+      border-color: var(--blueprint);
+      transform: translateY(-2px);
+    }
+    .phase-prog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .phase-prog-title {
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: var(--ink);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .phase-prog-pct {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--blueprint);
+      font-weight: bold;
+    }
+    .phase-prog-bar-bg {
+      height: 6px;
+      background: var(--bg-card);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    .phase-prog-bar-fill {
+      height: 100%;
+      background: var(--blueprint);
+      border-radius: 3px;
+    }
+    .phase-prog-meta {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* Bookmarks & Notes List */
+    .saved-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .saved-item-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .saved-item-main {
+      flex: 1;
+    }
+    .saved-item-title {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: var(--ink);
+      margin-bottom: 4px;
+      cursor: pointer;
+    }
+    .saved-item-title:hover {
+      color: var(--blueprint);
+    }
+    .saved-item-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .saved-item-text {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--ink-soft);
+      margin-top: 8px;
+      white-space: pre-wrap;
+      background: var(--bg-card);
+      padding: 10px 14px;
+      border-radius: 6px;
+      border-left: 3px solid var(--blueprint);
+    }
+    .saved-item-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .saved-item-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      cursor: pointer;
+    }
+    .saved-item-btn:hover {
+      border-color: var(--blueprint);
+      color: var(--blueprint);
+    }
+    .saved-item-btn.danger {
+      color: var(--danger);
+    }
+    .saved-item-btn.danger:hover {
+      border-color: var(--danger);
+      background: rgba(248, 81, 73, 0.1);
+    }
+
+    /* Backup Card */
+    .backup-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      max-width: 600px;
+    }
+    .backup-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .dash-action-btn {
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--ink);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dash-action-btn.primary {
+      background: var(--blueprint);
+      color: #ffffff;
+      border-color: var(--blueprint);
+    }
+    .backup-feedback {
+      margin-top: 16px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      background: rgba(63, 185, 80, 0.15);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+    .backup-feedback.error {
+      background: rgba(248, 81, 73, 0.15);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
     /* Mobile Backdrop & Layout (< 768px) */
     .drawer-backdrop {
       display: none;
@@ -1397,6 +1766,12 @@ function generateOfflineShell() {
       .header-title { display: none; }
       .library-header { padding: 20px 16px; }
       .library-grid { padding: 0 16px 32px; grid-template-columns: 1fr; }
+      .dashboard-header { padding: 20px 16px; }
+      .dashboard-metrics-grid { padding: 0 16px 20px; grid-template-columns: 1fr; }
+      .dashboard-tabs { padding: 0 16px; }
+      .dashboard-tab-content { padding: 0 16px 32px; }
+      .phase-progress-grid { grid-template-columns: 1fr; }
+      .lesson-note-panel { margin: 12px 16px 0; }
     }
   </style>
 </head>
@@ -1407,6 +1782,7 @@ function generateOfflineShell() {
       <div class="header-title">AI / FROM SCRATCH</div>
       <div class="view-switcher" id="viewSwitcher">
         <button class="view-btn active" id="viewLessonsBtn" data-view="lessons">📖 Lessons</button>
+        <button class="view-btn" id="viewDashboardBtn" data-view="dashboard">📊 Study</button>
         <button class="view-btn" id="viewLibraryBtn" data-view="library">📚 Books</button>
       </div>
     </div>
@@ -1463,13 +1839,71 @@ function generateOfflineShell() {
     <main class="content-area" id="contentArea">
       <!-- 1. Interactive Lesson View -->
       <div id="lessonView" class="view-pane" style="display: block;">
-        <div class="breadcrumbs-bar" id="breadcrumbsBar">Phase · Lesson</div>
+        <div class="lesson-top-bar">
+          <div class="breadcrumbs-bar" id="breadcrumbsBar">Phase · Lesson</div>
+          <div class="lesson-user-tools">
+            <button class="lesson-tool-btn" id="bookmarkBtn" title="Toggle Bookmark">🔖 Bookmark</button>
+            <button class="lesson-tool-btn" id="noteToggleBtn" title="Personal Notes">📝 Notes</button>
+          </div>
+        </div>
+        <div class="lesson-note-panel" id="lessonNotePanel" style="display: none;">
+          <div class="note-panel-header">
+            <span class="note-panel-title">PERSONAL STUDY NOTE</span>
+            <span class="note-save-status" id="noteSaveStatus">Saved locally</span>
+          </div>
+          <textarea class="note-textarea" id="noteTextarea" placeholder="Write personal reflections, formulas, or reminders for this lesson..."></textarea>
+        </div>
         <div class="lesson-article article-wrap" id="articleWrap">
           <h1>Loading Curriculum...</h1>
         </div>
       </div>
 
-      <!-- 2. Book Library View -->
+      <!-- 2. Study Dashboard View -->
+      <div id="studyDashboardView" class="view-pane" style="display: none;">
+        <div class="dashboard-header">
+          <div class="dashboard-header-badge">PERSONAL STUDY ANALYTICS & NOTES</div>
+          <h1 class="dashboard-title">Study Dashboard</h1>
+          <p class="dashboard-desc">Track curriculum progress across all 20 phases, review estimated study time remaining, revisit bookmarked lessons, and manage your personal notes.</p>
+        </div>
+
+        <div class="dashboard-metrics-grid" id="dashboardMetricsGrid"></div>
+
+        <div class="dashboard-tabs">
+          <button class="dash-tab-btn active" data-tab="phases">Phase Breakdown</button>
+          <button class="dash-tab-btn" data-tab="bookmarks">Bookmarks (<span id="dashBookmarkCount">0</span>)</button>
+          <button class="dash-tab-btn" data-tab="notes">Notes (<span id="dashNoteCount">0</span>)</button>
+          <button class="dash-tab-btn" data-tab="backup">Backup & Restore</button>
+        </div>
+
+        <div class="dashboard-tab-content" id="dashTabPhases">
+          <div class="phase-progress-grid" id="phaseProgressGrid"></div>
+        </div>
+
+        <div class="dashboard-tab-content" id="dashTabBookmarks" style="display: none;">
+          <div class="saved-items-list" id="bookmarksList"></div>
+        </div>
+
+        <div class="dashboard-tab-content" id="dashTabNotes" style="display: none;">
+          <div class="saved-items-list" id="notesList"></div>
+        </div>
+
+        <div class="dashboard-tab-content" id="dashTabBackup" style="display: none;">
+          <div class="backup-card">
+            <h3>Export & Import Study Data</h3>
+            <p>Save your completion progress, bookmarks, personal notes, and quiz scores as a JSON backup file, or restore them onto any device.</p>
+            <div class="backup-actions">
+              <button class="dash-action-btn primary" id="exportDataBtn">📥 Export Study Data (.json)</button>
+              <label class="dash-action-btn" style="cursor: pointer;">
+                📤 Import Study Data
+                <input type="file" id="importDataInput" accept=".json" style="display: none;">
+              </label>
+            </div>
+            <div id="backupFeedback" class="backup-feedback" style="display: none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Book Library View -->
       <div id="libraryView" class="view-pane" style="display: none;">
         <div class="library-header">
           <div class="library-header-badge">6 VOLUMES · 542 CHAPTERS · OFFLINE EDITIONS</div>
@@ -1482,7 +1916,7 @@ function generateOfflineShell() {
         <div class="library-grid" id="libraryGrid"></div>
       </div>
 
-      <!-- 3. Standalone Book Reader View -->
+      <!-- 4. Standalone Book Reader View -->
       <div id="bookReaderView" class="view-pane book-reader-view" style="display: none;">
         <div class="reader-toolbar">
           <button class="reader-tool-btn" id="readerBackBtn">← Back to Library</button>
@@ -1524,6 +1958,7 @@ function generateOfflineShell() {
   <script src="mermaid.min.js"></script>
   <script src="viewer-controller.js"></script>
   <script src="library-controller.js"></script>
+  <script src="study-controller.js"></script>
   <script src="search-engine.js"></script>
   <script src="app.js"></script>
 </body>
@@ -1553,8 +1988,10 @@ function generateOfflineShell() {
 
   // View Switcher & Screen Management
   const viewLessonsBtn = document.getElementById('viewLessonsBtn');
+  const viewDashboardBtn = document.getElementById('viewDashboardBtn');
   const viewLibraryBtn = document.getElementById('viewLibraryBtn');
   const lessonView = document.getElementById('lessonView');
+  const studyDashboardView = document.getElementById('studyDashboardView');
   const libraryView = document.getElementById('libraryView');
   const bookReaderView = document.getElementById('bookReaderView');
   const libraryGrid = document.getElementById('libraryGrid');
@@ -1565,28 +2002,66 @@ function generateOfflineShell() {
   const readerVolTitle = document.getElementById('readerVolTitle');
   const bookReaderFrame = document.getElementById('bookReaderFrame');
 
+  // Study Dashboard & Notes Elements
+  const bookmarkBtn = document.getElementById('bookmarkBtn');
+  const noteToggleBtn = document.getElementById('noteToggleBtn');
+  const lessonNotePanel = document.getElementById('lessonNotePanel');
+  const noteTextarea = document.getElementById('noteTextarea');
+  const noteSaveStatus = document.getElementById('noteSaveStatus');
+  const dashboardMetricsGrid = document.getElementById('dashboardMetricsGrid');
+  const phaseProgressGrid = document.getElementById('phaseProgressGrid');
+  const bookmarksList = document.getElementById('bookmarksList');
+  const notesList = document.getElementById('notesList');
+  const dashBookmarkCount = document.getElementById('dashBookmarkCount');
+  const dashNoteCount = document.getElementById('dashNoteCount');
+  const exportDataBtn = document.getElementById('exportDataBtn');
+  const importDataInput = document.getElementById('importDataInput');
+  const backupFeedback = document.getElementById('backupFeedback');
+
+  // Local Study State
+  let userBookmarks = JSON.parse(localStorage.getItem('user_bookmarks') || '[]');
+  let userNotes = JSON.parse(localStorage.getItem('user_notes') || '{}');
+  let quizScores = JSON.parse(localStorage.getItem('quiz_scores') || '{}');
+  let currentLoadedLesson = null;
   let libraryManifest = [];
 
   function switchView(viewName) {
     if (viewName === 'lessons') {
       if (lessonView) lessonView.style.display = 'block';
+      if (studyDashboardView) studyDashboardView.style.display = 'none';
       if (libraryView) libraryView.style.display = 'none';
       if (bookReaderView) bookReaderView.style.display = 'none';
       if (viewLessonsBtn) viewLessonsBtn.classList.add('active');
+      if (viewDashboardBtn) viewDashboardBtn.classList.remove('active');
       if (viewLibraryBtn) viewLibraryBtn.classList.remove('active');
+    } else if (viewName === 'dashboard') {
+      if (lessonView) lessonView.style.display = 'none';
+      if (studyDashboardView) studyDashboardView.style.display = 'block';
+      if (libraryView) libraryView.style.display = 'none';
+      if (bookReaderView) bookReaderView.style.display = 'none';
+      if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
+      if (viewDashboardBtn) viewDashboardBtn.classList.add('active');
+      if (viewLibraryBtn) viewLibraryBtn.classList.remove('active');
+      if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
+      if (drawerBackdrop) drawerBackdrop.classList.remove('open');
+      renderDashboard();
     } else if (viewName === 'library') {
       if (lessonView) lessonView.style.display = 'none';
+      if (studyDashboardView) studyDashboardView.style.display = 'none';
       if (libraryView) libraryView.style.display = 'block';
       if (bookReaderView) bookReaderView.style.display = 'none';
       if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
+      if (viewDashboardBtn) viewDashboardBtn.classList.remove('active');
       if (viewLibraryBtn) viewLibraryBtn.classList.add('active');
       if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
       if (drawerBackdrop) drawerBackdrop.classList.remove('open');
     } else if (viewName === 'reader') {
       if (lessonView) lessonView.style.display = 'none';
+      if (studyDashboardView) studyDashboardView.style.display = 'none';
       if (libraryView) libraryView.style.display = 'none';
       if (bookReaderView) bookReaderView.style.display = 'flex';
       if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
+      if (viewDashboardBtn) viewDashboardBtn.classList.remove('active');
       if (viewLibraryBtn) viewLibraryBtn.classList.add('active');
       if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
       if (drawerBackdrop) drawerBackdrop.classList.remove('open');
@@ -1594,8 +2069,297 @@ function generateOfflineShell() {
   }
 
   if (viewLessonsBtn) viewLessonsBtn.addEventListener('click', () => switchView('lessons'));
+  if (viewDashboardBtn) viewDashboardBtn.addEventListener('click', () => switchView('dashboard'));
   if (viewLibraryBtn) viewLibraryBtn.addEventListener('click', () => switchView('library'));
   if (readerBackBtn) readerBackBtn.addEventListener('click', () => switchView('library'));
+
+  // User Bookmark & Note controls
+  function updateLessonUserTools(lesson) {
+    if (!lesson) return;
+    const isBkm = typeof isBookmarked === 'function' ? isBookmarked(userBookmarks, lesson.id) : false;
+    if (bookmarkBtn) {
+      bookmarkBtn.classList.toggle('active', isBkm);
+      bookmarkBtn.textContent = isBkm ? '★ Bookmarked' : '🔖 Bookmark';
+    }
+    const note = typeof getNote === 'function' ? getNote(userNotes, lesson.id) : null;
+    if (noteToggleBtn) {
+      noteToggleBtn.classList.toggle('active', !!note);
+      noteToggleBtn.textContent = note ? '📝 Note (1)' : '📝 Notes';
+    }
+    if (noteTextarea) {
+      noteTextarea.value = note ? note.text : '';
+    }
+    if (noteSaveStatus) {
+      noteSaveStatus.textContent = note ? 'Saved locally' : '';
+    }
+  }
+
+  if (bookmarkBtn) {
+    bookmarkBtn.addEventListener('click', () => {
+      if (!currentLoadedLesson) return;
+      if (typeof toggleBookmark === 'function') {
+        userBookmarks = toggleBookmark(userBookmarks, currentLoadedLesson);
+        localStorage.setItem('user_bookmarks', JSON.stringify(userBookmarks));
+        updateLessonUserTools(currentLoadedLesson);
+        updateProgress();
+      }
+    });
+  }
+
+  if (noteToggleBtn) {
+    noteToggleBtn.addEventListener('click', () => {
+      if (lessonNotePanel) {
+        const isVisible = lessonNotePanel.style.display !== 'none';
+        lessonNotePanel.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible && noteTextarea) {
+          noteTextarea.focus();
+        }
+      }
+    });
+  }
+
+  let noteSaveTimeout = null;
+  if (noteTextarea) {
+    noteTextarea.addEventListener('input', () => {
+      if (noteSaveStatus) noteSaveStatus.textContent = 'Saving...';
+      clearTimeout(noteSaveTimeout);
+      noteSaveTimeout = setTimeout(() => {
+        if (!currentLoadedLesson) return;
+        const text = noteTextarea.value;
+        if (typeof saveNote === 'function') {
+          userNotes = saveNote(userNotes, currentLoadedLesson, text);
+          localStorage.setItem('user_notes', JSON.stringify(userNotes));
+          if (noteSaveStatus) noteSaveStatus.textContent = text.trim() ? 'Saved locally' : '';
+          updateLessonUserTools(currentLoadedLesson);
+          updateProgress();
+        }
+      }, 400);
+    });
+  }
+
+  function renderDashboard() {
+    if (!curriculum) return;
+    const stats = typeof computeStudyStats === 'function'
+      ? computeStudyStats(curriculum, Array.from(completedLessons), userBookmarks, userNotes, quizScores)
+      : null;
+
+    if (!stats) return;
+
+    if (dashBookmarkCount) dashBookmarkCount.textContent = stats.bookmarkCount;
+    if (dashNoteCount) dashNoteCount.textContent = stats.noteCount;
+
+    // Render Metrics Grid
+    if (dashboardMetricsGrid) {
+      dashboardMetricsGrid.innerHTML = \`
+        <div class="metric-card">
+          <span class="metric-label">Curriculum Completion</span>
+          <span class="metric-value">\${stats.overallPercentage}%</span>
+          <span class="metric-sub">\${stats.completedCount} of \${stats.totalLessons} Lessons</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Study Time Remaining</span>
+          <span class="metric-value">\${stats.remainingHours}h</span>
+          <span class="metric-sub">Across Unfinished Lessons</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Saved Bookmarks</span>
+          <span class="metric-value">\${stats.bookmarkCount}</span>
+          <span class="metric-sub">Quick Reference</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Personal Notes</span>
+          <span class="metric-value">\${stats.noteCount}</span>
+          <span class="metric-sub">Study Reflections</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Quiz Accuracy</span>
+          <span class="metric-value">\${stats.avgQuizScore}%</span>
+          <span class="metric-sub">\${stats.quizzesTaken} Quizzes Completed</span>
+        </div>
+      \`;
+    }
+
+    // Render Phase Progress Grid
+    if (phaseProgressGrid) {
+      phaseProgressGrid.innerHTML = stats.phaseStats.map(ps => \`
+        <div class="phase-prog-card" data-phase-id="\${ps.id}">
+          <div class="phase-prog-header">
+            <span class="phase-prog-title">Phase \${ps.number}: \${ps.title}</span>
+            <span class="phase-prog-pct">\${ps.percentage}%</span>
+          </div>
+          <div class="phase-prog-bar-bg">
+            <div class="phase-prog-bar-fill" style="width: \${ps.percentage}%"></div>
+          </div>
+          <div class="phase-prog-meta">
+            <span>\${ps.completed} / \${ps.total} Lessons</span>
+            <span>~\${Math.round(ps.remainingMinutes)}m left</span>
+          </div>
+        </div>
+      \`).join('');
+
+      phaseProgressGrid.querySelectorAll('.phase-prog-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const phaseId = card.getAttribute('data-phase-id');
+          const p = curriculum.phases.find(x => x.id === phaseId);
+          if (p && p.lessons && p.lessons[0]) {
+            loadLesson(p.lessons[0].id);
+          }
+        });
+      });
+    }
+
+    // Render Bookmarks List
+    if (bookmarksList) {
+      if (userBookmarks.length === 0) {
+        bookmarksList.innerHTML = '<p style="color:var(--text-muted);font-family:JetBrains Mono,monospace;padding:24px 0;">No bookmarked lessons yet. Click "🔖 Bookmark" on any lesson to save it here.</p>';
+      } else {
+        bookmarksList.innerHTML = userBookmarks.map(b => \`
+          <div class="saved-item-card" data-id="\${b.id}">
+            <div class="saved-item-main">
+              <div class="saved-item-title jump-to-lesson" data-id="\${b.id}">\${b.title}</div>
+              <div class="saved-item-meta">\${b.phaseId} · Saved on \${new Date(b.bookmarkedAt).toLocaleDateString()}</div>
+            </div>
+            <div class="saved-item-actions">
+              <button class="saved-item-btn jump-to-lesson" data-id="\${b.id}">Open</button>
+              <button class="saved-item-btn danger remove-bookmark" data-id="\${b.id}">Remove</button>
+            </div>
+          </div>
+        \`).join('');
+
+        bookmarksList.querySelectorAll('.jump-to-lesson').forEach(el => {
+          el.addEventListener('click', () => loadLesson(el.getAttribute('data-id')));
+        });
+
+        bookmarksList.querySelectorAll('.remove-bookmark').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            userBookmarks = userBookmarks.filter(b => b.id !== id);
+            localStorage.setItem('user_bookmarks', JSON.stringify(userBookmarks));
+            renderDashboard();
+            if (currentLoadedLesson && currentLoadedLesson.id === id) {
+              updateLessonUserTools(currentLoadedLesson);
+            }
+          });
+        });
+      }
+    }
+
+    // Render Notes List
+    if (notesList) {
+      const notesArray = Object.values(userNotes);
+      if (notesArray.length === 0) {
+        notesList.innerHTML = '<p style="color:var(--text-muted);font-family:JetBrains Mono,monospace;padding:24px 0;">No study notes yet. Click "📝 Notes" on any lesson to write reflections.</p>';
+      } else {
+        notesList.innerHTML = notesArray.map(n => \`
+          <div class="saved-item-card" data-id="\${n.lessonId}">
+            <div class="saved-item-main">
+              <div class="saved-item-title jump-to-lesson" data-id="\${n.lessonId}">\${n.lessonTitle}</div>
+              <div class="saved-item-meta">\${n.phaseId} · Updated \${new Date(n.updatedAt).toLocaleDateString()}</div>
+              <div class="saved-item-text">\${n.text}</div>
+            </div>
+            <div class="saved-item-actions">
+              <button class="saved-item-btn jump-to-lesson" data-id="\${n.lessonId}">Open</button>
+              <button class="saved-item-btn danger delete-note" data-id="\${n.lessonId}">Delete</button>
+            </div>
+          </div>
+        \`).join('');
+
+        notesList.querySelectorAll('.jump-to-lesson').forEach(el => {
+          el.addEventListener('click', () => loadLesson(el.getAttribute('data-id')));
+        });
+
+        notesList.querySelectorAll('.delete-note').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            delete userNotes[id];
+            localStorage.setItem('user_notes', JSON.stringify(userNotes));
+            renderDashboard();
+            if (currentLoadedLesson && currentLoadedLesson.id === id) {
+              updateLessonUserTools(currentLoadedLesson);
+            }
+          });
+        });
+      }
+    }
+  }
+
+  // Dashboard Sub-tabs
+  document.querySelectorAll('.dash-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.dash-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tabName = btn.getAttribute('data-tab');
+
+      document.querySelectorAll('.dashboard-tab-content').forEach(c => c.style.display = 'none');
+      if (tabName === 'phases') document.getElementById('dashTabPhases').style.display = 'block';
+      if (tabName === 'bookmarks') document.getElementById('dashTabBookmarks').style.display = 'block';
+      if (tabName === 'notes') document.getElementById('dashTabNotes').style.display = 'block';
+      if (tabName === 'backup') document.getElementById('dashTabBackup').style.display = 'block';
+    });
+  });
+
+  // Export Data
+  if (exportDataBtn) {
+    exportDataBtn.addEventListener('click', () => {
+      const payload = typeof exportUserData === 'function' ? exportUserData({
+        completedLessons: Array.from(completedLessons),
+        bookmarks: userBookmarks,
+        notes: userNotes,
+        quizScores: quizScores,
+      }) : JSON.stringify({ completedLessons: Array.from(completedLessons) });
+
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = \`ai-engineering-study-backup-\${new Date().toISOString().slice(0, 10)}.json\`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  // Import Data
+  if (importDataInput) {
+    importDataInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const text = evt.target.result;
+        const res = typeof importUserData === 'function' ? importUserData(text) : { success: false, error: 'Unavailable' };
+        if (res.success) {
+          completedLessons.clear();
+          (res.data.completedLessons || []).forEach(id => completedLessons.add(id));
+          userBookmarks = res.data.bookmarks || [];
+          userNotes = res.data.notes || {};
+          quizScores = res.data.quizScores || {};
+
+          localStorage.setItem('completed_lessons', JSON.stringify(Array.from(completedLessons)));
+          localStorage.setItem('user_bookmarks', JSON.stringify(userBookmarks));
+          localStorage.setItem('user_notes', JSON.stringify(userNotes));
+          localStorage.setItem('quiz_scores', JSON.stringify(quizScores));
+
+          if (curriculum) renderSidebar(curriculum.phases);
+          updateProgress();
+          renderDashboard();
+
+          if (backupFeedback) {
+            backupFeedback.style.display = 'block';
+            backupFeedback.className = 'backup-feedback';
+            backupFeedback.textContent = 'Study data restored successfully!';
+            setTimeout(() => { backupFeedback.style.display = 'none'; }, 4000);
+          }
+        } else {
+          if (backupFeedback) {
+            backupFeedback.style.display = 'block';
+            backupFeedback.className = 'backup-feedback error';
+            backupFeedback.textContent = 'Restore failed: ' + res.error;
+          }
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
 
   // Load 6-Volume Book Library
   fetch('books/library.json')
@@ -1879,6 +2643,8 @@ function generateOfflineShell() {
     fetch(\`data/lessons/\${lessonId}.json\`)
       .then(res => res.json())
       .then(lesson => {
+        currentLoadedLesson = lesson;
+        updateLessonUserTools(lesson);
         renderLesson(lesson);
       })
       .catch(err => {
@@ -2199,6 +2965,17 @@ function generateOfflineShell() {
         banner.className = 'quiz-result-banner ' + (grading.passed ? 'passed' : 'failed');
         banner.textContent = \`Score: \${grading.score} / \${grading.total} (\${grading.percentage}%) — \` +
           (grading.passed ? 'Passed! Excellent work.' : 'Keep reviewing the material and try again.');
+      }
+
+      if (typeof lessonId !== 'undefined') {
+        quizScores[lessonId] = {
+          score: grading.score,
+          total: grading.total,
+          percentage: grading.percentage,
+          passed: grading.passed,
+          takenAt: Date.now(),
+        };
+        localStorage.setItem('quiz_scores', JSON.stringify(quizScores));
       }
 
       if (grading.passed) {
