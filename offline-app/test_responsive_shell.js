@@ -172,6 +172,18 @@ test('dist/app.js and dist/index.html are syntactically valid and contain all re
     'snippetSelect',
     'runCodeBtn',
     'playgroundOutput',
+    'viewPythonPlaygroundBtn',
+    'pythonPlaygroundView',
+    'pythonCode',
+    'pythonSnippetSelect',
+    'runPythonBtn',
+    'resetPythonBtn',
+    'copyPythonBtn',
+    'clearPythonOutputBtn',
+    'pythonOutput',
+    'pythonSaveStatus',
+    'pythonTerminalBadge',
+    'pythonEditorTitle',
   ];
 
   for (const id of requiredIds) {
@@ -184,6 +196,40 @@ test('dist/app.js and dist/index.html are syntactically valid and contain all re
   // Verify attribution content in index.html
   assert.ok(indexHtml.includes('Amit Kumar'), 'index.html must include author attribution to Amit Kumar');
   assert.ok(indexHtml.includes('AI Engineering from Scratch'), 'index.html must include curriculum source attribution');
-  assert.ok(indexHtml.includes('v1.4.0'), 'index.html must display version 1.1.0');
+  assert.ok(indexHtml.includes('v1.5.0'), 'index.html must display version 1.5.0');
+});
+
+test('safe-area insets support for phone screens avoids system bar and notch overlap', () => {
+  const indexHtmlPath = path.join(__dirname, 'dist', 'index.html');
+  const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+
+  // Verify CSS safe-area insets in header
+  assert.ok(
+    indexHtml.includes('padding-top: max(0px, env(safe-area-inset-top'),
+    'Header must include safe-area-inset-top padding'
+  );
+  assert.ok(
+    indexHtml.includes('calc(56px + max(0px, env(safe-area-inset-top'),
+    'Header height must dynamically account for safe-area-inset-top'
+  );
+
+  // Verify CSS safe-area insets in sidebar footer and bottom navigation
+  assert.ok(
+    indexHtml.includes('padding-bottom: max(12px, calc(12px + env(safe-area-inset-bottom'),
+    'Sidebar footer must account for bottom safe area'
+  );
+  assert.ok(
+    indexHtml.includes('max(48px, calc(48px + env(safe-area-inset-bottom') ||
+    indexHtml.includes('padding-bottom: max(20px, calc(20px + env(safe-area-inset-bottom'),
+    'Article wrap must account for bottom safe area'
+  );
+  assert.ok(
+    indexHtml.includes('--safe-area-inset-top'),
+    'Must include fallback variable --safe-area-inset-top'
+  );
+  assert.ok(
+    indexHtml.includes('--safe-area-inset-bottom'),
+    'Must include fallback variable --safe-area-inset-bottom'
+  );
 });
 

@@ -146,4 +146,5 @@ package-lock.json
 offline-app/dist/
 offline-app/node_modules/
 offline-app/package-lock.json
+offline-app/pyodide-assets/
 

@@ -285,6 +285,53 @@ async function bundleKaTeX() {
   console.log('   bundled KaTeX offline assets & fonts');
 }
 
+async function bundlePyodide() {
+  console.log('🐍 Bundling offline Python 3.12, NumPy, SciPy & Scikit-Learn runtime...');
+  const pyodideAssetsDir = path.join(REPO_ROOT, 'offline-app', 'pyodide-assets');
+  const distPyodideDir = path.join(DIST_DIR, 'pyodide');
+  ensureDir(pyodideAssetsDir);
+  ensureDir(distPyodideDir);
+
+  const files = [
+    'pyodide.js',
+    'pyodide.asm.js',
+    'pyodide.asm.wasm',
+    'python_stdlib.zip',
+    'pyodide-lock.json',
+    'openblas-0.3.26.zip',
+    'numpy-1.26.4-cp312-cp312-pyodide_2024_0_wasm32.whl',
+    'scipy-1.12.0-cp312-cp312-pyodide_2024_0_wasm32.whl',
+    'joblib-1.4.0-py3-none-any.whl',
+    'threadpoolctl-3.4.0-py3-none-any.whl',
+    'scikit_learn-1.4.2-cp312-cp312-pyodide_2024_0_wasm32.whl'
+  ];
+
+  const base = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
+
+  for (const f of files) {
+    const assetPath = path.join(pyodideAssetsDir, f);
+    const distPath = path.join(distPyodideDir, f);
+
+    // If missing from local assets, download to pyodideAssetsDir
+    if (!fs.existsSync(assetPath) || fs.statSync(assetPath).size === 0) {
+      try {
+        console.log(`   downloading ${f}...`);
+        await downloadFile(base + f, assetPath);
+      } catch (err) {
+        console.warn(`Could not download ${f}:`, err.message);
+      }
+    }
+
+    // Ensure copied to dist
+    if (fs.existsSync(assetPath) && (!fs.existsSync(distPath) || fs.statSync(distPath).size === 0)) {
+      fs.copyFileSync(assetPath, distPath);
+    }
+  }
+
+  console.log('   bundled offline Python & ML packages');
+}
+
+
 function unescapeHtml(str) {
   return String(str || '')
     .replace(/&amp;/g, '&')
@@ -432,7 +479,31 @@ function copyStaticAssets() {
     fs.copyFileSync(sqliteDbJs, path.join(DIST_DIR, 'sqlite-db.js'));
     console.log('   copied dist/sqlite-db.js');
   }
+
+  // Copy python-playground-controller.js
+  const pyControllerJs = path.join(REPO_ROOT, 'offline-app', 'python-playground-controller.js');
+  if (fs.existsSync(pyControllerJs)) {
+    fs.copyFileSync(pyControllerJs, path.join(DIST_DIR, 'python-playground-controller.js'));
+    console.log('   copied dist/python-playground-controller.js');
+  }
+
+  // Copy python-worker.js
+  const pyWorkerJs = path.join(REPO_ROOT, 'offline-app', 'python-worker.js');
+  if (fs.existsSync(pyWorkerJs)) {
+    fs.copyFileSync(pyWorkerJs, path.join(DIST_DIR, 'python-worker.js'));
+    console.log('   copied dist/python-worker.js');
+  }
+
+  // Copy offline Pyodide assets
+  const pyodideAssetsDir = path.join(REPO_ROOT, 'offline-app', 'pyodide-assets');
+  const distPyodideDir = path.join(DIST_DIR, 'pyodide');
+  if (fs.existsSync(pyodideAssetsDir)) {
+    ensureDir(distPyodideDir);
+    fs.cpSync(pyodideAssetsDir, distPyodideDir, { recursive: true });
+    console.log('   copied dist/pyodide/ assets');
+  }
 }
+
 
 
 async function buildCurriculum() {
@@ -566,6 +637,7 @@ async function buildCurriculum() {
 
 function generateOfflineShell() {
   console.log('📱 Generating adaptive tablet/phone offline shell (index.html & app.js)...');
+  const pkgVersion = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'offline-app', 'package.json'), 'utf8')).version || '1.5.0';
   
   const htmlContent = `<!DOCTYPE html>
 <html lang="en" data-theme="dark">
@@ -687,15 +759,19 @@ function generateOfflineShell() {
       flex-direction: column;
     }
 
-    /* Top App Header */
+    /* Top App Header with Safe-Area Inset Support */
     header.app-header {
-      height: 56px;
+      padding-top: max(0px, env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+      padding-left: max(16px, env(safe-area-inset-left, 0px), var(--safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px), var(--safe-area-inset-right, 0px));
+      padding-bottom: 0;
+      height: calc(56px + max(0px, env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px)));
+      box-sizing: border-box;
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
       z-index: 100;
       flex-shrink: 0;
       gap: 12px;
@@ -732,6 +808,7 @@ function generateOfflineShell() {
       overflow-y: auto;
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.2s ease;
       z-index: 50;
+      padding-bottom: max(0px, env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
     }
     aside.sidebar.collapsed {
       display: none;
@@ -888,7 +965,7 @@ function generateOfflineShell() {
       max-width: 880px;
       width: 100%;
       margin: 0 auto;
-      padding: 32px 32px 48px;
+      padding: 32px 32px max(48px, calc(48px + env(safe-area-inset-bottom, 0px)), calc(48px + var(--safe-area-inset-bottom, 0px)));
       line-height: var(--reader-line-height);
       font-size: var(--reader-font-size);
       flex: 1;
@@ -1115,6 +1192,7 @@ function generateOfflineShell() {
     .sidebar-footer {
       margin-top: auto;
       padding: 12px 14px;
+      padding-bottom: max(12px, calc(12px + env(safe-area-inset-bottom, 0px)), calc(12px + var(--safe-area-inset-bottom, 0px)));
       background: var(--bg-card);
       border-top: 1px solid var(--border);
       font-family: 'JetBrains Mono', monospace;
@@ -1593,6 +1671,7 @@ function generateOfflineShell() {
       gap: 16px;
       margin-top: 60px;
       padding-top: 24px;
+      padding-bottom: max(24px, calc(24px + env(safe-area-inset-bottom, 0px)), calc(24px + var(--safe-area-inset-bottom, 0px)));
       border-top: 1px solid var(--border);
     }
     .nav-btn {
@@ -2237,6 +2316,9 @@ function generateOfflineShell() {
       aside.sidebar {
         position: absolute;
         top: 0; left: 0; bottom: 0;
+        padding-top: max(0px, env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+        padding-bottom: max(16px, env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+        padding-left: max(0px, env(safe-area-inset-left, 0px), var(--safe-area-inset-left, 0px));
         z-index: 50;
         transform: translateX(-100%);
         box-shadow: 4px 0 20px rgba(0,0,0,0.5);
@@ -2244,20 +2326,20 @@ function generateOfflineShell() {
       aside.sidebar.open { transform: translateX(0); }
       .drawer-backdrop.open { display: block; }
       .breadcrumbs-bar { padding: 8px 16px; font-size: 0.75rem; }
-      .article-wrap { padding: 20px 16px; }
-      .lesson-nav-footer { flex-direction: column; }
+      .article-wrap { padding: 20px 16px; padding-bottom: max(20px, calc(20px + env(safe-area-inset-bottom, 0px)), calc(20px + var(--safe-area-inset-bottom, 0px))); }
+      .lesson-nav-footer { flex-direction: column; padding-bottom: max(24px, calc(24px + env(safe-area-inset-bottom, 0px)), calc(24px + var(--safe-area-inset-bottom, 0px))); }
       .nav-btn { max-width: 100%; }
       .header-title { display: none; }
       .library-header { padding: 20px 16px; }
-      .library-grid { padding: 0 16px 32px; grid-template-columns: 1fr; }
+      .library-grid { padding: 0 16px max(32px, calc(32px + env(safe-area-inset-bottom, 0px)), calc(32px + var(--safe-area-inset-bottom, 0px))); grid-template-columns: 1fr; }
       .dashboard-header { padding: 20px 16px; }
       .dashboard-metrics-grid { padding: 0 16px 20px; grid-template-columns: 1fr; }
       .dashboard-tabs { padding: 0 16px; }
-      .dashboard-tab-content { padding: 0 16px 32px; }
+      .dashboard-tab-content { padding: 0 16px max(32px, calc(32px + env(safe-area-inset-bottom, 0px)), calc(32px + var(--safe-area-inset-bottom, 0px))); }
       .phase-progress-grid { grid-template-columns: 1fr; }
       .lesson-note-panel { margin: 12px 16px 0; }
       .playground-header { padding: 16px; }
-      .playground-body { grid-template-columns: 1fr; height: auto; }
+      .playground-body { grid-template-columns: 1fr; height: auto; padding-bottom: max(16px, calc(16px + env(safe-area-inset-bottom, 0px)), calc(16px + var(--safe-area-inset-bottom, 0px))); }
       .playground-editor-pane { min-height: 320px; border-right: none; border-bottom: 1px solid var(--border); }
       .playground-terminal-pane { min-height: 240px; }
     }
@@ -2468,7 +2550,8 @@ function generateOfflineShell() {
         <button class="view-btn active" id="viewLessonsBtn" data-view="lessons">📖 Lessons</button>
         <button class="view-btn" id="viewDashboardBtn" data-view="dashboard">📊 Study</button>
         <button class="view-btn" id="viewLibraryBtn" data-view="library">📚 Books</button>
-        <button class="view-btn" id="viewPlaygroundBtn" data-view="playground">💻 Playground</button>
+        <button class="view-btn" id="viewPlaygroundBtn" data-view="playground">💻 JS Playground</button>
+        <button class="view-btn" id="viewPythonPlaygroundBtn" data-view="python-playground">🐍 Python Playground</button>
       </div>
     </div>
     <div class="header-actions">
@@ -2522,7 +2605,7 @@ function generateOfflineShell() {
       <ul class="phase-list" id="phaseList"></ul>
       <div class="sidebar-footer" id="sidebarFooter">
         <div class="sidebar-attribution">
-          <span class="sidebar-release-tag">v1.4.0 Release</span>
+          <span class="sidebar-release-tag">v${pkgVersion} Release</span>
           <div class="sidebar-author">App: <strong>Amit Kumar</strong></div>
           <div class="sidebar-source">Curriculum: <strong>AI Engineering from Scratch</strong></div>
         </div>
@@ -2596,7 +2679,7 @@ function generateOfflineShell() {
 
           <div class="backup-card" style="margin-top: 16px;">
             <h3>Official Release & Attribution</h3>
-            <p><strong>App Version:</strong> 1.4.0 (Release Edition)</p>
+            <p><strong>App Version:</strong> ${pkgVersion} (Release Edition)</p>
             <p><strong>Offline App Architecture & Packaging:</strong> Amit Kumar</p>
             <p><strong>Curriculum & Pedagogical Source:</strong> AI Engineering from Scratch Contributors</p>
             <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 8px;">Standalone offline edition featuring 542 lessons, 6 complete volumes, interactive quizzes, and local progress tracking.</p>
@@ -2682,6 +2765,57 @@ function generateOfflineShell() {
           </div>
         </div>
       </div>
+
+      <!-- 6. Python ML Playground View -->
+      <div id="pythonPlaygroundView" class="view-pane" style="display: none;">
+        <div class="playground-header">
+          <div class="playground-header-info">
+            <div class="playground-badge">OFFLINE PYTHON 3.12 + NUMPY + SCIPY + SCIKIT-LEARN</div>
+            <h1 class="playground-title">Python ML Playground</h1>
+            <p class="playground-desc">Execute Machine Learning programs offline with pre-bundled NumPy, SciPy, and Scikit-Learn. Experiment with Andrew Ng foundational algorithms implemented from scratch and compared with production sklearn. External network and pip install are disabled.</p>
+          </div>
+          <div class="playground-toolbar">
+            <div class="preset-selector-wrap">
+              <label for="pythonSnippetSelect" class="preset-label">ML Model Preset:</label>
+              <select id="pythonSnippetSelect" class="playground-select">
+                <option value="custom">Scratchpad (Custom)</option>
+              </select>
+            </div>
+            <div class="playground-actions">
+              <button id="runPythonBtn" class="dash-action-btn primary play-action" title="Execute Python Code (Ctrl+Enter)">▶ Run Python</button>
+              <button id="resetPythonBtn" class="dash-action-btn play-action" title="Reset to Preset Default">↺ Reset</button>
+              <button id="copyPythonBtn" class="dash-action-btn play-action" title="Copy Python Code">📋 Copy</button>
+              <button id="clearPythonOutputBtn" class="dash-action-btn play-action" title="Clear Console Output">🧹 Clear Output</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="playground-body">
+          <!-- Editor Pane -->
+          <div class="playground-editor-pane">
+            <div class="editor-header">
+              <span class="editor-title" id="pythonEditorTitle">PYTHON SCRIPT EDITOR (NUMPY & SCIKIT-LEARN)</span>
+              <div class="editor-meta">
+                <span class="editor-save-status" id="pythonSaveStatus">Saved locally</span>
+              </div>
+            </div>
+            <div class="editor-textarea-wrap">
+              <textarea id="pythonCode" class="playground-textarea" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Write or paste your Python code here..."></textarea>
+            </div>
+          </div>
+
+          <!-- Terminal Output Pane -->
+          <div class="playground-terminal-pane">
+            <div class="terminal-header">
+              <span class="terminal-title">CONSOLE OUTPUT & EXECUTION LOGS</span>
+              <span class="terminal-badge" id="pythonTerminalBadge">PYTHON 3.12</span>
+            </div>
+            <div id="pythonOutput" class="terminal-viewport">
+              <div class="log-line log-empty">Click "▶ Run Python" or press Ctrl+Enter to execute.</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 
@@ -2707,7 +2841,7 @@ function generateOfflineShell() {
       <div class="about-modal-header">
         <div class="about-title-wrap">
           <h2 class="about-title">AI Engineering from Scratch</h2>
-          <span class="about-badge">v1.4.0 Official Release</span>
+          <span class="about-badge">v${pkgVersion} Official Release</span>
         </div>
         <button class="figure-tool-btn close" id="closeAboutBtn" title="Close">✕</button>
       </div>
@@ -2726,7 +2860,7 @@ function generateOfflineShell() {
         </div>
         <hr class="about-divider">
         <div class="about-modal-footer">
-          <div>Build: <strong>1.4.0 (Signed Release APK)</strong> · Local Database: <strong>542 Lessons / 6 Volumes</strong></div>
+          <div>Build: <strong>${pkgVersion} (Signed Release APK)</strong> · Local Database: <strong>542 Lessons / 6 Volumes</strong></div>
           <div>Zero External Network Dependencies · 100% On-Device Storage</div>
         </div>
       </div>
@@ -2747,6 +2881,7 @@ function generateOfflineShell() {
   <script src="study-controller.js"></script>
   <script src="search-engine.js"></script>
   <script src="playground-controller.js"></script>
+  <script src="python-playground-controller.js"></script>
   <script src="app.js"></script>
 </body>
 </html>`;
@@ -2798,11 +2933,13 @@ function generateOfflineShell() {
   const viewDashboardBtn = document.getElementById('viewDashboardBtn');
   const viewLibraryBtn = document.getElementById('viewLibraryBtn');
   const viewPlaygroundBtn = document.getElementById('viewPlaygroundBtn');
+  const viewPythonPlaygroundBtn = document.getElementById('viewPythonPlaygroundBtn');
   const lessonView = document.getElementById('lessonView');
   const studyDashboardView = document.getElementById('studyDashboardView');
   const libraryView = document.getElementById('libraryView');
   const bookReaderView = document.getElementById('bookReaderView');
   const playgroundView = document.getElementById('playgroundView');
+  const pythonPlaygroundView = document.getElementById('pythonPlaygroundView');
   const libraryGrid = document.getElementById('libraryGrid');
   const librarySearchInput = document.getElementById('librarySearchInput');
   const readerBackBtn = document.getElementById('readerBackBtn');
@@ -2822,6 +2959,18 @@ function generateOfflineShell() {
   const playgroundSaveStatus = document.getElementById('playgroundSaveStatus');
   const terminalStatusBadge = document.getElementById('terminalStatusBadge');
   const playgroundEditorTitle = document.getElementById('playgroundEditorTitle');
+
+  // Python ML Playground Elements
+  const pythonCode = document.getElementById('pythonCode');
+  const pythonSnippetSelect = document.getElementById('pythonSnippetSelect');
+  const runPythonBtn = document.getElementById('runPythonBtn');
+  const resetPythonBtn = document.getElementById('resetPythonBtn');
+  const copyPythonBtn = document.getElementById('copyPythonBtn');
+  const clearPythonOutputBtn = document.getElementById('clearPythonOutputBtn');
+  const pythonOutput = document.getElementById('pythonOutput');
+  const pythonSaveStatus = document.getElementById('pythonSaveStatus');
+  const pythonTerminalBadge = document.getElementById('pythonTerminalBadge');
+  const pythonEditorTitle = document.getElementById('pythonEditorTitle');
 
   // Study Dashboard & Notes Elements
   const bookmarkBtn = document.getElementById('bookmarkBtn');
@@ -2875,20 +3024,24 @@ function generateOfflineShell() {
       if (libraryView) libraryView.style.display = 'none';
       if (bookReaderView) bookReaderView.style.display = 'none';
       if (playgroundView) playgroundView.style.display = 'none';
+      if (pythonPlaygroundView) pythonPlaygroundView.style.display = 'none';
       if (viewLessonsBtn) viewLessonsBtn.classList.add('active');
       if (viewDashboardBtn) viewDashboardBtn.classList.remove('active');
       if (viewLibraryBtn) viewLibraryBtn.classList.remove('active');
       if (viewPlaygroundBtn) viewPlaygroundBtn.classList.remove('active');
+      if (viewPythonPlaygroundBtn) viewPythonPlaygroundBtn.classList.remove('active');
     } else if (viewName === 'dashboard') {
       if (lessonView) lessonView.style.display = 'none';
       if (studyDashboardView) studyDashboardView.style.display = 'block';
       if (libraryView) libraryView.style.display = 'none';
       if (bookReaderView) bookReaderView.style.display = 'none';
       if (playgroundView) playgroundView.style.display = 'none';
+      if (pythonPlaygroundView) pythonPlaygroundView.style.display = 'none';
       if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
       if (viewDashboardBtn) viewDashboardBtn.classList.add('active');
       if (viewLibraryBtn) viewLibraryBtn.classList.remove('active');
       if (viewPlaygroundBtn) viewPlaygroundBtn.classList.remove('active');
+      if (viewPythonPlaygroundBtn) viewPythonPlaygroundBtn.classList.remove('active');
       if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
       if (drawerBackdrop) drawerBackdrop.classList.remove('open');
       renderDashboard();
@@ -2898,10 +3051,12 @@ function generateOfflineShell() {
       if (libraryView) libraryView.style.display = 'block';
       if (bookReaderView) bookReaderView.style.display = 'none';
       if (playgroundView) playgroundView.style.display = 'none';
+      if (pythonPlaygroundView) pythonPlaygroundView.style.display = 'none';
       if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
       if (viewDashboardBtn) viewDashboardBtn.classList.remove('active');
       if (viewLibraryBtn) viewLibraryBtn.classList.add('active');
       if (viewPlaygroundBtn) viewPlaygroundBtn.classList.remove('active');
+      if (viewPythonPlaygroundBtn) viewPythonPlaygroundBtn.classList.remove('active');
       if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
       if (drawerBackdrop) drawerBackdrop.classList.remove('open');
     } else if (viewName === 'reader') {
@@ -2910,10 +3065,12 @@ function generateOfflineShell() {
       if (libraryView) libraryView.style.display = 'none';
       if (bookReaderView) bookReaderView.style.display = 'flex';
       if (playgroundView) playgroundView.style.display = 'none';
+      if (pythonPlaygroundView) pythonPlaygroundView.style.display = 'none';
       if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
       if (viewDashboardBtn) viewDashboardBtn.classList.remove('active');
       if (viewLibraryBtn) viewLibraryBtn.classList.add('active');
       if (viewPlaygroundBtn) viewPlaygroundBtn.classList.remove('active');
+      if (viewPythonPlaygroundBtn) viewPythonPlaygroundBtn.classList.remove('active');
       if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
       if (drawerBackdrop) drawerBackdrop.classList.remove('open');
     } else if (viewName === 'playground') {
@@ -2922,12 +3079,31 @@ function generateOfflineShell() {
       if (libraryView) libraryView.style.display = 'none';
       if (bookReaderView) bookReaderView.style.display = 'none';
       if (playgroundView) playgroundView.style.display = 'block';
+      if (pythonPlaygroundView) pythonPlaygroundView.style.display = 'none';
       if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
       if (viewDashboardBtn) viewDashboardBtn.classList.remove('active');
       if (viewLibraryBtn) viewLibraryBtn.classList.remove('active');
       if (viewPlaygroundBtn) viewPlaygroundBtn.classList.add('active');
+      if (viewPythonPlaygroundBtn) viewPythonPlaygroundBtn.classList.remove('active');
       if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
       if (drawerBackdrop) drawerBackdrop.classList.remove('open');
+    } else if (viewName === 'python-playground') {
+      if (lessonView) lessonView.style.display = 'none';
+      if (studyDashboardView) studyDashboardView.style.display = 'none';
+      if (libraryView) libraryView.style.display = 'none';
+      if (bookReaderView) bookReaderView.style.display = 'none';
+      if (playgroundView) playgroundView.style.display = 'none';
+      if (pythonPlaygroundView) pythonPlaygroundView.style.display = 'block';
+      if (viewLessonsBtn) viewLessonsBtn.classList.remove('active');
+      if (viewDashboardBtn) viewDashboardBtn.classList.remove('active');
+      if (viewLibraryBtn) viewLibraryBtn.classList.remove('active');
+      if (viewPlaygroundBtn) viewPlaygroundBtn.classList.remove('active');
+      if (viewPythonPlaygroundBtn) viewPythonPlaygroundBtn.classList.add('active');
+      if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
+      if (drawerBackdrop) drawerBackdrop.classList.remove('open');
+      if (typeof window.__initPythonWorker === 'function') {
+        window.__initPythonWorker();
+      }
     }
   }
 
@@ -2935,6 +3111,7 @@ function generateOfflineShell() {
   if (viewDashboardBtn) viewDashboardBtn.addEventListener('click', () => switchView('dashboard'));
   if (viewLibraryBtn) viewLibraryBtn.addEventListener('click', () => switchView('library'));
   if (viewPlaygroundBtn) viewPlaygroundBtn.addEventListener('click', () => switchView('playground'));
+  if (viewPythonPlaygroundBtn) viewPythonPlaygroundBtn.addEventListener('click', () => switchView('python-playground'));
   if (readerBackBtn) readerBackBtn.addEventListener('click', () => switchView('library'));
 
   // User Bookmark & Note controls
@@ -4254,7 +4431,250 @@ function generateOfflineShell() {
     });
   }
 
+  function initPythonPlayground() {
+    if (!pythonCode || !pythonSnippetSelect) return;
+
+    let pythonWorker = null;
+    let isPythonWorkerInitializing = false;
+    let isPythonWorkerReady = false;
+    let isPythonRunning = false;
+
+    function getOrCreatePythonWorker() {
+      if (pythonWorker && (isPythonWorkerReady || isPythonWorkerInitializing)) {
+        return pythonWorker;
+      }
+      isPythonWorkerInitializing = true;
+
+      if (pythonTerminalBadge) {
+        pythonTerminalBadge.textContent = 'INITIALIZING...';
+        pythonTerminalBadge.className = 'terminal-badge';
+      }
+      if (pythonOutput) {
+        pythonOutput.innerHTML = '<div class="log-line log-info">⏳ Initializing offline Python 3.12 (NumPy, SciPy & Scikit-Learn)...</div>';
+      }
+
+      try {
+        pythonWorker = new Worker('python-worker.js');
+        pythonWorker.addEventListener('message', (event) => {
+          const msg = event.data;
+          if (!msg) return;
+
+          if (msg.type === 'status') {
+            if (pythonTerminalBadge) pythonTerminalBadge.textContent = 'LOADING...';
+            if (pythonOutput) {
+              pythonOutput.innerHTML += '<div class="log-line log-info">' + msg.message + '</div>';
+            }
+          } else if (msg.type === 'ready') {
+            isPythonWorkerReady = true;
+            isPythonWorkerInitializing = false;
+            if (pythonTerminalBadge) {
+              pythonTerminalBadge.textContent = 'READY';
+              pythonTerminalBadge.className = 'terminal-badge success';
+            }
+            if (pythonOutput) {
+              pythonOutput.innerHTML += '<div class="log-line log-info">✔ Python environment ready. Click \\"▶ Run Python\\" to execute.</div>';
+            }
+          } else if (msg.type === 'init_error') {
+            isPythonWorkerReady = false;
+            isPythonWorkerInitializing = false;
+            if (pythonTerminalBadge) {
+              pythonTerminalBadge.textContent = 'LOAD ERROR';
+              pythonTerminalBadge.className = 'terminal-badge error';
+            }
+            if (pythonOutput) {
+              pythonOutput.innerHTML += '<div class="log-line log-err">❌ Failed to initialize Python: ' + msg.error + '</div>';
+            }
+          } else if (msg.type === 'result') {
+            isPythonRunning = false;
+            if (runPythonBtn) runPythonBtn.disabled = false;
+            if (pythonTerminalBadge) {
+              pythonTerminalBadge.textContent = msg.error ? 'ERROR' : 'SUCCESS';
+              pythonTerminalBadge.className = 'terminal-badge ' + (msg.error ? 'error' : 'success');
+            }
+            if (pythonOutput) {
+              if (typeof formatPythonTerminalHtml === 'function') {
+                pythonOutput.innerHTML = formatPythonTerminalHtml(msg.logs, msg.error, msg.durationMs);
+              } else {
+                pythonOutput.innerText = msg.logs.map(l => l.text).join('\\n');
+              }
+            }
+          }
+        });
+
+        pythonWorker.postMessage({ type: 'init' });
+      } catch (err) {
+        isPythonWorkerInitializing = false;
+        if (pythonOutput) {
+          pythonOutput.innerHTML = '<div class="log-line log-err">Error creating Web Worker: ' + (err.message || String(err)) + '</div>';
+        }
+      }
+      return pythonWorker;
+    }
+
+    // Populate preset dropdown from PYTHON_ML_PRESETS
+    if (typeof PYTHON_ML_PRESETS !== 'undefined' && Array.isArray(PYTHON_ML_PRESETS)) {
+      pythonSnippetSelect.innerHTML = '<option value="custom">Scratchpad (Custom)</option>';
+      PYTHON_ML_PRESETS.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.title;
+        pythonSnippetSelect.appendChild(opt);
+      });
+    }
+
+    // Load initial code (first preset or saved scratchpad)
+    const initialPreset = (typeof PYTHON_ML_PRESETS !== 'undefined' && PYTHON_ML_PRESETS[0]) || null;
+    if (initialPreset) {
+      const saved = typeof loadPythonScratchpad === 'function' ? loadPythonScratchpad(initialPreset.id) : null;
+      pythonCode.value = saved || initialPreset.code;
+      pythonSnippetSelect.value = initialPreset.id;
+      if (pythonEditorTitle) {
+        pythonEditorTitle.textContent = 'PYTHON SCRIPT EDITOR (' + initialPreset.id.toUpperCase() + ')';
+      }
+    } else {
+      const savedCustom = typeof loadPythonScratchpad === 'function' ? loadPythonScratchpad('custom') : null;
+      pythonCode.value = savedCustom || '# Welcome to the Offline Python ML Playground\\nimport numpy as np\\nprint("Hello AI Engineering from Scratch!")\\n';
+    }
+
+    // Handle snippet change
+    pythonSnippetSelect.addEventListener('change', (e) => {
+      const selectedId = e.target.value;
+      if (selectedId === 'custom') {
+        const savedCustom = typeof loadPythonScratchpad === 'function' ? loadPythonScratchpad('custom') : null;
+        pythonCode.value = savedCustom || '# Custom Python scratchpad\\nimport numpy as np\\nfrom sklearn.linear_model import LinearRegression\\nprint("Ready to code in Python")\\n';
+        if (pythonEditorTitle) pythonEditorTitle.textContent = 'PYTHON SCRIPT EDITOR (CUSTOM)';
+      } else if (typeof PYTHON_ML_PRESETS !== 'undefined') {
+        const preset = PYTHON_ML_PRESETS.find(p => p.id === selectedId);
+        if (preset) {
+          const saved = typeof loadPythonScratchpad === 'function' ? loadPythonScratchpad(preset.id) : null;
+          pythonCode.value = saved || preset.code;
+          if (pythonEditorTitle) pythonEditorTitle.textContent = 'PYTHON SCRIPT EDITOR (' + preset.id.toUpperCase() + ')';
+        }
+      }
+      if (pythonOutput) {
+        pythonOutput.innerHTML = '<div class="log-line log-empty">Click "▶ Run Python" or press Ctrl+Enter to execute.</div>';
+      }
+      if (pythonTerminalBadge) {
+        pythonTerminalBadge.textContent = isPythonWorkerReady ? 'READY' : 'PYTHON 3.12';
+        pythonTerminalBadge.className = 'terminal-badge';
+      }
+    });
+
+    // Run Python Code
+    function runPythonScript() {
+      if (!pythonCode || isPythonRunning) return;
+      const code = pythonCode.value;
+      isPythonRunning = true;
+      if (runPythonBtn) runPythonBtn.disabled = true;
+      if (pythonTerminalBadge) {
+        pythonTerminalBadge.textContent = 'RUNNING...';
+        pythonTerminalBadge.className = 'terminal-badge';
+      }
+      if (pythonOutput) {
+        pythonOutput.innerHTML = '<div class="log-line log-info">⏳ Executing Python ML code...</div>';
+      }
+
+      const worker = getOrCreatePythonWorker();
+      if (worker) {
+        worker.postMessage({
+          type: 'run',
+          code,
+          id: pythonSnippetSelect ? pythonSnippetSelect.value : 'custom'
+        });
+      } else {
+        isPythonRunning = false;
+        if (runPythonBtn) runPythonBtn.disabled = false;
+        if (pythonOutput) {
+          pythonOutput.innerHTML = '<div class="log-line log-err">Python execution worker unavailable.</div>';
+        }
+      }
+    }
+
+    if (runPythonBtn) {
+      runPythonBtn.addEventListener('click', runPythonScript);
+    }
+
+    // Keyboard shortcut (Ctrl+Enter or Cmd+Enter) & 4-space Tab indent
+    pythonCode.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runPythonScript();
+      }
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = pythonCode.selectionStart;
+        const end = pythonCode.selectionEnd;
+        pythonCode.value = pythonCode.value.substring(0, start) + '    ' + pythonCode.value.substring(end);
+        pythonCode.selectionStart = pythonCode.selectionEnd = start + 4;
+      }
+    });
+
+    // Reset button
+    if (resetPythonBtn) {
+      resetPythonBtn.addEventListener('click', () => {
+        const curId = pythonSnippetSelect ? pythonSnippetSelect.value : 'custom';
+        if (curId !== 'custom' && typeof PYTHON_ML_PRESETS !== 'undefined') {
+          const preset = PYTHON_ML_PRESETS.find(p => p.id === curId);
+          if (preset) {
+            pythonCode.value = preset.code;
+            if (typeof savePythonScratchpad === 'function') savePythonScratchpad(preset.code, preset.id);
+            if (pythonSaveStatus) pythonSaveStatus.textContent = 'Reset to preset default';
+            setTimeout(() => { if (pythonSaveStatus) pythonSaveStatus.textContent = 'Saved locally'; }, 1500);
+          }
+        } else {
+          pythonCode.value = '# Custom Python scratchpad\\nimport numpy as np\\nprint("Ready to code");\\n';
+          if (typeof savePythonScratchpad === 'function') savePythonScratchpad(pythonCode.value, 'custom');
+        }
+      });
+    }
+
+    // Copy button
+    if (copyPythonBtn) {
+      copyPythonBtn.addEventListener('click', () => {
+        if (!pythonCode) return;
+        navigator.clipboard.writeText(pythonCode.value).then(() => {
+          copyPythonBtn.textContent = 'Copied!';
+          setTimeout(() => { copyPythonBtn.textContent = '📋 Copy'; }, 2000);
+        }).catch(() => {
+          copyPythonBtn.textContent = 'Copied!';
+          setTimeout(() => { copyPythonBtn.textContent = '📋 Copy'; }, 2000);
+        });
+      });
+    }
+
+    // Clear Output button
+    if (clearPythonOutputBtn) {
+      clearPythonOutputBtn.addEventListener('click', () => {
+        if (pythonOutput) {
+          pythonOutput.innerHTML = '<div class="log-line log-empty">Python console output cleared.</div>';
+        }
+        if (pythonTerminalBadge) {
+          pythonTerminalBadge.textContent = 'CLEARED';
+          pythonTerminalBadge.className = 'terminal-badge';
+        }
+      });
+    }
+
+    // Debounced auto-save
+    let autoSavePyTimer = null;
+    pythonCode.addEventListener('input', () => {
+      if (pythonSaveStatus) pythonSaveStatus.textContent = 'Typing...';
+      clearTimeout(autoSavePyTimer);
+      autoSavePyTimer = setTimeout(() => {
+        const curId = pythonSnippetSelect ? pythonSnippetSelect.value : 'custom';
+        if (typeof savePythonScratchpad === 'function') {
+          savePythonScratchpad(pythonCode.value, curId);
+        }
+        if (pythonSaveStatus) pythonSaveStatus.textContent = 'Saved locally';
+      }, 500);
+    });
+
+    // Expose worker initialization on view switch
+    window.__initPythonWorker = getOrCreatePythonWorker;
+  }
+
   initPlayground();
+  initPythonPlayground();
 })();
 `;
 
@@ -4269,6 +4689,7 @@ async function main() {
   await bundleFonts();
   await bundleMermaid();
   await bundleKaTeX();
+  await bundlePyodide();
   copyStaticAssets();
 
   console.log('📚 Building 6 Curriculum Book Volumes (EPUB & HTML)...');

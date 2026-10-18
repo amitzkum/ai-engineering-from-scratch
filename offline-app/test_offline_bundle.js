@@ -47,8 +47,18 @@ test('offline bundle enforces zero external network dependencies', () => {
   const fontsCss = fs.readFileSync(path.join(DIST_DIR, 'fonts.css'), 'utf8');
   const styleCss = fs.readFileSync(path.join(DIST_DIR, 'style.css'), 'utf8');
   const katexCss = fs.readFileSync(path.join(DIST_DIR, 'katex.min.css'), 'utf8');
+  const pyController = fs.readFileSync(path.join(DIST_DIR, 'python-playground-controller.js'), 'utf8');
+  const pyWorker = fs.readFileSync(path.join(DIST_DIR, 'python-worker.js'), 'utf8');
 
-  for (const [name, content] of [['index.html', indexHtml], ['app.js', appJs], ['fonts.css', fontsCss], ['style.css', styleCss], ['katex.min.css', katexCss]]) {
+  for (const [name, content] of [
+    ['index.html', indexHtml],
+    ['app.js', appJs],
+    ['fonts.css', fontsCss],
+    ['style.css', styleCss],
+    ['katex.min.css', katexCss],
+    ['python-playground-controller.js', pyController],
+    ['python-worker.js', pyWorker]
+  ]) {
     assert.doesNotMatch(content, /https?:\/\/fonts\.googleapis\.com/, `${name} must not load external Google Fonts`);
     assert.doesNotMatch(content, /https?:\/\/raw\.githubusercontent\.com/, `${name} must not fetch external raw github content`);
     assert.doesNotMatch(content, /https?:\/\/va\.vercel-scripts\.com/, `${name} must not load external Vercel analytics`);
