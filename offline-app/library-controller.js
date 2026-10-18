@@ -75,6 +75,16 @@ function getVolumeDownloadUrl(volume) {
 }
 
 /**
+ * Returns the relative download URL for a PDF file.
+ */
+function getVolumePdfUrl(volume) {
+  if (!volume) return '#';
+  if (volume.pdfFile) return `books/${encodeURIComponent(volume.pdfFile)}`;
+  if (volume.epubFile) return `books/${encodeURIComponent(volume.epubFile.replace(/\.epub$/, '.pdf'))}`;
+  return `books/volume-${volume.number}.pdf`;
+}
+
+/**
  * Returns the relative URL for the standalone HTML reader.
  */
 function getVolumeReaderUrl(volume) {
@@ -89,6 +99,8 @@ function renderVolumeCardHtml(volume) {
   const stats = formatVolumeStats(volume);
   const downloadUrl = getVolumeDownloadUrl(volume);
   const readerUrl = getVolumeReaderUrl(volume);
+  const pdfUrl = getVolumePdfUrl(volume);
+  const pdfFile = volume.pdfFile || (volume.epubFile ? volume.epubFile.replace(/\.epub$/, '.pdf') : `volume-${volume.number}.pdf`);
   const phasesText = (volume.phases || []).join(' · ');
 
   return `
@@ -110,12 +122,12 @@ function renderVolumeCardHtml(volume) {
         <button class="lib-action-btn primary read-vol-btn" data-url="${readerUrl}" data-vol="${volume.number}">
           📖 Read Volume
         </button>
-        <a class="lib-action-btn download-vol-btn" href="${downloadUrl}" download="${volume.epubFile}" title="Export EPUB to storage">
+        <a class="lib-action-btn download-vol-btn epub-btn" href="${downloadUrl}" download="${volume.epubFile}" data-file="${volume.epubFile}" data-url="${downloadUrl}" data-type="epub" title="Download EPUB copy locally">
           📥 EPUB
         </a>
-        <button class="lib-action-btn print-vol-btn" data-url="${readerUrl}" title="Open Print / PDF dialog">
-          🖨️ PDF
-        </button>
+        <a class="lib-action-btn download-vol-btn pdf-btn" href="${pdfUrl}" download="${pdfFile}" data-file="${pdfFile}" data-url="${pdfUrl}" data-type="pdf" title="Download PDF copy locally">
+          📄 PDF
+        </a>
       </div>
     </div>
   `;
@@ -127,6 +139,7 @@ if (typeof module !== 'undefined' && module.exports) {
     formatVolumeStats,
     filterVolumes,
     getVolumeDownloadUrl,
+    getVolumePdfUrl,
     getVolumeReaderUrl,
     renderVolumeCardHtml,
   };

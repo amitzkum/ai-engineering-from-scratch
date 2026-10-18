@@ -2490,11 +2490,13 @@ function generateOfflineShell() {
       .lesson-note-panel { margin: 12px 16px 0; }
       .playground-header { padding: 16px; max-width: 100%; box-sizing: border-box; }
       .playground-title { font-size: 1.35rem; }
-      .playground-toolbar { flex-direction: column; align-items: stretch; gap: 12px; }
-      .preset-selector-wrap { width: 100%; max-width: 100%; flex-direction: column; align-items: stretch; gap: 6px; }
-      .playground-select { width: 100%; max-width: 100%; font-size: 0.82rem; }
+      .playground-toolbar { flex-direction: column; align-items: stretch; gap: 10px; }
+      .preset-selector-wrap { width: 100%; max-width: 100%; display: flex; flex-direction: row; align-items: center; gap: 8px; }
+      .preset-label { font-size: 0.76rem; white-space: nowrap; flex-shrink: 0; }
+      .custom-select-box { height: 34px; min-height: 34px; max-height: 34px; padding: 0 8px; flex: 1; }
+      .select-marquee-content { font-size: 0.78rem; line-height: 32px; }
       .playground-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-      .play-action { width: 100%; justify-content: center; text-align: center; padding: 8px 10px; font-size: 0.78rem; box-sizing: border-box; }
+      .play-action { width: 100%; justify-content: center; text-align: center; padding: 7px 10px; font-size: 0.78rem; box-sizing: border-box; }
       .playground-body { grid-template-columns: 1fr; height: auto; max-width: 100%; box-sizing: border-box; padding-bottom: max(16px, calc(16px + env(safe-area-inset-bottom, 0px)), calc(16px + var(--safe-area-inset-bottom, 0px))); }
       .playground-editor-pane { min-height: 320px; border-right: none; border-bottom: 1px solid var(--border); max-width: 100%; box-sizing: border-box; }
       .playground-terminal-pane { min-height: 240px; max-width: 100%; box-sizing: border-box; }
@@ -2624,6 +2626,129 @@ function generateOfflineShell() {
       font-family: system-ui, -apple-system, sans-serif;
       font-size: 0.85rem;
       white-space: normal;
+    }
+    .custom-select-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 34px;
+      min-height: 34px;
+      max-height: 34px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0 10px;
+      box-sizing: border-box;
+      flex: 1;
+      min-width: 0;
+      max-width: 100%;
+      cursor: pointer;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .custom-select-box:focus-within,
+    .custom-select-box:hover {
+      border-color: var(--accent);
+    }
+    .select-marquee-viewport {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      mask-image: linear-gradient(to right, transparent 0, black 8px, black calc(100% - 8px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0, black 8px, black calc(100% - 8px), transparent 100%);
+    }
+    .select-marquee-content {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--ink);
+      line-height: 32px;
+      will-change: transform;
+    }
+    .select-marquee-content.scrolling {
+      animation: selectMarqueeScroll 12s linear infinite;
+    }
+    .select-marquee-content.scrolling:hover {
+      animation-play-state: paused;
+    }
+    .select-marquee-dup {
+      padding-left: 36px;
+      aria-hidden: true;
+    }
+    @keyframes selectMarqueeScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .select-arrow {
+      margin-left: 8px;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      pointer-events: none;
+      transition: transform 0.2s ease;
+    }
+    .playground-select-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 5;
+      -webkit-appearance: none;
+      appearance: none;
+      font-size: 16px;
+      border: none;
+      background: transparent;
+      margin: 0;
+      padding: 0;
+    }
+    .playground-select-overlay option {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 0.85rem;
+      color: #111;
+      background: #fff;
+    }
+    [data-theme="dark"] .playground-select-overlay option {
+      color: #eee;
+      background: #18191a;
+    }
+    .app-toast {
+      position: fixed;
+      bottom: max(24px, calc(24px + env(safe-area-inset-bottom, 0px)), calc(24px + var(--safe-area-inset-bottom, 0px)));
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      background: var(--ink);
+      color: var(--bg);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+      max-width: 90vw;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .app-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
     }
     .playground-actions {
       display: flex;
@@ -2918,8 +3043,9 @@ function generateOfflineShell() {
           <button class="reader-tool-btn" id="readerBackBtn">← Back to Library</button>
           <div class="reader-vol-title" id="readerVolTitle">Volume Reader</div>
           <div class="reader-tool-actions">
-            <a class="reader-tool-btn" id="readerExportEpubBtn" href="#" download title="Save EPUB to device">📥 Save EPUB</a>
-            <button class="reader-tool-btn primary" id="readerPrintBtn" title="Print or save as PDF">🖨️ Print / PDF</button>
+            <button class="reader-tool-btn" id="readerExportEpubBtn" title="Download EPUB to device">📥 EPUB</button>
+            <button class="reader-tool-btn" id="readerExportPdfBtn" title="Download PDF to device">📄 PDF</button>
+            <button class="reader-tool-btn primary" id="readerPrintBtn" title="Print or save as PDF">🖨️ Print</button>
           </div>
         </div>
         <div class="book-reader-container">
@@ -2938,9 +3064,15 @@ function generateOfflineShell() {
           <div class="playground-toolbar">
             <div class="preset-selector-wrap">
               <label for="snippetSelect" class="preset-label">Preset Algorithm:</label>
-              <select id="snippetSelect" class="playground-select">
-                <option value="custom">Scratchpad (Custom)</option>
-              </select>
+              <div class="custom-select-box" id="snippetSelectBox">
+                <div class="select-marquee-viewport">
+                  <div class="select-marquee-content" id="snippetTitleMarquee">Scratchpad (Custom)</div>
+                </div>
+                <span class="select-arrow">▼</span>
+                <select id="snippetSelect" class="playground-select-overlay" aria-label="Preset Algorithm">
+                  <option value="custom">Scratchpad (Custom)</option>
+                </select>
+              </div>
             </div>
             <div class="playground-actions">
               <button id="runCodeBtn" class="dash-action-btn primary play-action" title="Execute Code (Ctrl+Enter)">▶ Run Code</button>
@@ -2989,9 +3121,15 @@ function generateOfflineShell() {
           <div class="playground-toolbar">
             <div class="preset-selector-wrap">
               <label for="pythonSnippetSelect" class="preset-label">ML Model Preset:</label>
-              <select id="pythonSnippetSelect" class="playground-select">
-                <option value="custom">Scratchpad (Custom)</option>
-              </select>
+              <div class="custom-select-box" id="pythonSelectBox">
+                <div class="select-marquee-viewport">
+                  <div class="select-marquee-content" id="pythonSnippetTitleMarquee">Scratchpad (Custom)</div>
+                </div>
+                <span class="select-arrow">▼</span>
+                <select id="pythonSnippetSelect" class="playground-select-overlay" aria-label="ML Model Preset">
+                  <option value="custom">Scratchpad (Custom)</option>
+                </select>
+              </div>
             </div>
             <div class="playground-actions">
               <button id="runPythonBtn" class="dash-action-btn primary play-action" title="Execute Python Code (Ctrl+Enter)">▶ Run Python</button>
@@ -3157,12 +3295,14 @@ function generateOfflineShell() {
   const readerBackBtn = document.getElementById('readerBackBtn');
   const readerPrintBtn = document.getElementById('readerPrintBtn');
   const readerExportEpubBtn = document.getElementById('readerExportEpubBtn');
+  const readerExportPdfBtn = document.getElementById('readerExportPdfBtn');
   const readerVolTitle = document.getElementById('readerVolTitle');
   const bookReaderFrame = document.getElementById('bookReaderFrame');
 
   // Code Playground Elements
   const playgroundCode = document.getElementById('playgroundCode');
   const snippetSelect = document.getElementById('snippetSelect');
+  const snippetTitleMarquee = document.getElementById('snippetTitleMarquee');
   const runCodeBtn = document.getElementById('runCodeBtn');
   const resetCodeBtn = document.getElementById('resetCodeBtn');
   const copyCodeBtn = document.getElementById('copyCodeBtn');
@@ -3175,6 +3315,7 @@ function generateOfflineShell() {
   // Python ML Playground Elements
   const pythonCode = document.getElementById('pythonCode');
   const pythonSnippetSelect = document.getElementById('pythonSnippetSelect');
+  const pythonSnippetTitleMarquee = document.getElementById('pythonSnippetTitleMarquee');
   const runPythonBtn = document.getElementById('runPythonBtn');
   const resetPythonBtn = document.getElementById('resetPythonBtn');
   const copyPythonBtn = document.getElementById('copyPythonBtn');
@@ -3199,6 +3340,89 @@ function generateOfflineShell() {
   const exportDataBtn = document.getElementById('exportDataBtn');
   const importDataInput = document.getElementById('importDataInput');
   const backupFeedback = document.getElementById('backupFeedback');
+
+  // -------------------------------------------------------------
+  // In-App Toast & Native Downloader Bridge
+  // -------------------------------------------------------------
+  function showToast(message, duration = 3000) {
+    let toast = document.getElementById('appToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'appToast';
+      toast.className = 'app-toast';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => {
+      toast.classList.remove('show');
+    }, duration);
+  }
+
+  async function downloadBookLocally(fileUrl, fileName, mimeType) {
+    showToast('Downloading ' + fileName + '...');
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error('HTTP error ' + response.status);
+      const blob = await response.blob();
+
+      // Check if running inside Android WebView native bridge
+      if (window.AndroidDownloader && typeof window.AndroidDownloader.downloadBlob === 'function') {
+        const reader = new FileReader();
+        reader.onloadend = function() {
+          const base64Data = (reader.result || '').split(',')[1] || '';
+          window.AndroidDownloader.downloadBlob(fileName, mimeType || blob.type || 'application/octet-stream', base64Data);
+        };
+        reader.readAsDataURL(blob);
+        return;
+      }
+
+      // Browser fallback (Blob URL download)
+      const blobUrl = URL.createObjectURL(blob);
+      const tempLink = document.createElement('a');
+      tempLink.href = blobUrl;
+      tempLink.download = fileName;
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      setTimeout(() => {
+        document.body.removeChild(tempLink);
+        URL.revokeObjectURL(blobUrl);
+      }, 1000);
+      showToast('Saved ' + fileName + ' to Downloads');
+    } catch (err) {
+      console.error('Download error:', err);
+      showToast('Download failed: ' + err.message);
+    }
+  }
+
+  // -------------------------------------------------------------
+  // Preset Marquee Synchronizer
+  // -------------------------------------------------------------
+  function syncSelectMarquee(selectEl, marqueeEl) {
+    if (!selectEl || !marqueeEl) return;
+    const selectedText = (selectEl.options && selectEl.selectedIndex >= 0 && selectEl.options[selectEl.selectedIndex])
+      ? selectEl.options[selectEl.selectedIndex].text
+      : (selectEl.value || '');
+    marqueeEl.classList.remove('scrolling');
+    marqueeEl.innerHTML = '';
+    const span1 = document.createElement('span');
+    span1.textContent = selectedText;
+    marqueeEl.appendChild(span1);
+
+    setTimeout(() => {
+      const parentWidth = marqueeEl.parentElement ? marqueeEl.parentElement.clientWidth : 0;
+      if (span1.offsetWidth > (parentWidth - 10)) {
+        span1.style.paddingRight = '36px';
+        const span2 = document.createElement('span');
+        span2.textContent = selectedText;
+        span2.style.paddingRight = '36px';
+        span2.setAttribute('aria-hidden', 'true');
+        marqueeEl.appendChild(span2);
+        marqueeEl.classList.add('scrolling');
+      }
+    }, 50);
+  }
 
   // Local Study State
   let userBookmarks = JSON.parse(localStorage.getItem('user_bookmarks') || '[]');
@@ -3299,6 +3523,9 @@ function generateOfflineShell() {
       if (viewPythonPlaygroundBtn) viewPythonPlaygroundBtn.classList.remove('active');
       if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
       if (drawerBackdrop) drawerBackdrop.classList.remove('open');
+      if (typeof syncSelectMarquee === 'function') {
+        syncSelectMarquee(snippetSelect, snippetTitleMarquee);
+      }
     } else if (viewName === 'python-playground') {
       if (lessonView) lessonView.style.display = 'none';
       if (studyDashboardView) studyDashboardView.style.display = 'none';
@@ -3313,6 +3540,9 @@ function generateOfflineShell() {
       if (viewPythonPlaygroundBtn) viewPythonPlaygroundBtn.classList.add('active');
       if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
       if (drawerBackdrop) drawerBackdrop.classList.remove('open');
+      if (typeof syncSelectMarquee === 'function') {
+        syncSelectMarquee(pythonSnippetSelect, pythonSnippetTitleMarquee);
+      }
       if (typeof window.__initPythonWorker === 'function') {
         window.__initPythonWorker();
       }
@@ -3719,6 +3949,17 @@ function generateOfflineShell() {
       });
     });
 
+    libraryGrid.querySelectorAll('.download-vol-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const url = btn.getAttribute('data-url');
+        const fileName = btn.getAttribute('data-file');
+        const type = btn.getAttribute('data-type');
+        const mimeType = type === 'pdf' ? 'application/pdf' : 'application/epub+zip';
+        downloadBookLocally(url, fileName, mimeType);
+      });
+    });
+
     libraryGrid.querySelectorAll('.print-vol-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const url = btn.getAttribute('data-url');
@@ -3729,13 +3970,12 @@ function generateOfflineShell() {
     });
   }
 
+  let currentReaderVolume = null;
+
   function openBookReader(volNum, url, autoPrint = false) {
     const vol = libraryManifest.find(v => v.number === volNum) || { title: \`Volume \${volNum}\` };
+    currentReaderVolume = vol;
     if (readerVolTitle) readerVolTitle.textContent = \`Volume \${vol.roman || volNum}: \${vol.title}\`;
-    if (readerExportEpubBtn && vol.epubFile) {
-      readerExportEpubBtn.href = \`books/\${vol.epubFile}\`;
-      readerExportEpubBtn.setAttribute('download', vol.epubFile);
-    }
     if (bookReaderFrame) {
       bookReaderFrame.src = url;
       if (autoPrint) {
@@ -3749,6 +3989,24 @@ function generateOfflineShell() {
       }
     }
     switchView('reader');
+  }
+
+  if (readerExportEpubBtn) {
+    readerExportEpubBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!currentReaderVolume) return;
+      const epubFile = currentReaderVolume.epubFile || ('volume-' + currentReaderVolume.number + '.epub');
+      downloadBookLocally('books/' + epubFile, epubFile, 'application/epub+zip');
+    });
+  }
+
+  if (readerExportPdfBtn) {
+    readerExportPdfBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!currentReaderVolume) return;
+      const pdfFile = currentReaderVolume.pdfFile || (currentReaderVolume.epubFile ? currentReaderVolume.epubFile.replace(/\.epub$/, '.pdf') : ('volume-' + currentReaderVolume.number + '.pdf'));
+      downloadBookLocally('books/' + pdfFile, pdfFile, 'application/pdf');
+    });
   }
 
   if (readerPrintBtn) {
@@ -4480,6 +4738,9 @@ function generateOfflineShell() {
     }
     if (snippetSelect) {
       snippetSelect.value = presetId;
+      if (typeof syncSelectMarquee === 'function') {
+        syncSelectMarquee(snippetSelect, snippetTitleMarquee);
+      }
     }
     if (playgroundEditorTitle) {
       playgroundEditorTitle.textContent = presetId === 'custom' ? 'SCRIPT EDITOR (CUSTOM SNIPPET)' : ('SCRIPT EDITOR (' + presetId.toUpperCase() + ')');
@@ -4522,8 +4783,15 @@ function generateOfflineShell() {
       playgroundCode.value = savedCustom || '// Welcome to the Offline Code Playground\\nconsole.log("Hello AI Engineering from Scratch!");\\n';
     }
 
+    if (typeof syncSelectMarquee === 'function') {
+      syncSelectMarquee(snippetSelect, snippetTitleMarquee);
+    }
+
     // Handle snippet change
     snippetSelect.addEventListener('change', (e) => {
+      if (typeof syncSelectMarquee === 'function') {
+        syncSelectMarquee(snippetSelect, snippetTitleMarquee);
+      }
       const selectedId = e.target.value;
       if (selectedId === 'custom') {
         const savedCustom = typeof loadScratchpad === 'function' ? loadScratchpad('custom') : null;
@@ -4757,8 +5025,15 @@ function generateOfflineShell() {
       pythonCode.value = savedCustom || '# Welcome to the Offline Python ML Playground\\nimport numpy as np\\nprint("Hello AI Engineering from Scratch!")\\n';
     }
 
+    if (typeof syncSelectMarquee === 'function') {
+      syncSelectMarquee(pythonSnippetSelect, pythonSnippetTitleMarquee);
+    }
+
     // Handle snippet change
     pythonSnippetSelect.addEventListener('change', (e) => {
+      if (typeof syncSelectMarquee === 'function') {
+        syncSelectMarquee(pythonSnippetSelect, pythonSnippetTitleMarquee);
+      }
       const selectedId = e.target.value;
       if (selectedId === 'custom') {
         const savedCustom = typeof loadPythonScratchpad === 'function' ? loadPythonScratchpad('custom') : null;
@@ -4896,6 +5171,13 @@ function generateOfflineShell() {
 
   initPlayground();
   initPythonPlayground();
+
+  window.addEventListener('resize', () => {
+    if (typeof syncSelectMarquee === 'function') {
+      syncSelectMarquee(snippetSelect, snippetTitleMarquee);
+      syncSelectMarquee(pythonSnippetSelect, pythonSnippetTitleMarquee);
+    }
+  });
 })();
 `;
 

@@ -9,6 +9,7 @@ const {
   formatVolumeStats,
   filterVolumes,
   getVolumeDownloadUrl,
+  getVolumePdfUrl,
   getVolumeReaderUrl,
   renderVolumeCardHtml,
 } = require('./library-controller');
@@ -82,12 +83,14 @@ test('filterVolumes accurately matches title, subtitle, Roman numeral, and phase
   assert.equal(foundPhase[0].number, 5);
 });
 
-test('getVolumeDownloadUrl and getVolumeReaderUrl return correct relative asset paths', () => {
-  const vol = { epubFile: 'volume-1-foundations.epub', htmlFile: 'volume-1-foundations.html' };
+test('getVolumeDownloadUrl, getVolumePdfUrl, and getVolumeReaderUrl return correct relative asset paths', () => {
+  const vol = { epubFile: 'volume-1-foundations.epub', htmlFile: 'volume-1-foundations.html', pdfFile: 'volume-1-foundations.pdf' };
   assert.equal(getVolumeDownloadUrl(vol), 'books/volume-1-foundations.epub');
+  assert.equal(getVolumePdfUrl(vol), 'books/volume-1-foundations.pdf');
   assert.equal(getVolumeReaderUrl(vol), 'books/volume-1-foundations.html');
 
   assert.equal(getVolumeDownloadUrl(null), '#');
+  assert.equal(getVolumePdfUrl(null), '#');
   assert.equal(getVolumeReaderUrl(null), '#');
 });
 
@@ -104,6 +107,8 @@ test('renderVolumeCardHtml renders valid card markup with action buttons and dat
     epubFile: 'volume-1-foundations.epub',
     epubSizeKb: 435.1,
     htmlFile: 'volume-1-foundations.html',
+    pdfFile: 'volume-1-foundations.pdf',
+    pdfSizeKb: 7463.7,
   };
 
   const html = renderVolumeCardHtml(vol);
@@ -114,6 +119,8 @@ test('renderVolumeCardHtml renders valid card markup with action buttons and dat
   assert.ok(html.includes('href="books/volume-1-foundations.epub"'));
   assert.ok(html.includes('data-url="books/volume-1-foundations.html"'));
   assert.ok(html.includes('download="volume-1-foundations.epub"'));
+  assert.ok(html.includes('download="volume-1-foundations.pdf"'));
+  assert.ok(html.includes('href="books/volume-1-foundations.pdf"'));
   assert.ok(html.includes('class="lib-action-btn primary read-vol-btn"'));
 });
 

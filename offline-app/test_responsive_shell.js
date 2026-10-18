@@ -196,7 +196,7 @@ test('dist/app.js and dist/index.html are syntactically valid and contain all re
   // Verify attribution content in index.html
   assert.ok(indexHtml.includes('Amit Kumar'), 'index.html must include author attribution to Amit Kumar');
   assert.ok(indexHtml.includes('AI Engineering from Scratch'), 'index.html must include curriculum source attribution');
-  assert.ok(indexHtml.includes('v1.5.2'), 'index.html must display version 1.5.0');
+  assert.ok(indexHtml.includes('v1.5.3'), 'index.html must display version 1.5.0');
 });
 
 test('safe-area insets support for phone screens avoids system bar and notch overlap', () => {
@@ -312,32 +312,76 @@ test('top header view-switcher navigation is horizontally scrollable on mobile s
   );
 });
 
-test('python playground select and toolbar prevent horizontal scrolling with responsive containment', () => {
+test('python playground compact select button with horizontal marquee prevents vertical stretching and horizontal overflow', () => {
   const indexHtmlPath = path.join(__dirname, 'dist', 'index.html');
   const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
 
-  // Verify playground-select has ellipsis and max-width 100%
+  // Verify custom-select-box and marquee viewport in base CSS
   assert.ok(
-    indexHtml.includes('.playground-select {') &&
-    indexHtml.includes('text-overflow: ellipsis;') &&
-    indexHtml.includes('max-width: 100%;'),
-    'playground-select must constrain width and truncate with ellipsis'
+    indexHtml.includes('.custom-select-box {') &&
+    indexHtml.includes('height: 34px;') &&
+    indexHtml.includes('overflow: hidden;'),
+    'custom-select-box must constrain height to 34px and clip overflow'
   );
 
-  // Verify mobile stacking for playground-toolbar and preset-selector-wrap
+  // Verify marquee scrolling animation
   assert.ok(
-    indexHtml.includes('.playground-toolbar { flex-direction: column; align-items: stretch;'),
-    'Mobile media query must stack playground-toolbar vertically'
+    indexHtml.includes('@keyframes selectMarqueeScroll') &&
+    indexHtml.includes('transform: translateX(-50%);'),
+    'selectMarqueeScroll keyframes must provide seamless horizontal loop'
+  );
+
+  // Verify mobile media query row layout and compact 34px height
+  assert.ok(
+    indexHtml.includes('.preset-selector-wrap { width: 100%; max-width: 100%; display: flex; flex-direction: row; align-items: center; gap: 8px; }'),
+    'Mobile media query must format preset-selector-wrap as single row'
   );
   assert.ok(
-    indexHtml.includes('.preset-selector-wrap { width: 100%; max-width: 100%; flex-direction: column;'),
-    'Mobile media query must stack preset-selector-wrap full-width'
+    indexHtml.includes('.custom-select-box { height: 34px; min-height: 34px; max-height: 34px; padding: 0 8px; flex: 1; }'),
+    'Mobile media query must maintain compact 34px height for custom-select-box'
   );
 
   // Verify playground-actions 2-column grid on mobile
   assert.ok(
     indexHtml.includes('.playground-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr;'),
     'Mobile media query must format playground-actions as responsive grid'
+  );
+
+  // Verify marquee elements in DOM markup
+  assert.ok(
+    indexHtml.includes('id="snippetTitleMarquee"') &&
+    indexHtml.includes('id="pythonSnippetTitleMarquee"'),
+    'DOM must include marquee text elements for JS and Python playground selectors'
+  );
+});
+
+test('native Android downloader bridge and local book download integration', () => {
+  const appJsPath = path.join(__dirname, 'dist', 'app.js');
+  const appJs = fs.readFileSync(appJsPath, 'utf8');
+
+  // Verify downloadBookLocally function exists
+  assert.ok(
+    appJs.includes('async function downloadBookLocally(fileUrl, fileName, mimeType)'),
+    'app.js must define downloadBookLocally handler'
+  );
+
+  // Verify AndroidDownloader bridge invocation
+  assert.ok(
+    appJs.includes('window.AndroidDownloader.downloadBlob(fileName,'),
+    'downloadBookLocally must pass base64 blob to AndroidDownloader.downloadBlob'
+  );
+
+  // Verify fallback to Blob URL download
+  assert.ok(
+    appJs.includes('URL.createObjectURL(blob)'),
+    'downloadBookLocally must fall back to Blob URL download for desktop / web'
+  );
+
+  // Verify reader export buttons wired
+  assert.ok(
+    appJs.includes('readerExportEpubBtn.addEventListener') &&
+    appJs.includes('readerExportPdfBtn.addEventListener'),
+    'Reader toolbar must wire EPUB and PDF download buttons'
   );
 });
 

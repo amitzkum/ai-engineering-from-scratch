@@ -12,6 +12,8 @@ Zero external dependencies (uses Python stdlib only: zipfile, html, json, re, pa
 import html
 import json
 import re
+import shutil
+import subprocess
 import zipfile
 from pathlib import Path
 
@@ -517,7 +519,18 @@ def build_volume(volume_cfg):
         zf.writestr("OEBPS/content.opf", content_opf)
 
     epub_size_kb = round(epub_path.stat().st_size / 1024, 1)
-    print(f"   ✓ Built Volume {vol_num}: {vol_title} ({len(chapters)} chapters, {total_words:,} words, {epub_size_kb} KB)")
+    # 3. PDF Generation (headless libreoffice if available and not already built)
+    pdf_filename = f"volume-{vol_num}-{vol_slug}.pdf"
+    pdf_path = BOOKS_DIR / pdf_filename
+    pdf_size_kb = 0
+    if not pdf_path.exists() and shutil.which("libreoffice"):
+        try:
+            cmd = ["libreoffice", "--headless", "--convert-to", "pdf", "--outdir", str(BOOKS_DIR), str(html_path)]
+            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception as e:
+            print(f"      ⚠ Could not generate PDF for {vol_slug}: {e}")
+    if pdf_path.exists():
+        pdf_size_kb = round(pdf_path.stat().st_size / 1024, 1)
 
     return {
         "id": f"volume-{vol_num}-{vol_slug}",
@@ -532,6 +545,8 @@ def build_volume(volume_cfg):
         "epubFile": epub_filename,
         "epubSizeKb": epub_size_kb,
         "htmlFile": html_filename,
+        "pdfFile": pdf_filename,
+        "pdfSizeKb": pdf_size_kb,
     }
 
 
