@@ -188,5 +188,50 @@ test('Pre-generated standalone HTML readers exist and contain full volume conten
     const chapterMatches = content.match(/<article class="reader-chapter"/g);
     assert.ok(chapterMatches, `No chapters found in ${vol.htmlFile}`);
     assert.equal(chapterMatches.length, vol.chapterCount, `Mismatch in chapter count for volume ${vol.number}`);
+
+    // Verify tables are rendered with table-wrap and table elements
+    assert.ok(content.includes('<div class="table-wrap">'), `Volume ${vol.number} must contain table-wrap containers`);
+    assert.ok(content.includes('<table>'), `Volume ${vol.number} must contain table elements`);
+
+    // Verify math formulas are pre-rendered into KaTeX HTML
+    assert.ok(content.includes('class="katex"'), `Volume ${vol.number} must contain pre-rendered KaTeX math`);
+
+    // Verify diagrams have container markup
+    assert.ok(content.includes('class="mermaid-container"'), `Volume ${vol.number} must contain mermaid diagram containers`);
+
+    // Verify horizontal overflow containment CSS
+    assert.ok(content.includes('overflow-x: hidden;'), `Volume ${vol.number} must contain overflow-x hidden containment`);
+    assert.ok(content.includes('.table-wrap {'), `Volume ${vol.number} must contain .table-wrap styling`);
   }
+});
+
+test('Standalone book reader pane in app bundle contains responsive toolbar and overflow-x containment', () => {
+  const indexHtmlPath = path.join(__dirname, 'dist', 'index.html');
+  const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+
+  // Verify book-reader-view has overflow-x hidden and box-sizing
+  assert.ok(
+    indexHtml.includes('.book-reader-view {') &&
+    indexHtml.includes('overflow-x: hidden;') &&
+    indexHtml.includes('box-sizing: border-box;'),
+    'book-reader-view must have overflow-x: hidden and box-sizing: border-box'
+  );
+
+  // Verify reader-toolbar has gap and max-width containment
+  assert.ok(
+    indexHtml.includes('.reader-toolbar {') &&
+    indexHtml.includes('box-sizing: border-box;') &&
+    indexHtml.includes('overflow-x: hidden;'),
+    'reader-toolbar must contain overflow and have box-sizing'
+  );
+
+  // Verify mobile responsive styles for reader-toolbar
+  assert.ok(
+    indexHtml.includes('.reader-toolbar { padding: 6px 10px; gap: 6px; }'),
+    'Mobile media query must format reader-toolbar compactly'
+  );
+  assert.ok(
+    indexHtml.includes('.reader-vol-title { width: 100%; order: -1;'),
+    'Mobile media query must place reader-vol-title full-width above buttons'
+  );
 });

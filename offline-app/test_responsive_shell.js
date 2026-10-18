@@ -196,7 +196,7 @@ test('dist/app.js and dist/index.html are syntactically valid and contain all re
   // Verify attribution content in index.html
   assert.ok(indexHtml.includes('Amit Kumar'), 'index.html must include author attribution to Amit Kumar');
   assert.ok(indexHtml.includes('AI Engineering from Scratch'), 'index.html must include curriculum source attribution');
-  assert.ok(indexHtml.includes('v1.5.3'), 'index.html must display version 1.5.0');
+  assert.ok(indexHtml.includes('v1.5.4'), 'index.html must display version 1.5.0');
 });
 
 test('safe-area insets support for phone screens avoids system bar and notch overlap', () => {

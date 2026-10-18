@@ -1983,31 +1983,41 @@ function generateOfflineShell() {
       flex-direction: column;
       height: 100%;
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      overflow-x: hidden;
+      box-sizing: border-box;
     }
     .reader-toolbar {
-      padding: 10px 20px;
+      padding: 8px 14px;
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      overflow-x: hidden;
     }
     .reader-tool-btn {
       background: var(--bg-card);
       border: 1px solid var(--border);
       color: var(--ink);
-      padding: 6px 14px;
+      padding: 6px 12px;
       border-radius: 6px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       cursor: pointer;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       transition: all 0.15s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .reader-tool-btn:hover {
       border-color: var(--blueprint);
@@ -2020,28 +2030,42 @@ function generateOfflineShell() {
     }
     .reader-vol-title {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 700;
       color: var(--blueprint);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      min-width: 0;
+      flex: 1 1 auto;
+      max-width: 100%;
     }
     .reader-tool-actions {
       display: flex;
-      gap: 8px;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+      max-width: 100%;
+      flex-wrap: wrap;
     }
     .book-reader-container {
       flex: 1;
-      height: calc(100vh - 114px);
+      height: calc(100vh - 100px);
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      box-sizing: border-box;
       background: #fafaf5;
     }
     .book-reader-frame {
       width: 100%;
       height: 100%;
+      max-width: 100%;
+      min-width: 0;
       border: none;
       display: block;
+      box-sizing: border-box;
     }
 
     /* Lesson Top Bar & User Tools */
@@ -2482,6 +2506,11 @@ function generateOfflineShell() {
       .nav-btn { max-width: 100%; }
       .library-header { padding: 20px 16px; }
       .library-grid { padding: 0 16px max(32px, calc(32px + env(safe-area-inset-bottom, 0px)), calc(32px + var(--safe-area-inset-bottom, 0px))); grid-template-columns: 1fr; }
+      .reader-toolbar { padding: 6px 10px; gap: 6px; }
+      .reader-vol-title { width: 100%; order: -1; font-size: 0.78rem; margin-bottom: 2px; }
+      .reader-tool-btn { padding: 5px 8px; font-size: 0.72rem; }
+      .reader-tool-actions { gap: 4px; }
+      .book-reader-container { height: calc(100vh - 100px); }
       .dashboard-header { padding: 20px 16px; }
       .dashboard-metrics-grid { padding: 0 16px 20px; grid-template-columns: 1fr; }
       .dashboard-tabs { padding: 0 16px; }

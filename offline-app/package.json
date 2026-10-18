@@ -1,6 +1,6 @@
 {
   "name": "offline-app",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Offline Android Tablet and Mobile edition of AI Engineering from Scratch.",
   "main": "index.js",
   "scripts": {
