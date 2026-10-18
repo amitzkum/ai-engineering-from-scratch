@@ -110,6 +110,9 @@ def clean_markdown_to_xhtml(md_text):
     in_quote = False
     quote_lines = []
 
+    in_math_block = False
+    math_lines = []
+
     def flush_list():
         nonlocal in_list
         if in_list:
@@ -125,6 +128,24 @@ def clean_markdown_to_xhtml(md_text):
 
     for line in lines:
         stripped = line.strip()
+
+        # Math block fences ($$)
+        if stripped.startswith("$$"):
+            flush_list()
+            flush_quote()
+            if in_math_block:
+                in_math_block = False
+                raw_tex = "\n".join(math_lines).strip()
+                out.append(f'<div class="math-display" data-math="display" data-tex="{html.escape(raw_tex)}">{html.escape(raw_tex)}</div>')
+                math_lines = []
+            else:
+                in_math_block = True
+                math_lines = []
+            continue
+
+        if in_math_block:
+            math_lines.append(line)
+            continue
 
         # Code block fences
         if stripped.startswith("```"):
@@ -176,10 +197,12 @@ def clean_markdown_to_xhtml(md_text):
             if not in_list:
                 out.append("<ul>")
                 in_list = True
-            item_text = html.escape(stripped[2:])
-            # Inline bold and code
+            raw_item = stripped[2:]
+            raw_item = re.sub(r'(?<!\\)\$([^\$\n]+?)(?<!\\)\$', r'@@MATH_\1_END@@', raw_item)
+            item_text = html.escape(raw_item)
             item_text = re.sub(r"`([^`]+)`", r"<code>\1</code>", item_text)
             item_text = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", item_text)
+            item_text = re.sub(r'@@MATH_(.*?)_END@@', r'<span class="math-inline" data-math="inline" data-tex="\1">\1</span>', item_text)
             out.append(f"<li>{item_text}</li>")
             continue
         else:
@@ -191,11 +214,14 @@ def clean_markdown_to_xhtml(md_text):
 
         # Regular paragraphs
         flush_quote()
-        para = html.escape(stripped)
+        raw_para = stripped
+        raw_para = re.sub(r'(?<!\\)\$([^\$\n]+?)(?<!\\)\$', r'@@MATH_\1_END@@', raw_para)
+        para = html.escape(raw_para)
         # Inline code, bold, italic
         para = re.sub(r"`([^`]+)`", r"<code>\1</code>", para)
         para = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", para)
         para = re.sub(r"\*([^*]+)\*", r"<em>\1</em>", para)
+        para = re.sub(r'@@MATH_(.*?)_END@@', r'<span class="math-inline" data-math="inline" data-tex="\1">\1</span>', para)
         out.append(f"<p>{para}</p>")
 
     flush_list()
@@ -278,6 +304,8 @@ def build_volume(volume_cfg):
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Volume {vol_roman}: {html.escape(vol_title)} - AI Engineering from Scratch</title>
+  <link rel="stylesheet" href="../katex.min.css">
+  <script src="../katex.min.js"></script>
   <style>
     {EPUB_CSS}
     body {{ max-width: 840px; margin: 0 auto; padding: 40px 24px; }}
@@ -313,6 +341,20 @@ def build_volume(volume_cfg):
   <main>
     {"".join(html_chapters)}
   </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {{
+      if (window.katex) {{
+        document.querySelectorAll('.math-inline, .math-display').forEach(function (el) {{
+          var isDisplay = el.classList.contains('math-display');
+          try {{
+            var tex = el.getAttribute('data-tex') || el.textContent;
+            katex.render(tex, el, {{ displayMode: isDisplay, throwOnError: false }});
+            el.setAttribute('data-math-rendered', 'true');
+          }} catch (_) {{}}
+        }});
+      }}
+    }});
+  </script>
 </body>
 </html>"""
     html_path.write_text(full_html, encoding="utf-8")

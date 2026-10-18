@@ -14,6 +14,7 @@ const DATA_DIR = path.join(DIST_DIR, 'data');
 const LESSONS_DIR = path.join(DATA_DIR, 'lessons');
 const FONTS_DIR = path.join(DIST_DIR, 'fonts');
 const ASSETS_DIR = path.join(DIST_DIR, 'assets');
+const VENDOR_KATEX_DIR = path.join(REPO_ROOT, 'offline-app', 'vendor', 'katex');
 
 // Helper to ensure directories exist
 function ensureDir(dirPath) {
@@ -177,6 +178,170 @@ async function bundleMermaid() {
   }
 }
 
+async function bundleKaTeX() {
+  console.log('📐 Bundling offline KaTeX math formula renderer & fonts...');
+  ensureDir(DIST_DIR);
+  ensureDir(FONTS_DIR);
+
+  const destJs = path.join(DIST_DIR, 'katex.min.js');
+  const destCss = path.join(DIST_DIR, 'katex.min.css');
+
+  // Copy from local vendor directory if available (deterministic offline operation)
+  if (fs.existsSync(VENDOR_KATEX_DIR)) {
+    const srcJs = path.join(VENDOR_KATEX_DIR, 'katex.min.js');
+    const srcCss = path.join(VENDOR_KATEX_DIR, 'katex.min.css');
+    const srcFonts = path.join(VENDOR_KATEX_DIR, 'fonts');
+
+    if (fs.existsSync(srcJs)) {
+      fs.copyFileSync(srcJs, destJs);
+    }
+    if (fs.existsSync(srcCss)) {
+      fs.copyFileSync(srcCss, destCss);
+    }
+    if (fs.existsSync(srcFonts)) {
+      for (const font of fs.readdirSync(srcFonts)) {
+        if (font.endsWith('.woff2')) {
+          fs.copyFileSync(path.join(srcFonts, font), path.join(FONTS_DIR, font));
+        }
+      }
+    }
+  }
+
+  // Fallback to cache or download if missing
+  if (!fs.existsSync(destJs) || fs.statSync(destJs).size < 100000) {
+    const tmpCache = '/tmp/katex.min.js';
+    if (fs.existsSync(tmpCache) && fs.statSync(tmpCache).size > 100000) {
+      fs.copyFileSync(tmpCache, destJs);
+    } else {
+      try {
+        await downloadFile('https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.js', destJs);
+        try { fs.copyFileSync(destJs, tmpCache); } catch (_) {}
+      } catch (err) {
+        console.warn('Could not bundle katex.min.js:', err.message);
+      }
+    }
+  }
+
+  if (!fs.existsSync(destCss) || fs.statSync(destCss).size < 10000) {
+    const tmpCacheCss = '/tmp/katex.min.css';
+    if (fs.existsSync(tmpCacheCss) && fs.statSync(tmpCacheCss).size > 10000) {
+      fs.copyFileSync(tmpCacheCss, destCss);
+    } else {
+      try {
+        const tmpCss = path.join(DIST_DIR, 'katex.raw.css');
+        await downloadFile('https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css', tmpCss);
+        let css = fs.readFileSync(tmpCss, 'utf8');
+        css = css.replace(/url\(fonts\/([^)]+)\.woff2\)\s*format\(['"]woff2['"]\)[^;]*;/g, "url('fonts/$1.woff2') format('woff2');");
+        css = css.replace(/url\(fonts\/([^)]+)\.woff\)\s*format\(['"]woff['"]\),?/g, '');
+        css = css.replace(/url\(fonts\/([^)]+)\.ttf\)\s*format\(['"]truetype['"]\),?/g, '');
+        fs.writeFileSync(destCss, css, 'utf8');
+        try { fs.copyFileSync(destCss, tmpCacheCss); } catch (_) {}
+        try { fs.unlinkSync(tmpCss); } catch (_) {}
+      } catch (err) {
+        console.warn('Could not bundle katex.min.css:', err.message);
+      }
+    }
+  }
+
+  // Ensure KaTeX woff2 fonts are bundled locally
+  const katexFonts = [
+    'KaTeX_AMS-Regular.woff2',
+    'KaTeX_Caligraphic-Bold.woff2',
+    'KaTeX_Caligraphic-Regular.woff2',
+    'KaTeX_Fraktur-Bold.woff2',
+    'KaTeX_Fraktur-Regular.woff2',
+    'KaTeX_Main-Bold.woff2',
+    'KaTeX_Main-BoldItalic.woff2',
+    'KaTeX_Main-Italic.woff2',
+    'KaTeX_Main-Regular.woff2',
+    'KaTeX_Math-BoldItalic.woff2',
+    'KaTeX_Math-Italic.woff2',
+    'KaTeX_SansSerif-Bold.woff2',
+    'KaTeX_SansSerif-Italic.woff2',
+    'KaTeX_SansSerif-Regular.woff2',
+    'KaTeX_Script-Regular.woff2',
+    'KaTeX_Size1-Regular.woff2',
+    'KaTeX_Size2-Regular.woff2',
+    'KaTeX_Size3-Regular.woff2',
+    'KaTeX_Size4-Regular.woff2',
+    'KaTeX_Typewriter-Regular.woff2'
+  ];
+
+  for (const font of katexFonts) {
+    const dest = path.join(FONTS_DIR, font);
+    if (!fs.existsSync(dest) || fs.statSync(dest).size === 0) {
+      const tmpFont = path.join('/tmp', font);
+      if (fs.existsSync(tmpFont) && fs.statSync(tmpFont).size > 0) {
+        fs.copyFileSync(tmpFont, dest);
+      } else {
+        try {
+          await downloadFile(`https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/fonts/${font}`, dest);
+          try { fs.copyFileSync(dest, tmpFont); } catch (_) {}
+        } catch (_) {}
+      }
+    }
+  }
+
+  console.log('   bundled KaTeX offline assets & fonts');
+}
+
+function unescapeHtml(str) {
+  return String(str || '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+}
+
+function escapeAttr(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function renderMathInHtml(html, katex) {
+  if (!katex) return html;
+
+  // 1. Render display math blocks
+  html = html.replace(/<div class="math-display" data-math="display">([\s\S]*?)<\/div>/g, (match, rawTex) => {
+    const tex = unescapeHtml(rawTex.trim());
+    try {
+      const rendered = katex.renderToString(tex, {
+        displayMode: true,
+        throwOnError: false,
+        strict: 'ignore'
+      });
+      return `<div class="math-display" data-math="display" data-math-rendered="true" data-tex="${escapeAttr(tex)}">${rendered}</div>`;
+    } catch (err) {
+      console.warn('KaTeX display render error:', err.message);
+      return `<div class="math-display" data-math="display" data-math-rendered="true" data-tex="${escapeAttr(tex)}">${rawTex}</div>`;
+    }
+  });
+
+  // 2. Render inline math spans
+  html = html.replace(/<span class="math-inline" data-math="inline">(.*?)<\/span>/g, (match, rawTex) => {
+    const tex = unescapeHtml(rawTex.trim());
+    try {
+      const rendered = katex.renderToString(tex, {
+        displayMode: false,
+        throwOnError: false,
+        strict: 'ignore'
+      });
+      return `<span class="math-inline" data-math="inline" data-math-rendered="true" data-tex="${escapeAttr(tex)}">${rendered}</span>`;
+    } catch (err) {
+      console.warn('KaTeX inline render error:', err.message);
+      return `<span class="math-inline" data-math="inline" data-math-rendered="true" data-tex="${escapeAttr(tex)}">${rawTex}</span>`;
+    }
+  });
+
+  return html;
+}
+
 function copyStaticAssets() {
   console.log('🎨 Copying CSS and SVG diagram assets...');
   ensureDir(ASSETS_DIR);
@@ -271,9 +436,24 @@ function copyStaticAssets() {
 
 
 async function buildCurriculum() {
-  console.log('📚 Pre-rendering 542 lessons and quizzes...');
+  console.log('📚 Pre-rendering 542 lessons and quizzes with math rendering...');
   ensureDir(DATA_DIR);
   ensureDir(LESSONS_DIR);
+
+  let katex = null;
+  const katexPath = path.join(DIST_DIR, 'katex.min.js');
+  const vendorKatexPath = path.join(VENDOR_KATEX_DIR, 'katex.min.js');
+  if (fs.existsSync(katexPath)) {
+    try {
+      katex = require(katexPath);
+      console.log('   ✓ Loaded KaTeX', katex.version, 'for offline formula pre-rendering');
+    } catch (_) {}
+  } else if (fs.existsSync(vendorKatexPath)) {
+    try {
+      katex = require(vendorKatexPath);
+      console.log('   ✓ Loaded KaTeX', katex.version, 'from vendor for offline formula pre-rendering');
+    } catch (_) {}
+  }
 
   const phaseDirs = fs.readdirSync(PHASES_DIR, { withFileTypes: true })
     .filter(d => d.isDirectory() && /^\d{2}-/.test(d.name))
@@ -329,7 +509,10 @@ async function buildCurriculum() {
 
       const mdContent = fs.readFileSync(enMdPath, 'utf8');
       const metadata = extractMetadata(mdContent);
-      const htmlContent = parseMd(mdContent);
+      let htmlContent = parseMd(mdContent);
+      if (katex) {
+        htmlContent = renderMathInHtml(htmlContent, katex);
+      }
 
       let quizData = null;
       if (fs.existsSync(quizJsonPath)) {
@@ -393,6 +576,7 @@ function generateOfflineShell() {
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="lesson.css">
+  <link rel="stylesheet" href="katex.min.css">
   <link rel="stylesheet" href="certifications.css">
   <style>
     :root {
@@ -2556,6 +2740,7 @@ function generateOfflineShell() {
   <script src="figures.js"></script>
   <script src="lesson-figures.js"></script>
   <script src="mermaid.min.js"></script>
+  <script src="katex.min.js"></script>
   <script src="viewer-controller.js"></script>
   <script src="library-controller.js"></script>
   <script src="sqlite-db.js"></script>
@@ -3522,6 +3707,24 @@ function generateOfflineShell() {
       }
     });
 
+    // Render KaTeX math formulas offline
+    if (window.katex) {
+      articleWrap.querySelectorAll('.math-inline:not([data-math-rendered]), .math-display:not([data-math-rendered])').forEach(node => {
+        const isDisplay = node.classList.contains('math-display');
+        const tex = node.getAttribute('data-tex') || node.textContent;
+        try {
+          node.innerHTML = window.katex.renderToString(tex, {
+            displayMode: isDisplay,
+            throwOnError: false,
+            strict: 'ignore'
+          });
+          node.setAttribute('data-math-rendered', 'true');
+        } catch (err) {
+          console.warn('Client KaTeX render error:', err);
+        }
+      });
+    }
+
     // Render Mermaid diagrams offline
     if (window.mermaid) {
       const curTheme = document.documentElement.getAttribute('data-theme');
@@ -4065,6 +4268,7 @@ async function main() {
   ensureDir(DIST_DIR);
   await bundleFonts();
   await bundleMermaid();
+  await bundleKaTeX();
   copyStaticAssets();
 
   console.log('📚 Building 6 Curriculum Book Volumes (EPUB & HTML)...');
@@ -4083,5 +4287,5 @@ if (require.main === module) {
   });
 }
 
-module.exports = { main, extractMetadata, buildCurriculum };
+module.exports = { main, extractMetadata, buildCurriculum, bundleKaTeX, renderMathInHtml };
 

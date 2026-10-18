@@ -46,11 +46,13 @@ test('offline bundle enforces zero external network dependencies', () => {
   const appJs = fs.readFileSync(path.join(DIST_DIR, 'app.js'), 'utf8');
   const fontsCss = fs.readFileSync(path.join(DIST_DIR, 'fonts.css'), 'utf8');
   const styleCss = fs.readFileSync(path.join(DIST_DIR, 'style.css'), 'utf8');
+  const katexCss = fs.readFileSync(path.join(DIST_DIR, 'katex.min.css'), 'utf8');
 
-  for (const [name, content] of [['index.html', indexHtml], ['app.js', appJs], ['fonts.css', fontsCss], ['style.css', styleCss]]) {
+  for (const [name, content] of [['index.html', indexHtml], ['app.js', appJs], ['fonts.css', fontsCss], ['style.css', styleCss], ['katex.min.css', katexCss]]) {
     assert.doesNotMatch(content, /https?:\/\/fonts\.googleapis\.com/, `${name} must not load external Google Fonts`);
     assert.doesNotMatch(content, /https?:\/\/raw\.githubusercontent\.com/, `${name} must not fetch external raw github content`);
     assert.doesNotMatch(content, /https?:\/\/va\.vercel-scripts\.com/, `${name} must not load external Vercel analytics`);
+    assert.doesNotMatch(content, /https?:\/\/cdn\.jsdelivr\.net/, `${name} must not load external jsdelivr CDNs`);
   }
 });
 
