@@ -22,7 +22,7 @@ git fetch origin main && git merge origin/main
 
 # 3. Commit and push the new release artifacts
 git add -f offline-app/ android/ releases/ scripts/ package.json
-git commit -m "chore(release): v1.3.0 update with upstream curriculum"
+git commit -m "chore(release): v1.5.4 update with upstream curriculum"
 git push origin android-offline-app
 ```
 
@@ -78,15 +78,15 @@ From the repository root, execute:
   ```bash
   ./scripts/rebuild-app.sh 2.0.0
   # or
-  ./scripts/rebuild-app.sh 1.2.1
+  ./scripts/rebuild-app.sh 1.5.4
   ```
 
-#### What the Script Executes Automatically (~7 seconds):
+#### What the Script Executes Automatically (~40 seconds):
 1. **Validates Environment:** Confirms `ANDROID_HOME`, `JAVA_HOME`, and `release.keystore`.
 2. **Synchronizes Metadata:** Updates version strings across `build.gradle`, `strings.xml`, `package.json`, and test files.
-3. **Compiles Offline Bundle:** Scans all 542 lessons in `phases/`, converts Markdown to standalone HTML with syntax highlighting, KaTeX math formulas, and bundled SVG diagrams, and rebuilds the client-side search index.
-4. **Pre-compiles Offline Library:** Re-renders the 6-volume offline book library (`library.json`), EPUBs, and standalone HTML readers.
-5. **Executes Quality Gates:** Runs the entire 44+ test suite (`node --test offline-app/test_*.js`). If any test fails, the build halts immediately.
+3. **Compiles Offline Bundle:** Scans all 542 lessons in `phases/`, pre-renders KaTeX math formulas into static HTML spans, bundles local fonts, SVGs, offline Pyodide 3.12 with NumPy/SciPy/Scikit-Learn wheels, and rebuilds the client-side search index.
+4. **Pre-compiles Offline Library:** Compiles all 6 book volumes into EPUB 3 archives, responsive standalone HTML readers with table containment (`.table-wrap`), and high-fidelity LibreOffice PDFs with pre-rendered KaTeX math.
+5. **Executes Quality Gates:** Runs the entire 73+ test suite across 11 test suites (`node --test offline-app/test_*.js`). If any test fails, the build halts immediately.
 6. **Syncs Native Assets:** Runs `npx cap sync android` to stage web assets into the Android native directory.
 7. **Compiles Signed Release APK:** Runs `./gradlew assembleRelease` using your production `release.keystore`.
 8. **Verifies Cryptographic Signature:** Runs `apksigner verify` confirming APK Signature Scheme v2 (`CN=Amit Kumar`).

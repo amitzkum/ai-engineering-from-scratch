@@ -37,6 +37,40 @@ This directory contains the official signed Android APK releases for the **AI En
 
 ---
 
+## 🚀 Recent Milestones & Release Highlights
+
+### [v1.5.4](v1.5.4/RELEASE_NOTES.md) — High-Fidelity Book Rendering, Tables, Math & Mobile Containment
+- **Canonical Markdown Table Pipeline:** Migrated chapter compilation to `site/lesson-markdown.js`, generating clean HTML `<table>` elements wrapped in responsive `<div class="table-wrap">`.
+- **Pre-rendered KaTeX Math in Readers & PDFs:** Pre-rendered LaTeX formulas into static HTML spans so equations render cleanly in offline readers, EPUBs, and LibreOffice PDFs without runtime script dependencies.
+- **Zero Horizontal Scrolling:** Added responsive `.reader-toolbar` wrapping and viewport containment (`overflow-x: hidden`) on mobile screens.
+
+### [v1.5.3](v1.5.3/RELEASE_NOTES.md) — Native Local Book Downloads & Compact Selector
+- **Native Android Downloader Bridge:** Implemented `@JavascriptInterface AndroidDownloader.downloadBlob` in `MainActivity.java` streaming EPUBs and PDFs directly to Android's `MediaStore.Downloads` or `DIRECTORY_DOWNLOADS` with native system Toasts.
+- **Offline Book Downloads:** Updated all 6 volume cards in the Books tab to download local EPUB and PDF copies with zero network calls.
+- **Compact Preset Selector:** Reduced playground dropdown height to 34px with an infinite looping horizontal marquee animation (`@keyframes selectMarqueeScroll`).
+
+### [v1.5.2](v1.5.2/RELEASE_NOTES.md) — Touch-Scrollable Navigation & Equation Overflow Containment
+- **Horizontal Header View Switcher:** Added touch-scrollable navigation (`touch-action: pan-x`) across all 5 app views (`Lessons`, `Study`, `Books`, `JS Playground`, `Python Playground`) on small mobile viewports.
+- **Math Formula Touch Scrolling:** Added horizontal scroll containment (`overflow-x: auto`) and responsive font clamping to `.math-display` containers.
+
+### [v1.5.1](v1.5.1/RELEASE_NOTES.md) — KaTeX Multi-Line Math & Mobile Completion Card Reflow
+- **KaTeX Delimiter & Font Preloading:** Resolved rendering issues with multi-line LaTeX formulas, double vertical bar norms (`||`), and font glyph resolution.
+- **Mobile Completion Button Reflow:** Replaced horizontal overflow on `#markCompleteBtn` with full-width vertical column wrapping on phones.
+
+### [v1.5.0](v1.5.0/RELEASE_NOTES.md) — Safe-Area Viewport Insets & Offline Python ML Playground
+- **System Bar Inset Support:** Integrated `env(safe-area-inset-top)` and `env(safe-area-inset-bottom)` to eliminate UI overlap with battery, clock, status bar icons, and gesture bars on Android phones.
+- **Offline Python 3.12 Runtime:** Bundled WebAssembly Pyodide engine running in a dedicated Web Worker (`python-worker.js`).
+- **Pre-bundled Scientific Stack:** Bundled offline WebAssembly wheels for NumPy, SciPy, and Scikit-Learn with zero network dependencies.
+- **Andrew Ng Machine Learning Presets:** Bundled 11 foundational ML models with dual raw math (`numpy`) and production (`scikit-learn`) implementations and configurable training rounds.
+- **Strict Sandbox Security:** Disabled `pip` and `micropip` installations to enforce 100% offline security.
+
+### [v1.4.0](v1.4.0/RELEASE_NOTES.md) — Offline KaTeX Math Formula Rendering Across All Lessons
+- **542 Lessons Pre-rendered:** Scanned all 542 lessons and pre-rendered inline (`$...$`) and display (`$$...$$`) LaTeX formulas with KaTeX 0.16.47.
+- **Local Font Packaging:** Bundled all KaTeX WOFF2 fonts into APK assets.
+- **Math Regression Gate:** Added `test_math_rendering.js` validating zero unrendered math delimiters outside code blocks.
+
+---
+
 ## 📲 Quick Install
 
 To install the latest release on your Android device:
