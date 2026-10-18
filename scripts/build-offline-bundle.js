@@ -222,18 +222,18 @@ async function bundleKaTeX() {
     }
   }
 
-  if (!fs.existsSync(destCss) || fs.statSync(destCss).size < 10000) {
+  const fontFaceMatches = fs.existsSync(destCss) ? (fs.readFileSync(destCss, 'utf8').match(/@font-face/g) || []).length : 0;
+  if (!fs.existsSync(destCss) || fs.statSync(destCss).size < 10000 || fontFaceMatches < 15) {
     const tmpCacheCss = '/tmp/katex.min.css';
-    if (fs.existsSync(tmpCacheCss) && fs.statSync(tmpCacheCss).size > 10000) {
+    if (fs.existsSync(tmpCacheCss) && fs.statSync(tmpCacheCss).size > 10000 && (fs.readFileSync(tmpCacheCss, 'utf8').match(/@font-face/g) || []).length >= 15) {
       fs.copyFileSync(tmpCacheCss, destCss);
     } else {
       try {
         const tmpCss = path.join(DIST_DIR, 'katex.raw.css');
         await downloadFile('https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css', tmpCss);
         let css = fs.readFileSync(tmpCss, 'utf8');
-        css = css.replace(/url\(fonts\/([^)]+)\.woff2\)\s*format\(['"]woff2['"]\)[^;]*;/g, "url('fonts/$1.woff2') format('woff2');");
-        css = css.replace(/url\(fonts\/([^)]+)\.woff\)\s*format\(['"]woff['"]\),?/g, '');
-        css = css.replace(/url\(fonts\/([^)]+)\.ttf\)\s*format\(['"]truetype['"]\),?/g, '');
+        css = css.replace(/,url\(fonts\/[^)]+\.woff\)\s*format\(['"]woff['"]\)/g, '');
+        css = css.replace(/,url\(fonts\/[^)]+\.ttf\)\s*format\(['"]truetype['"]\)/g, '');
         fs.writeFileSync(destCss, css, 'utf8');
         try { fs.copyFileSync(destCss, tmpCacheCss); } catch (_) {}
         try { fs.unlinkSync(tmpCss); } catch (_) {}
@@ -1530,6 +1530,8 @@ function generateOfflineShell() {
       border: 1px solid var(--border);
       border-radius: 12px;
       transition: all 0.2s ease;
+      box-sizing: border-box;
+      max-width: 100%;
     }
     .chapter-complete-card.is-completed {
       border-color: #10b981;
@@ -1537,6 +1539,7 @@ function generateOfflineShell() {
     }
     .complete-card-info {
       flex: 1;
+      min-width: 0;
     }
     .complete-card-badge {
       display: inline-block;
@@ -1555,17 +1558,20 @@ function generateOfflineShell() {
       font-weight: 700;
       color: var(--ink);
       margin-bottom: 4px;
+      word-break: break-word;
     }
     .complete-card-status-text {
       font-size: 0.88rem;
       color: var(--text-muted);
       line-height: 1.4;
+      word-break: break-word;
     }
     .complete-card-timestamp {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.78rem;
       color: #10b981;
       margin-top: 4px;
+      word-break: break-word;
     }
     .chapter-complete-btn {
       display: inline-flex;
@@ -1582,6 +1588,9 @@ function generateOfflineShell() {
       color: var(--ink);
       transition: all 0.2s ease;
       white-space: nowrap;
+      box-sizing: border-box;
+      max-width: 100%;
+      flex-shrink: 0;
     }
     .chapter-complete-btn:hover {
       background: var(--accent);
@@ -2327,6 +2336,11 @@ function generateOfflineShell() {
       .drawer-backdrop.open { display: block; }
       .breadcrumbs-bar { padding: 8px 16px; font-size: 0.75rem; }
       .article-wrap { padding: 20px 16px; padding-bottom: max(20px, calc(20px + env(safe-area-inset-bottom, 0px)), calc(20px + var(--safe-area-inset-bottom, 0px))); }
+      .chapter-complete-card { flex-direction: column; align-items: stretch; gap: 16px; padding: 16px; margin-top: 32px; }
+      .complete-card-info { width: 100%; }
+      .chapter-complete-btn { width: 100%; justify-content: center; white-space: normal; text-align: center; padding: 12px 16px; font-size: 0.88rem; }
+      .page-notes-card { padding: 16px; margin-top: 20px; }
+      .page-notes-header { flex-direction: column; align-items: flex-start; gap: 8px; }
       .lesson-nav-footer { flex-direction: column; padding-bottom: max(24px, calc(24px + env(safe-area-inset-bottom, 0px)), calc(24px + var(--safe-area-inset-bottom, 0px))); }
       .nav-btn { max-width: 100%; }
       .header-title { display: none; }

@@ -38,6 +38,13 @@ test('offline KaTeX assets and fonts are packaged with zero external network dep
   const fontFiles = fs.readdirSync(FONTS_DIR);
   const katexFonts = fontFiles.filter(f => f.startsWith('KaTeX_') && f.endsWith('.woff2'));
   assert.ok(katexFonts.length >= 15, `Must have bundled at least 15 KaTeX woff2 font files, found: ${katexFonts.length}`);
+
+  // Verify all KaTeX @font-face rules are properly preserved (preventing fallback slashes / glyph distortion)
+  const fontFaces = katexCss.match(/@font-face\s*\{[^}]+\}/g) || [];
+  assert.ok(fontFaces.length >= 15, `katex.min.css must define distinct @font-face rules for each font family, found ${fontFaces.length}`);
+  assert.ok(katexCss.includes('font-family:KaTeX_Main') || katexCss.includes('font-family:"KaTeX_Main"') || katexCss.includes("font-family:'KaTeX_Main'"), 'katex.min.css must define KaTeX_Main font family');
+  assert.ok(katexCss.includes('KaTeX_Main-Regular.woff2'), 'katex.min.css must point to KaTeX_Main-Regular.woff2');
+  assert.ok(katexCss.includes('KaTeX_Size1-Regular.woff2'), 'katex.min.css must point to KaTeX_Size1-Regular.woff2');
 });
 
 test('scans all 542 pre-rendered lesson pages and confirms every single math formula is rendered', () => {

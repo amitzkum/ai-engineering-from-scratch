@@ -24,6 +24,7 @@ This directory contains the official signed Android APK releases for the **AI En
 
 | Version | Release Date | APK File | SHA-256 Checksum | Release Notes |
 |:-------:|:------------:|:--------:|:----------------:|:-------------:|
+| **v1.5.1** | 2026-10-18 | [`ai-engineering-v1.5.1.apk`](v1.5.1/ai-engineering-v1.5.1.apk) | `02928f5727dcbeb80a918f6667cebd0491a977a516508813a711a06806fcd9ce` | [Notes](v1.5.1/RELEASE_NOTES.md) |
 | **v1.5.0** | 2026-10-18 | [`ai-engineering-v1.5.0.apk`](v1.5.0/ai-engineering-v1.5.0.apk) | `c01d1e182d004b90c0c41fd642a114d2b105a7476ca89e9f04e339a9c43600d5` | [Notes](v1.5.0/RELEASE_NOTES.md) |
 | **v1.4.0** | 2026-10-18 | [`ai-engineering-v1.4.0.apk`](v1.4.0/ai-engineering-v1.4.0.apk) | `dd5e972f60430946aa3cec76699e05a77f1baf4bea43c2bd4a932552e0612065` | [Notes](v1.4.0/RELEASE_NOTES.md) |
 | **v1.3.0** | 2026-10-15 | [`ai-engineering-v1.3.0.apk`](v1.3.0/ai-engineering-v1.3.0.apk) | `779b9646cfd4c172cbdc28baa1739193916c5923984c4578c44d4b60a921ee10` | [Notes](v1.3.0/RELEASE_NOTES.md) |

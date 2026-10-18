@@ -196,7 +196,7 @@ test('dist/app.js and dist/index.html are syntactically valid and contain all re
   // Verify attribution content in index.html
   assert.ok(indexHtml.includes('Amit Kumar'), 'index.html must include author attribution to Amit Kumar');
   assert.ok(indexHtml.includes('AI Engineering from Scratch'), 'index.html must include curriculum source attribution');
-  assert.ok(indexHtml.includes('v1.5.0'), 'index.html must display version 1.5.0');
+  assert.ok(indexHtml.includes('v1.5.1'), 'index.html must display version 1.5.0');
 });
 
 test('safe-area insets support for phone screens avoids system bar and notch overlap', () => {
@@ -230,6 +230,29 @@ test('safe-area insets support for phone screens avoids system bar and notch ove
   assert.ok(
     indexHtml.includes('--safe-area-inset-bottom'),
     'Must include fallback variable --safe-area-inset-bottom'
+  );
+});
+
+test('chapter completion card and mark chapter complete button avoid horizontal scroll on mobile', () => {
+  const indexHtmlPath = path.join(__dirname, 'dist', 'index.html');
+  const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+
+  // Verify responsive column layout and wrapping on mobile screens
+  assert.ok(
+    indexHtml.includes('.chapter-complete-card { flex-direction: column; align-items: stretch;'),
+    'Mobile media query must stack chapter-complete-card vertically'
+  );
+  assert.ok(
+    indexHtml.includes('.chapter-complete-btn { width: 100%; justify-content: center; white-space: normal;'),
+    'Mobile media query must stretch button full-width with normal white-space to prevent overflow'
+  );
+  assert.ok(
+    indexHtml.includes('box-sizing: border-box;'),
+    'Base styles must apply box-sizing: border-box to layout containers'
+  );
+  assert.ok(
+    indexHtml.includes('max-width: 100%;'),
+    'Base styles must constrain button and cards to max-width: 100%'
   );
 });
 

@@ -129,8 +129,8 @@ def clean_markdown_to_xhtml(md_text):
     for line in lines:
         stripped = line.strip()
 
-        # Math block fences ($$)
-        if stripped.startswith("$$"):
+        # Math block fences ($$ or ```math)
+        if stripped.startswith("$$") or (stripped == "```" and in_math_block) or stripped.startswith("```math"):
             flush_list()
             flush_quote()
             if in_math_block:
