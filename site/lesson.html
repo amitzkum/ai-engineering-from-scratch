@@ -554,8 +554,49 @@
       color: inherit;
     }
 
+    .lesson-article .math-display {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      box-sizing: border-box;
+      -webkit-overflow-scrolling: touch;
+      padding: 8px 0;
+      margin: 18px 0;
+    }
+
     .lesson-article .katex-display {
       margin: 0;
+      padding: 4px 0;
+      display: block;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    .lesson-article .katex-display > .katex {
+      display: inline-block;
+      min-width: min-content;
+      max-width: none;
+      text-align: center;
+    }
+
+    .lesson-article .math-inline {
+      display: inline-block;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      vertical-align: middle;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .lesson-article .math-inline::-webkit-scrollbar {
+      display: none;
     }
 
     .lesson-article pre {

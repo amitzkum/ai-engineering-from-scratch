@@ -78,6 +78,33 @@ th {
   background: #eaeaea;
   font-weight: bold;
 }
+.math-display {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+  padding: 8px 0;
+  margin: 1.2em 0;
+}
+.math-display .katex-display,
+.katex-display {
+  margin: 0;
+  padding: 4px 0;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+}
+.math-inline {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  vertical-align: middle;
+}
 .title-page {
   text-align: center;
   padding: 4em 1em;

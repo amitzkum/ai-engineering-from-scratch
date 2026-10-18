@@ -196,7 +196,7 @@ test('dist/app.js and dist/index.html are syntactically valid and contain all re
   // Verify attribution content in index.html
   assert.ok(indexHtml.includes('Amit Kumar'), 'index.html must include author attribution to Amit Kumar');
   assert.ok(indexHtml.includes('AI Engineering from Scratch'), 'index.html must include curriculum source attribution');
-  assert.ok(indexHtml.includes('v1.5.1'), 'index.html must display version 1.5.0');
+  assert.ok(indexHtml.includes('v1.5.2'), 'index.html must display version 1.5.0');
 });
 
 test('safe-area insets support for phone screens avoids system bar and notch overlap', () => {
@@ -255,4 +255,90 @@ test('chapter completion card and mark chapter complete button avoid horizontal 
     'Base styles must constrain button and cards to max-width: 100%'
   );
 });
+
+test('math formulas and reading detail pane prevent horizontal scrolling on mobile', () => {
+  const indexHtmlPath = path.join(__dirname, 'dist', 'index.html');
+  const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+
+  // Verify reading pane overflow-x is hidden and bounded
+  assert.ok(
+    indexHtml.includes('main.content-area {') &&
+    indexHtml.includes('overflow-x: hidden;') &&
+    indexHtml.includes('min-width: 0;'),
+    'main.content-area must contain overflow-x and have min-width: 0'
+  );
+
+  // Verify math-display has overflow-x auto and max-width 100%
+  assert.ok(
+    indexHtml.includes('.math-display {') &&
+    indexHtml.includes('overflow-x: auto;') &&
+    indexHtml.includes('-webkit-overflow-scrolling: touch;'),
+    'math-display must scroll horizontally inside its container'
+  );
+
+  // Verify katex-display has max-width: 100%
+  assert.ok(
+    indexHtml.includes('.math-display .katex-display') ||
+    indexHtml.includes('.lesson-article .katex-display'),
+    'katex-display must have responsive overflow containment'
+  );
+});
+
+test('top header view-switcher navigation is horizontally scrollable on mobile screens', () => {
+  const indexHtmlPath = path.join(__dirname, 'dist', 'index.html');
+  const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+
+  // Verify view-switcher has overflow-x auto, touch-action pan-x, and flex container
+  assert.ok(
+    indexHtml.includes('.view-switcher {') &&
+    indexHtml.includes('overflow-x: auto;') &&
+    indexHtml.includes('touch-action: pan-x;'),
+    'view-switcher must support horizontal swipe and touch scrolling'
+  );
+
+  // Verify view-btn does not wrap or compress
+  assert.ok(
+    indexHtml.includes('flex-shrink: 0;') &&
+    indexHtml.includes('white-space: nowrap;'),
+    'view buttons must preserve width with flex-shrink: 0 and white-space: nowrap'
+  );
+
+  // Verify header-left flex containment
+  assert.ok(
+    indexHtml.includes('.header-left {') &&
+    indexHtml.includes('min-width: 0;') &&
+    indexHtml.includes('flex: 1;'),
+    'header-left must have min-width: 0 and flex: 1 to allow view-switcher scrolling'
+  );
+});
+
+test('python playground select and toolbar prevent horizontal scrolling with responsive containment', () => {
+  const indexHtmlPath = path.join(__dirname, 'dist', 'index.html');
+  const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+
+  // Verify playground-select has ellipsis and max-width 100%
+  assert.ok(
+    indexHtml.includes('.playground-select {') &&
+    indexHtml.includes('text-overflow: ellipsis;') &&
+    indexHtml.includes('max-width: 100%;'),
+    'playground-select must constrain width and truncate with ellipsis'
+  );
+
+  // Verify mobile stacking for playground-toolbar and preset-selector-wrap
+  assert.ok(
+    indexHtml.includes('.playground-toolbar { flex-direction: column; align-items: stretch;'),
+    'Mobile media query must stack playground-toolbar vertically'
+  );
+  assert.ok(
+    indexHtml.includes('.preset-selector-wrap { width: 100%; max-width: 100%; flex-direction: column;'),
+    'Mobile media query must stack preset-selector-wrap full-width'
+  );
+
+  // Verify playground-actions 2-column grid on mobile
+  assert.ok(
+    indexHtml.includes('.playground-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr;'),
+    'Mobile media query must format playground-actions as responsive grid'
+  );
+});
+
 

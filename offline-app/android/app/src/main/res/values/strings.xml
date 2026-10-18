@@ -4,7 +4,7 @@
     <string name="title_activity_main">AI Engineering</string>
     <string name="package_name">com.aiengineering.offline</string>
     <string name="custom_url_scheme">com.aiengineering.offline</string>
-    <string name="app_version">1.5.1</string>
+    <string name="app_version">1.5.2</string>
     <string name="app_author">Amit Kumar</string>
     <string name="curriculum_source">AI Engineering from Scratch Contributors</string>
 </resources>

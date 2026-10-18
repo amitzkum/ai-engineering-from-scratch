@@ -13,7 +13,7 @@
 const PYTHON_ML_PRESETS = [
   {
     id: 'linear-regression',
-    title: '1. Linear Regression with Gradient Descent (Andrew Ng Week 1-2)',
+    title: '1. Linear Regression (Gradient Descent)',
     category: 'Supervised Learning / Regression',
     description: 'Implements univariate and multivariate linear regression using both raw NumPy gradient descent (J(θ) cost function & Normal Equation) and scikit-learn LinearRegression.',
     configurableTraining: true,
@@ -115,7 +115,7 @@ print(f"  Prediction Difference: \${abs(pred_np - pred_sk):.4f}k")
   },
   {
     id: 'logistic-regression',
-    title: '2. Logistic Regression (Binary Classification & Sigmoid) (Andrew Ng Week 3)',
+    title: '2. Logistic Regression (Sigmoid)',
     category: 'Supervised Learning / Classification',
     description: 'Implements binary classification using Sigmoid activation, binary cross-entropy log-loss, and gradient descent in raw NumPy, compared with scikit-learn LogisticRegression.',
     configurableTraining: true,
@@ -214,7 +214,7 @@ print(f"  Decision Consensus:            {'ADMIT' if prob_np >= 0.5 else 'REJECT
   },
   {
     id: 'regularized-regression',
-    title: '3. Regularized Linear Regression (Ridge / L2 Penalty) (Andrew Ng Week 3)',
+    title: '3. Regularized Regression (Ridge / L2)',
     category: 'Supervised Learning / Regularization',
     description: 'Implements L2 Ridge regularization from raw math to prevent overfitting in polynomial regression, compared with scikit-learn Ridge.',
     configurableTraining: true,
@@ -305,7 +305,7 @@ print(f"  NumPy vs Sklearn Weights Diff: {np.max(np.abs(theta[1:] - ridge_weight
   },
   {
     id: 'softmax-regression',
-    title: '4. Softmax Regression (Multi-Class Classification) (Andrew Ng Week 4)',
+    title: '4. Softmax Regression (Multi-Class)',
     category: 'Supervised Learning / Classification',
     description: 'Implements multi-class Softmax classification with categorical cross-entropy from scratch in NumPy, compared with scikit-learn multinomial LogisticRegression.',
     configurableTraining: true,
@@ -402,7 +402,7 @@ for i, pt in enumerate(test_points):
   },
   {
     id: 'neural-network-mlp',
-    title: '5. Neural Network / Multi-Layer Perceptron (Backprop) (Andrew Ng Week 4-5)',
+    title: '5. Neural Network (MLP Backprop)',
     category: 'Deep Learning / Neural Networks',
     description: 'Builds a 2-layer Neural Network from raw math with forward propagation, ReLU hidden activation, sigmoid output, and analytic backpropagation, compared with scikit-learn MLPClassifier.',
     configurableTraining: true,
@@ -514,7 +514,7 @@ print(f"  Sklearn Accuracy:   {acc_sk * 100:.2f}%")
   },
   {
     id: 'support-vector-machine',
-    title: '6. Support Vector Machine (Linear SVM & Hinge Loss) (Andrew Ng Week 7)',
+    title: '6. Support Vector Machine (Linear SVM)',
     category: 'Supervised Learning / Large Margin',
     description: 'Implements soft-margin linear SVM using subgradient descent on Hinge Loss in pure NumPy, compared with scikit-learn SVC.',
     configurableTraining: true,
@@ -601,7 +601,7 @@ print(f"  Sklearn Accuracy:      {acc_sk * 100:.2f}%")
   },
   {
     id: 'decision-tree',
-    title: '7. Decision Tree Classifier (Entropy & Information Gain) (Andrew Ng ML)',
+    title: '7. Decision Tree (Information Gain)',
     category: 'Supervised Learning / Trees',
     description: 'Implements recursive Decision Tree splitting from raw math using Shannon Entropy and Information Gain, compared with scikit-learn DecisionTreeClassifier.',
     configurableTraining: true,
@@ -727,7 +727,7 @@ print(f"  Prediction Agreement: {np.mean(y_pred_np == y_pred_sk) * 100:.2f}%")
   },
   {
     id: 'kmeans-clustering',
-    title: '8. K-Means Clustering (Unsupervised Expectation-Maximization) (Andrew Ng Week 8)',
+    title: '8. K-Means Clustering',
     category: 'Unsupervised Learning / Clustering',
     description: 'Implements K-Means centroid expectation-maximization with distortion cost minimization from raw math in NumPy, compared with scikit-learn KMeans.',
     configurableTraining: true,
@@ -812,7 +812,7 @@ print(f"\\n  Maximum Centroid Offset: {np.max(diffs):.4f} (Clean convergence)")
   },
   {
     id: 'principal-component-analysis',
-    title: '9. Principal Component Analysis (PCA) (Andrew Ng Week 8)',
+    title: '9. PCA Dimensionality Reduction',
     category: 'Unsupervised Learning / Dimensionality Reduction',
     description: 'Implements PCA dimensionality reduction from raw math via covariance matrix and eigendecomposition in NumPy, compared with scikit-learn PCA.',
     configurableTraining: true,
@@ -897,7 +897,7 @@ print(f"  PC2 Correlation: {corr2:.5f} (Exact match)")
   },
   {
     id: 'anomaly-detection',
-    title: '10. Anomaly Detection (Multivariate Gaussian Model) (Andrew Ng Week 9)',
+    title: '10. Anomaly Detection (Gaussian)',
     category: 'Unsupervised Learning / Anomaly Detection',
     description: 'Implements server monitoring anomaly detection from raw math using multivariate Gaussian density thresholding p(x) < ε, compared with scikit-learn EllipticEnvelope.',
     configurableTraining: true,
@@ -973,7 +973,7 @@ print(f"\\n  Ground-Truth Outliers Caught: {gt_detected} / 5 (100% recall)")
   },
   {
     id: 'collaborative-filtering',
-    title: '11. Collaborative Filtering (Recommender System Matrix Factorization) (Andrew Ng Week 9)',
+    title: '11. Collaborative Filtering (Recommender)',
     category: 'Unsupervised Learning / Recommenders',
     description: 'Implements movie recommendation matrix factorization with gradient descent on latent features from raw math in NumPy, compared with scikit-learn TruncatedSVD.',
     configurableTraining: true,
