@@ -84,24 +84,23 @@ Attribution is a hard invariant of this project and must be preserved across all
 
 ## 4. Release Archival & Versioning Policy
 
-1. **Non-Destructive Permanent Archival**  
-   Every generated release APK is permanently saved in a dedicated version directory:
+1. **Lean Archival & Metadata Preservation**  
+   Every generated release maintains permanent version metadata and notes in a dedicated directory:
    ```
    releases/
      v1.0.0/
-       ai-engineering-v1.0.0.apk
        ai-engineering-v1.0.0.apk.sha256
        RELEASE_NOTES.md
-     v1.1.0/
-       ai-engineering-v1.1.0.apk
-       ai-engineering-v1.1.0.apk.sha256
+     v1.5.4/
+       ai-engineering-v1.5.4.apk
+       ai-engineering-v1.5.4.apk.sha256
        RELEASE_NOTES.md
      ai-engineering-latest.apk
      README.md
    ```
-   **RULE:** Existing release folders and APKs must **never be deleted, overwritten, or replaced**.
+   **RULE:** To prevent repository bloat, only the **latest official production APK release** is stored directly in Git. Historical metadata, release notes, and SHA-256 checksums are permanently preserved across all versions.
 2. **Latest Release Pointer**  
-   `releases/ai-engineering-latest.apk` must always mirror or symlink to the newest official release APK for convenient single-link sharing and downloading.
+   `releases/ai-engineering-latest.apk` must always mirror the newest official release APK for convenient single-link sharing and downloading.
 3. **Minor Version Cadence by Default**  
    Unless explicitly instructed otherwise by Amit Kumar, all new releases increment the **minor** version number:
    - Initial Release: `v1.0.0`

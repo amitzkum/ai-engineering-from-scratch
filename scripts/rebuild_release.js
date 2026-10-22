@@ -191,8 +191,8 @@ function main() {
     }
   }
 
-  // Step 7: Permanent Archival
-  console.log('\n🏛️ Step 6: Archiving Release Artifacts (Non-Destructive Archival)...');
+  // Step 7: Archival (Preserves only the latest APK binary, retains historical notes/checksums)
+  console.log('\n🏛️ Step 6: Archiving Release Artifacts (Lean Archival)...');
   const targetDir = path.join(RELEASES_DIR, `v${vInfo.nextVersion}`);
   if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
 
@@ -202,6 +202,23 @@ function main() {
 
   fs.copyFileSync(builtApkPath, targetApkPath);
   fs.copyFileSync(builtApkPath, latestApkPath);
+
+  // Prune prior version APK binaries to prevent repository bloat
+  try {
+    const entries = fs.readdirSync(RELEASES_DIR, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory() && entry.name.startsWith('v') && entry.name !== `v${vInfo.nextVersion}`) {
+        const vDir = path.join(RELEASES_DIR, entry.name);
+        const oldApks = fs.readdirSync(vDir).filter(f => f.endsWith('.apk'));
+        for (const apk of oldApks) {
+          fs.unlinkSync(path.join(vDir, apk));
+          console.log(`   ✓ Pruned prior release APK to save repo size: releases/${entry.name}/${apk}`);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('   ⚠️ Failed to prune older release APKs:', err.message);
+  }
 
   // Step 8: Checksum
   const checksum = computeSha256(targetApkPath);

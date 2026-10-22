@@ -137,4 +137,4 @@ Every build must preserve the core rules documented in [`APP_BUILD_RULES.md`](AP
 2. **Attribution Invariants:**
    - **App Creator & Architect:** Amit Kumar (UI, offline engine, packaging, release signing).
    - **Curriculum Authors:** AI Engineering from Scratch Contributors.
-3. **Permanent Archival:** Older releases under `releases/v*` are never deleted or overwritten.
+3. **Lean Archival:** Only the latest production APK release is preserved in Git; older release notes and checksums are permanently preserved.
