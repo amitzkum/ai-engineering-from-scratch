@@ -24,7 +24,7 @@ The manual pins tag `v1.0.1` of the A2A repository, commit `3303592`. In request
 
 Facts come from five sources, ranked by authority. When two of them disagree, the higher one wins and the text says so.
 
-| Rank | Source | What the manual takes from it | Cited as |
+| Rank | Source | What the manual takes from it | Source key |
 |---|---|---|---|
 | 1 | `specification/a2a.proto` at v1.0.1 | every object, field, enum value, and method | `proto` and a message or enum name |
 | 2 | `docs/specification.md` at v1.0.1 | every behavior rule, quoted word for word | `spec` and a section number |
@@ -52,7 +52,7 @@ Seeded ids and a fixed clock make two runs byte-identical. [The kit README](manu
 
 ## Conventions
 
-Citations name a place: {{spec §3.7}} a section of the specification, {{proto TaskState}} a message or enum in the proto, {{docs life-of-a-task}} a documentation page, and {{sdk src/a2a/server/tasks/task_manager.py}} a file in the SDK.
+Each section records its sources in the manual source, where the audit checks every quote and number. The sections do not show them. The sources reference lists them.
 
 A listing copies lines from a capture file unchanged, and a `…` marks a cut that the note explains.
 

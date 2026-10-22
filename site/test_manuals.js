@@ -145,14 +145,20 @@ test('rejects constructs outside the subset', () => {
   assert.throws(() => manuals.parseDocument('# T\n\n- a\n  - b\n', 'x'), /nested lists/);
   assert.throws(() => manuals.parseDocument('# T\n\n<div>x</div>\n', 'x'), /raw HTML/);
   assert.throws(() => manuals.parseDocument('# T\n\n---\n', 'x'), /horizontal rules/);
-  assert.throws(() => manuals.parseDocument('# T\n\n```figure\nid: f-1\nkind: chart\ntitle: t\nclaim: c.\ncaption: c\n```\n', 'x'), /kind must be one of/);
+  assert.throws(() => manuals.parseDocument('# T\n\n```figure\nid: f-1\nkind: plot\ntitle: t\nclaim: c.\ncaption: c\n```\n', 'x'), /kind must be one of/);
 });
 
 test('inline markup escapes HTML and records cross references with their location', () => {
   const acc = manuals.newInline();
   const html = manuals.inlineHtml('**a** <b> `x < y` {{spec §2}} [s](#s-1-1)', 'doc.md:4', acc);
-  assert.match(html, /<strong>a<\/strong> &lt;b&gt; <code>x &lt; y<\/code> <span class="m-cite">spec §2<\/span> <a class="m-xref" href="#s-1-1">s<\/a>/);
+  assert.match(html, /<strong>a<\/strong> &lt;b&gt; <code>x &lt; y<\/code> <a class="m-xref" href="#s-1-1">s<\/a>/);
+  assert.doesNotMatch(html, /spec §2|m-cite/);
   assert.deepEqual(acc.refs, [{ id: 's-1-1', where: 'doc.md:4' }]);
+});
+
+test('citation markers render nothing and leave the punctuation in place', () => {
+  const html = manuals.inlineHtml('Stop the server {{docs Install}}.', 'doc.md:5', manuals.newInline());
+  assert.equal(html, 'Stop the server.');
 });
 
 test('numbers figures per part and renders the print edition', () => {
@@ -164,6 +170,8 @@ test('numbers figures per part and renders the print edition', () => {
   assert.match(html, /href="#fig-1-1">1\.1<\/a>/);
   assert.match(html, /string-set: mtitle content\(text\)/);
   assert.match(html, /<span class="m-tok-key">&quot;kind&quot;<\/span>/);
+  assert.doesNotMatch(html, /class="m-(sources|listing-src|cite)"|>Sources:</);
+  assert.doesNotMatch(html, /<span[^>]*>capture\/out\/task\.json/);
 });
 
 test('fails the build on dangling cross references anywhere, including the plate caption', () => {

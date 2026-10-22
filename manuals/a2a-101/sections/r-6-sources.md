@@ -20,7 +20,7 @@ The changelog dates the release 2026-05-26, and the spec banner still names 1.0.
 
 The files in `research/sources/` are copied from the tag under the Apache License 2.0 in [LICENSE](manuals/a2a-101/research/sources/LICENSE). The audit checks every quote of 24 characters or more against them.
 
-| File | Upstream | Cited as |
+| File | Upstream | Source key |
 |---|---|---|
 | a2a.proto | `specification/a2a.proto`, 811 lines, normative | `proto` and a message or enum name |
 | specification.md | `docs/specification.md`, 3610 lines | `spec` and a section number |
@@ -33,7 +33,7 @@ Section 1.4 of the spec gives the proto path as `spec/a2a.proto`, which is wrong
 
 Body sections compare six official SDKs and the official test kit, each read at one tag. The manual cites the reference SDK as `sdk`, and the others as `sdk-go`, `sdk-java`, `sdk-js`, `sdk-dotnet`, and `sdk-rust`, with a file path and the tag. It paraphrases them and never quotes them.
 
-| Repository | Cited as | Tag | Commit | Date |
+| Repository | Source key | Tag | Commit | Date |
 |---|---|---|---|---|
 | [a2a-python](https://github.com/a2aproject/a2a-python) | `sdk` | `v1.2.2` | `2f9e44a` | 2026-10-05 |
 | [a2a-go](https://github.com/a2aproject/a2a-go) | `sdk-go` | `v2.6.0` | `ebf17c5` | 2026-09-25 |

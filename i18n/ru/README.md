@@ -7,6 +7,12 @@
   </picture>
 </p>
 
+<p align="center">
+ <a href="https://www.star-history.com/rohitg00/ai-engineering-from-scratch">
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /><img alt="Место в истории звёзд" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /></picture> <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /><img alt="Популярный репозиторий GitHub дня" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /></picture>
+ </a>
+</p>
+
 Реализуйте внутренние механизмы моделей, поисковые конвейеры и среды выполнения агентов. Тестируйте их, исследуйте сбои и сохраняйте код и результаты оценки.
 
 **[Начать обучение](https://aiengineeringfromscratch.com/lesson?path=phases/00-setup-and-tooling/01-dev-environment)** · **[Выберите путь](#learning-routes)** · **[Попробуйте лабораторную работу](#interactive-lab)** · **[Создайте проект](#project-challenges)** · **[Посмотреть программу](#contents)**
@@ -36,7 +42,6 @@
 
 <p align="center">
   <a href="https://serpapi.com/ai-engineering-from-scratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/serpapi-banner-compact.png" width="48%"><img src="../../assets/sponsors/serpapi-banner-compact.png" alt="SerpApi — API веб-поиска для приложений на базе ИИ; поддерживает Markdown и JSON для интеграции." width="440"></picture></a>
-  <a href="https://nitrostack.ai/referral/aiengineeringfromscratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/nitrostack-banner-equal.png" width="48%"><img src="../../assets/sponsors/nitrostack-banner-equal.png" alt="NitroStack. Создайте и разверните приложение MCP за 10 минут. Разместите свой продукт в маркетплейсах ChatGPT и Claude благодаря бесплатному развёртыванию в облаке." width="440"></picture></a>
 </p>
 
 <p align="center">

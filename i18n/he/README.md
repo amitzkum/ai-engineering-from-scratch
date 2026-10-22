@@ -7,6 +7,12 @@
   </picture>
 </p>
 
+<p align="center">
+ <a href="https://www.star-history.com/rohitg00/ai-engineering-from-scratch">
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /><img alt="דירוג היסטוריית כוכבים" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /></picture> <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /><img alt="מאגר GitHub פופולרי של היום" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /></picture>
+ </a>
+</p>
+
 ממשו את הפעולות הפנימיות של מודלים, צינורות אחזור וסביבות ריצה לסוכנים. בדקו אותם, חקרו כשלים ושמרו את הקוד ואת תוצאות ההערכה.
 
 **[התחילו ללמוד](https://aiengineeringfromscratch.com/lesson?path=phases/00-setup-and-tooling/01-dev-environment)** · **[בחרו מסלול](#learning-routes)** · **[נסו מעבדה](#interactive-lab)** · **[בנו פרויקט](#project-challenges)** · **[עיינו בתוכנית הלימודים](#contents)**
@@ -36,7 +42,6 @@
 
 <p align="center">
   <a href="https://serpapi.com/ai-engineering-from-scratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/serpapi-banner-compact.png" width="48%"><img src="../../assets/sponsors/serpapi-banner-compact.png" alt="SerpApi. API לחיפוש ברשת עבור יישומי ה-AI שלכם. זמין בפורמטים Markdown ו-JSON לכל שילוב." width="440"></picture></a>
-  <a href="https://nitrostack.ai/referral/aiengineeringfromscratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/nitrostack-banner-equal.png" width="48%"><img src="../../assets/sponsors/nitrostack-banner-equal.png" alt="NitroStack. בנו ופרסו יישום MCP בתוך 10 דקות. הביאו את המוצר לשווקים של ChatGPT ושל Claude עם פריסה חינמית בענן." width="440"></picture></a>
 </p>
 
 <p align="center">

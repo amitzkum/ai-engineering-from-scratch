@@ -29,6 +29,8 @@
   <link href="https://fonts.googleapis.com/css2?family=VT323&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=20261015a">
   <link rel="stylesheet" href="certifications.css?v=20260925a">
+  <link rel="stylesheet" href="highlights.css?v=20261018a">
+  <link rel="stylesheet" href="lesson-walkthrough.css?v=20261021b">
   <style>
     .scroll-progress {
       position: fixed;
@@ -320,7 +322,8 @@
 
     .lesson-article h2.section-build,
     .lesson-article h2.section-use,
-    .lesson-article h2.section-ship {
+    .lesson-article h2.section-ship,
+    .lesson-article h2.section-summary {
       border-left: 3px solid var(--blueprint);
       padding-left: 16px;
     }
@@ -2837,6 +2840,10 @@
   <script src="content-source.js?v=20260821a"></script>
   <script src="lesson-markdown.js?v=20261015a"></script>
   <script src="progress.js?v=20260822a"></script>
+  <script src="highlights-anchor.js?v=20261018a"></script>
+  <script src="highlights-store.js?v=20261018a"></script>
+  <script src="highlights.js?v=20261018a"></script>
+  <script src="lesson-walkthrough.js?v=20261021b"></script>
   <script id="learningPathProgressRuntime">
     (function (root) {
       'use strict';
@@ -2936,10 +2943,10 @@
       root.AIFSLearningPathProgress = createStore(root.localStorage);
     }(window));
   </script>
-  <script src="header.js?v=20261015b" defer></script>
+  <script src="header.js?v=20261021a" defer></script>
   <script src="cmdpalette.js?v=20260821a" defer></script>
   <script src="lesson-figures.js?v=843871fd2942"></script>
-  <script src="figure-manifest.js?v=98984ac816e2"></script>
+  <script src="figure-manifest.js?v=49adfab3cb07"></script>
   <script>
     (function () {
       var root = document.documentElement;
@@ -3079,16 +3086,6 @@
       function findLearningPath(id) {
         if (!id || typeof LEARNING_PATHS === 'undefined' || !Array.isArray(LEARNING_PATHS)) return null;
         return LEARNING_PATHS.find(function (path) { return path && path.id === id; }) || null;
-      }
-
-      function inferLearningPath(target) {
-        if (!target || typeof LEARNING_PATHS === 'undefined' || !Array.isArray(LEARNING_PATHS)) return null;
-        var preferredIds = ['agent-skills', 'model-context-protocol'];
-        for (var i = 0; i < preferredIds.length; i++) {
-          var preferred = findLearningPath(preferredIds[i]);
-          if (preferred && learningPathContains(preferred, target)) return preferred;
-        }
-        return LEARNING_PATHS.find(function (path) { return learningPathContains(path, target); }) || null;
       }
 
       function learningPathEntries(path, includeOptional) {
@@ -3416,10 +3413,9 @@
         certificationMode = !!(certificationTrack && certificationTrackContains(certificationTrack, lessonPath));
         certificationSupplementalMode = !!(certificationOriginTrack && !certificationMode);
         learningPath = !certificationMode && !certificationSupplementalMode
-          ? (requestedLearningPathId ? findLearningPath(requestedLearningPathId) : inferLearningPath(lessonPath))
+          ? findLearningPath(requestedLearningPathId)
           : null;
         learningPathMode = !!(learningPath && learningPathContains(learningPath, lessonPath));
-        if (learningPathMode && !incomingLearningPathId) replaceLearningPathInUrl(learningPath.id);
 
         syncCertificationQuizProgressVersion();
 
@@ -3588,7 +3584,8 @@
             pathReturnHref = 'learning-paths.html#career-route-' + encodeURIComponent(learningPath.id);
             pathReturnLabel = 'Back to career route';
           }
-          var pathHtml = '<div class="sidebar-phase-nav"><a href="' + pathReturnHref + '">&larr; ' + pathReturnLabel + '</a></div>';
+          var pathHtml = '<div class="sidebar-phase-nav"><a href="' + pathReturnHref + '">&larr; ' + pathReturnLabel + '</a>' +
+            '<a href="lesson?path=' + encodeURIComponent(lessonPath) + '">Phase view</a></div>';
           var requiredPathLessons = flatLessons.filter(function (item) { return item.required !== false; });
           var optionalPathLessons = flatLessons.filter(function (item) { return item.required === false; });
           pathHtml += '<div class="sidebar-phase-header">' + escapeHtml(learningPath.title || learningPath.id) + ' · ' + requiredPathLessons.length + ' lessons</div>';
@@ -3968,6 +3965,8 @@
       }
 
       function disposeRenderedLesson(root) {
+        if (window.AIFSHighlights) window.AIFSHighlights.unmount();
+        if (window.AIFSWalkthrough) window.AIFSWalkthrough.unmount();
         if (window.AIFSFigureRuntime && root) window.AIFSFigureRuntime.disposeRoot(root);
         disposeTocRuntime();
         mermaidRenderSeq++;
@@ -4020,7 +4019,15 @@
         });
         renderAIPanels();
         buildTOC();
+        if (window.AIFSHighlights) {
+          window.AIFSHighlights.mount(article, {
+            path: lessonPath,
+            lang: document.documentElement.lang || currentLang(),
+            title: extractTitle(md)
+          });
+        }
         restoreHeadingHash();
+        if (window.AIFSWalkthrough) window.AIFSWalkthrough.mount(article, { path: lessonPath });
 
         document.querySelectorAll('a[href^="#"]').forEach(function (link) {
           link.addEventListener('click', function (e) {
@@ -4499,7 +4506,8 @@
         'build-it': 'Type this code in your own file and run it after each step.',
         'use-it': 'Install the library in a virtual environment, then compare its result with your Build It result.',
         'ship-it': 'Open the file in this lesson\'s outputs/ folder and use it in your own work.',
-        exercises: 'Say the task again, predict a small case by hand, then write the smallest version that works.'
+        exercises: 'Say the task again, predict a small case by hand, then write the smallest version that works.',
+        summary: 'Bookmark the key formulas and concepts here for quick review before exercises or projects.'
       };
 
       function renderSectionGuides(article) {

@@ -8,7 +8,7 @@ When you finish this section, you can read the sixteen facets of a dossier. You 
 
 ## The dossier
 
-`rea function` is the CLI name of `analyze_function`. The CLI run on `_grade` and the MCP call in the same session produced the same `evidence_id`, `ev_15244427` and 56 more digits. The id is a hash of the record's semantic content, and the file path and the display name are left out of it. [Section 5.1](#s-the-evidence-record) reads every field of the record. This section reads its `normalized_result`, which has sixteen facets.
+`rea function` is the CLI name of `analyze_function`. The CLI run on `_grade` and the MCP call in the same session produced the same `evidence_id`, `ev_41e8ca1c` and 56 more digits. The id is a hash of the record's semantic content, and the file path and the display name are left out of it. [Section 5.1](#s-the-evidence-record) reads every field of the record. This section reads its `normalized_result`, which has sixteen facets.
 
 ```listing
 title: the pseudocode, the blocks, and the signature facts of _grade
@@ -259,6 +259,8 @@ The lookup was a round trip on the socket to Ghidra, a couple of milliseconds in
 
 Read the sixteen facets in this order. Start with `procedure` for the body and `assembly` for what the processor does. Then read `basic_blocks` for the shape and the references for the edges, and `pseudocode` last. [Section 5.5](#s-compare-and-compare-functions) compares two dossiers of the same function from two builds. [Section 7.2](#s-a-proof-harness-outside-rea) shows the test that decides whether a rebuild from this text is equal to the original.
 
+To see where each line of pseudocode comes from, run the [Inside a Decompiler](https://aiengineeringfromscratch.com/inside-a-decompiler) machine. It decompiles `percent_change` from the x86-64 fixture object in nine stations, from the header to the pseudocode. The instructions, IR and pseudocode on the page are the ones that the course lifter in lesson 34 prints. Switch the build to `-O0` to see stack slots become locals, and switch the symbols off to see the name become an unknown.
+
 ```takeaways
 - Read `signature_source` and the parameter `confidence` before you trust a type in the pseudocode.
 - Check every constant and table address in the text against the assembly and the bytes.
@@ -266,4 +268,4 @@ Read the sixteen facets in this order. Start with `procedure` for the body and `
 - Expect `invalid_request` with `retryable: true` for an unknown name, then fix the name.
 ```
 
-Sources: capture/out/06-function-grade.json, capture/out/10-mcp-10-analyze-function-grade-O1.json, capture/out/07-decompile-total.json, capture/out/07-decompile-grade-x86_64-O1.json, capture/out/10-mcp-09-analyze-function-percent-change-O1.json, capture/out/10-mcp-11-analyze-function-total-O1.json, capture/out/10-mcp-12-analyze-function-grade-label-O1.json, capture/out/10-mcp-13-analyze-function-missing.json, capture/out/10-mcp-server.log, capture/fixtures/ledger.c, capture/fixtures/ledger-arm64-O1; rea 6.5.0 at 3b79af2: src/cliCommandNames.ts, src/domain/evidence.ts, src/ghidra/GhidraProviderCapabilities.ts, src/ghidra/GhidraProviderClient.ts, src/domain/analysisErrorProjection.ts, src/server/toolResult.ts, bridge/ghidra/ReaGhidraBridge.java
+Sources: capture/out/06-function-grade.json, capture/out/10-mcp-10-analyze-function-grade-O1.json, capture/out/07-decompile-total.json, capture/out/07-decompile-grade-x86_64-O1.json, capture/out/10-mcp-09-analyze-function-percent-change-O1.json, capture/out/10-mcp-11-analyze-function-total-O1.json, capture/out/10-mcp-12-analyze-function-grade-label-O1.json, capture/out/10-mcp-13-analyze-function-missing.json, capture/out/10-mcp-server.log, capture/fixtures/ledger.c, capture/fixtures/ledger-arm64-O1; rea 6.7.0 at 27dc42d: src/cliCommandNames.ts, src/domain/evidence.ts, src/ghidra/GhidraProviderCapabilities.ts, src/ghidra/GhidraProviderClient.ts, src/domain/analysisErrorProjection.ts, src/server/toolResult.ts, bridge/ghidra/ReaGhidraBridge.java; the Inside a Decompiler machine: scripts/decompiler-machine/fixture.mjs, scripts/decompiler-machine/model.mjs

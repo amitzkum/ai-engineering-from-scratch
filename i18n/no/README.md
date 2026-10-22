@@ -7,6 +7,12 @@
   </picture>
 </p>
 
+<p align="center">
+ <a href="https://www.star-history.com/rohitg00/ai-engineering-from-scratch">
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /><img alt="Plassering i stjernehistorikk" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /></picture> <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /><img alt="Dagens trendende GitHub-repository" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /></picture>
+ </a>
+</p>
+
 Implementer modellens indre, gjenfinningspipeliner og kjøremiljøer for agenter. Test dem, undersøk feil og behold koden og evalueringsresultatene.
 
 **[Begynn å lære](https://aiengineeringfromscratch.com/lesson?path=phases/00-setup-and-tooling/01-dev-environment)** · **[Velg et læringsløp](#learning-routes)** · **[Prøv en øvelse](#interactive-lab)** · **[Bygg et prosjekt](#project-challenges)** · **[Bla gjennom læreplanen](#contents)**
@@ -36,7 +42,6 @@ Gratis, åpen kildekode, MIT-lisens. Lær på nettstedet, med en kodeagent eller
 
 <p align="center">
   <a href="https://serpapi.com/ai-engineering-from-scratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/serpapi-banner-compact.png" width="48%"><img src="../../assets/sponsors/serpapi-banner-compact.png" alt="SerpApi. API for nettsøk i AI-applikasjonene dine. Tilgjengelig i Markdown og JSON for enhver integrasjon." width="440"></picture></a>
-  <a href="https://nitrostack.ai/referral/aiengineeringfromscratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/nitrostack-banner-equal.png" width="48%"><img src="../../assets/sponsors/nitrostack-banner-equal.png" alt="NitroStack. Bygg og rull ut MCP-appen din på 10 minutter. Få produktet ditt inn på markedsplassene til ChatGPT og Claude med gratis utrulling i skyen." width="440"></picture></a>
 </p>
 
 <p align="center">

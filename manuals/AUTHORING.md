@@ -76,7 +76,7 @@ The `<id>` is lowercase and hyphenated, such as `a2a-101`. It matches the direct
 3. An opening paragraph that starts from a concrete situation, then says "When you finish this section, you can ...". The outcome sentence must be in the first two paragraphs.
 4. The body: `##` subsections, definition paragraphs that start with `**Term:**`, figures, listings, and tables.
 5. Exactly one `takeaways` block. It says what to do with the section, as actions.
-6. A final `Sources: ...` paragraph that names every file the section was written from.
+6. A final `Sources: ...` paragraph that names every file the section was written from. The audit reads it. The reader view does not render it.
 
 Reference sections and the front matter need a thesis and a sources line, but no outcome sentence or takeaways.
 
@@ -92,7 +92,7 @@ The renderer accepts a small subset so that every edition renders the same way.
 | paragraphs, lists | plain paragraphs, `-` or `1.` lists, one level only |
 | tables | pipe tables with a header row |
 | emphasis | `**bold**`, `*italic*`, inline code |
-| citation | `{{spec §4.1}}` renders as a small mono citation |
+| citation | `{{spec §4.1}}` stays in the source for verification and renders nothing |
 | cross-reference | `[the effect](#s-5-3)` or `[figure](#fig-5-3)`; print adds the page number |
 | repository link | `[the lesson](phases/13-tools-and-protocols/19-a2a-protocol)` |
 | code | fenced blocks with a language tag |
@@ -153,7 +153,7 @@ Generated blocks take no body: `parts`, `palette`, `figure-index`, and `contents
 
 ## Figures
 
-### Nine kinds
+### Ten kinds
 
 | Kind | Use it for |
 |---|---|
@@ -166,8 +166,9 @@ Generated blocks take no body: `parts`, `palette`, `figure-index`, and `contents
 | `state` | a state machine with its transitions |
 | `decision` | where something fails and what each outcome means |
 | `layers` | a stack of layers with the parts each one owns |
+| `chart` | measured runs plotted on axes: sweeps, distributions, and the spread over repeated runs |
 
-The templates in [_shared/templates](_shared/templates) show one of each, drawn with the figure kit.
+The templates in [_shared/templates](_shared/templates) show one of each, drawn with the figure kit. A `chart` uses [_shared/chart.js](_shared/chart.js) on top of the figure kit and reads its numbers from a summary file that the capture kit writes, so the figure and the data cannot drift apart.
 
 ### Colour
 
@@ -246,7 +247,7 @@ Save it as `figures/src/fig-1-2.js` and run `node manuals/_shared/figkit.js buil
 - The capture kit lives in `capture/`. It runs offline, needs no network and no keys, and follows the repository dependency allowlist.
 - A subject that is a proprietary binary or a hosted service cannot run offline in CI. Its kit records on the author's machine with the pinned binaries installed. Its `check` compares stored outputs after masking, and when the subject is not installed it prints `skipped` with the reason and exits 0. The front matter names the captures recorded that way and the machine they were recorded on.
 - `capture.run` writes `capture/out/`. `capture.check` writes to a temporary directory and compares with `capture/out/` after masking values that change on every run, such as timestamps and generated ids. The audit runs `capture.check` and fails on drift.
-- A listing head names its source file, so a reader can open the full record.
+- A listing names its source file in the `source:` field, so the build and the audit can check the excerpt. The reader view shows the title and the language, not the file path.
 
 ## Sources and quotes
 
@@ -254,6 +255,8 @@ Save it as `figures/src/fig-1-2.js` and run `node manuals/_shared/figkit.js buil
 - Vendor a source under `research/sources/` only when its license allows it, and keep its license file beside it.
 - Every `rule` block and every inline quote followed by a citation such as `{{spec §4.1}}` must use a key declared in `quoteSources`. The build fails on an undeclared key or a missing file.
 - The audit checks each of those quotes, word for word, against the vendored file for its key. A key declared as `null` marks a source that cannot be vendored, and its quotes are not checked.
+- Citations, `Sources:` lines, and listing source paths live in the markdown for verification. They never render in a section. A reader sees no file paths, capture file names, commits, or citation chips in the prose.
+- The sources reference page is the one place a reader sees where the facts came from. Write it for people: the kinds of sources, such as the code and docs, our measured runs, issues and pull requests, and papers, and the external reports by title and date. Do not list repository file paths there.
 
 ## Prose
 

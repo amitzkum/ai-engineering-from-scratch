@@ -7,6 +7,12 @@
   </picture>
 </p>
 
+<p align="center">
+ <a href="https://www.star-history.com/rohitg00/ai-engineering-from-scratch">
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /><img alt="Yıldız geçmişi sıralaması" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /></picture> <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /><img alt="Günün trend GitHub deposu" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /></picture>
+ </a>
+</p>
+
 Modellerin iç mekanizmalarını, bilgi erişim işlem hatlarını ve ajan çalışma ortamlarını uygulayın. Bunları test edin, hataları inceleyin, kodu ve değerlendirme sonuçlarını saklayın.
 
 **[Öğrenmeye başlayın](https://aiengineeringfromscratch.com/lesson?path=phases/00-setup-and-tooling/01-dev-environment)** · **[Bir yol seçin](#learning-routes)** · **[Bir laboratuvar deneyin](#interactive-lab)** · **[Bir proje geliştirin](#project-challenges)** · **[Müfredatı inceleyin](#contents)**
@@ -36,7 +42,6 @@ Modellerin iç mekanizmalarını, bilgi erişim işlem hatlarını ve ajan çal�
 
 <p align="center">
   <a href="https://serpapi.com/ai-engineering-from-scratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/serpapi-banner-compact.png" width="48%"><img src="../../assets/sponsors/serpapi-banner-compact.png" alt="SerpApi. Yapay zekâ uygulamalarınıza web araması ekleyen API; her entegrasyon için Markdown ve JSON çıktısı sunar." width="440"></picture></a>
-  <a href="https://nitrostack.ai/referral/aiengineeringfromscratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/nitrostack-banner-equal.png" width="48%"><img src="../../assets/sponsors/nitrostack-banner-equal.png" alt="NitroStack. MCP uygulamanızı 10 dakikada oluşturup dağıtın. Ücretsiz bulut dağıtımıyla ürününüzü ChatGPT ve Claude pazar yerlerine taşıyın." width="440"></picture></a>
 </p>
 
 <p align="center">

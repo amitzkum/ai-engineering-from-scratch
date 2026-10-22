@@ -7,6 +7,12 @@
   </picture>
 </p>
 
+<p align="center">
+ <a href="https://www.star-history.com/rohitg00/ai-engineering-from-scratch">
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /><img alt="Κατάταξη ιστορικού αστεριών" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /></picture> <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /><img alt="Δημοφιλές αποθετήριο GitHub της ημέρας" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /></picture>
+ </a>
+</p>
+
 Υλοποίησε εσωτερικούς μηχανισμούς μοντέλων, ροές ανάκτησης και περιβάλλοντα εκτέλεσης πρακτόρων. Δοκίμασέ τα, εξέτασε αστοχίες και κράτησε τον κώδικα και τα αποτελέσματα αξιολόγησης.
 
 **[Ξεκινήστε τη μάθηση](https://aiengineeringfromscratch.com/lesson?path=phases/00-setup-and-tooling/01-dev-environment)** · **[Επίλεξε διαδρομή](#learning-routes)** · **[Δοκίμασε ένα εργαστήριο](#interactive-lab)** · **[Υλοποίησε ένα έργο](#project-challenges)** · **[Περιηγηθείτε στο πρόγραμμα](#contents)**
@@ -36,7 +42,6 @@
 
 <p align="center">
   <a href="https://serpapi.com/ai-engineering-from-scratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/serpapi-banner-compact.png" width="48%"><img src="../../assets/sponsors/serpapi-banner-compact.png" alt="SerpApi. API αναζήτησης ιστού για τις εφαρμογές AI σου. Διαθέσιμο σε Markdown και JSON για κάθε ενσωμάτωση." width="440"></picture></a>
-  <a href="https://nitrostack.ai/referral/aiengineeringfromscratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/nitrostack-banner-equal.png" width="48%"><img src="../../assets/sponsors/nitrostack-banner-equal.png" alt="NitroStack. Δημιούργησε και δημοσίευσε την εφαρμογή MCP σου σε 10 λεπτά. Βάλε το προϊόν σου στις αγορές του ChatGPT και του Claude με δωρεάν ανάπτυξη στο cloud." width="440"></picture></a>
 </p>
 
 <p align="center">

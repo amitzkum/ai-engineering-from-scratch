@@ -19,7 +19,7 @@ The pin is sbx 0.47.0 and docker-agent 1.149.0 (manual.json). The agent file sch
 
 When two sources disagree, the higher one wins and the section says so. The table repeats the ranking of manual.json with the citation keys of `quoteSources`.
 
-| Rank | Source | Cited as | Used for |
+| Rank | Source | Source key | Used for |
 |---|---|---|---|
 | 1 | the help text that sbx 0.47.0 and docker-agent 1.149.0 print | `help-sbx`, `help-agent` with the command | every command, flag, default, and path |
 | 2 | the agent file schema at v1.149.0 | `schema` with the definition | every key, type, and default of the agent file |

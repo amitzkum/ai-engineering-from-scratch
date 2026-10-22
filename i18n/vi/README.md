@@ -7,6 +7,12 @@
   </picture>
 </p>
 
+<p align="center">
+ <a href="https://www.star-history.com/rohitg00/ai-engineering-from-scratch">
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /><img alt="Thứ hạng lịch sử sao" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /></picture> <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /><img alt="Kho GitHub thịnh hành trong ngày" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /></picture>
+ </a>
+</p>
+
 Triển khai cơ chế bên trong mô hình, quy trình truy xuất và môi trường thực thi tác tử. Kiểm thử, phân tích lỗi và lưu lại mã nguồn cùng kết quả đánh giá.
 
 **[Bắt đầu học](https://aiengineeringfromscratch.com/lesson?path=phases/00-setup-and-tooling/01-dev-environment)** · **[Chọn lộ trình](#learning-routes)** · **[Thử bài thực hành](#interactive-lab)** · **[Xây dựng dự án](#project-challenges)** · **[Xem chương trình học](#contents)**
@@ -36,7 +42,6 @@ Miễn phí, mã nguồn mở, giấy phép MIT. Học trên trang web, cùng t�
 
 <p align="center">
   <a href="https://serpapi.com/ai-engineering-from-scratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/serpapi-banner-compact.png" width="48%"><img src="../../assets/sponsors/serpapi-banner-compact.png" alt="SerpApi. API tìm kiếm web cho ứng dụng AI của bạn. Hỗ trợ Markdown và JSON để tích hợp với các công cụ khác." width="440"></picture></a>
-  <a href="https://nitrostack.ai/referral/aiengineeringfromscratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/nitrostack-banner-equal.png" width="48%"><img src="../../assets/sponsors/nitrostack-banner-equal.png" alt="NitroStack. Xây dựng và triển khai ứng dụng MCP trong 10 phút. Đưa sản phẩm lên chợ ứng dụng ChatGPT và Claude với triển khai đám mây miễn phí." width="440"></picture></a>
 </p>
 
 <p align="center">

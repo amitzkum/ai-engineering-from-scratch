@@ -17,7 +17,7 @@ const ISSUES_URL = 'https://github.com/rohitg00/ai-engineering-from-scratch/issu
 const AUTHOR = 'Rohit Ghumare';
 const LICENSE = 'MIT license';
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const KINDS = ['sequence', 'structure', 'flow', 'comparison', 'timeline', 'tree', 'state', 'decision', 'layers'];
+const KINDS = ['sequence', 'structure', 'flow', 'comparison', 'timeline', 'tree', 'state', 'decision', 'layers', 'chart'];
 const CONTINUATION = /^\s{2,}\S/;
 const NESTED_ITEM = /^\s+([-*]|\d+\.)\s+/;
 const LISTING_LANGS = new Set(['json', 'jsonl', 'http', 'sse']);
@@ -235,7 +235,7 @@ function inlineHtml(source, where, acc) {
   const codes = [];
   let html = String(source).replace(/`([^`]+)`/g, (match, code) => { codes.push(code); return `\u0000${codes.length - 1}\u0000`; });
   html = escapeHtml(html);
-  html = html.replace(/\{\{(.+?)\}\}/g, (match, cite) => `<span class="m-cite">${cite}</span>`);
+  html = html.replace(/\s*\{\{(.+?)\}\}/g, '');
   html = html.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (match, label, href) => linkHtml(label, href.replace(/&amp;/g, '&').replace(/&#39;/g, "'"), where, acc));
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/(^|[^*\w])\*(?!\s)([^*]+?)\*(?!\w)/g, '$1<em>$2</em>');
@@ -475,7 +475,10 @@ function blockHtml(block, doc, manual, acc) {
   switch (block.type) {
     case 'heading': return `<h${block.level} id="${block.id}">${inline(block.text)}</h${block.level}>`;
     case 'paragraph': {
-      if (/^Sources:\s/.test(block.text)) return `<p class="m-sources"><span class="m-sources-label">Sources:</span>${inline(block.text.replace(/^Sources:\s*/, ''))}</p>`;
+      if (/^Sources:\s/.test(block.text)) {
+        inline(block.text.replace(/^Sources:\s*/, ''));
+        return '';
+      }
       return `<p${/^\*\*[^*]+:\*\*\s/.test(block.text) ? ' class="m-def"' : ''}>${inline(block.text)}</p>`;
     }
     case 'list': {
@@ -493,7 +496,7 @@ function blockHtml(block, doc, manual, acc) {
     }
     case 'figure-index': return tableHtml(['Fig.', 'The claim it makes'], [...manual.figures.values()].map(figure => ({ accent: figure.accent, cells: [`<a class="m-xref" href="#${figure.id}">${figure.number}</a>`, figure.claimHtml] })));
     case 'contents': return tocHtml(manual, 'web');
-    case 'listing': return `<figure class="m-listing"><div class="m-listing-head"><span class="m-listing-title">${inline(block.title)}</span><span class="m-listing-src">${escapeHtml(block.source)}</span><span>${escapeHtml(block.lang)}</span></div><pre><code>${highlight(block.code, block.lang)}</code></pre>${block.note ? `<figcaption class="m-listing-note">${inline(block.note)}</figcaption>` : ''}</figure>`;
+    case 'listing': return `<figure class="m-listing"><div class="m-listing-head"><span class="m-listing-title">${inline(block.title)}</span><span>${escapeHtml(block.lang)}</span></div><pre><code>${highlight(block.code, block.lang)}</code></pre>${block.note ? `<figcaption class="m-listing-note">${inline(block.note)}</figcaption>` : ''}</figure>`;
     case 'takeaways': return `<aside class="m-takeaways"><div class="m-box-label">${TAKEAWAYS_LABEL}</div><ul>${block.items.map(item => `<li>${inline(item)}</li>`).join('')}</ul></aside>`;
     case 'rule': return `<aside class="m-rule"><div class="m-box-label">${escapeHtml(block.label)}</div><blockquote>${inline(block.quote)}</blockquote><div class="m-rule-src">${escapeHtml(block.source)}</div></aside>`;
     default: throw new Error(`${where}: unknown block ${block.type}`);
@@ -605,7 +608,17 @@ function manualArticle(manual, mode) {
 
 const SITE_HEADER = '<header class="site-header"><div class="header-inner"><a href="index.html" class="logo"><span class="logo-icon" aria-hidden="true"></span> AI / FROM SCRATCH</a><nav class="header-nav"><a href="index.html#contents">Contents</a><a href="catalog.html">Catalog</a><a href="projects.html">Projects</a><a href="manuals.html">Manuals</a><a href="roadmap.html">Roadmap</a><a href="glossary.html">Glossary</a><a href="about.html">About</a><a href="https://github.com/rohitg00/ai-engineering-from-scratch" target="_blank" rel="noopener" class="header-github"><span>GitHub</span><span class="star-count" data-loading="true">…</span></a></nav><button class="search-toggle" type="button" data-cmd-palette aria-label="Search"><span aria-hidden="true">⌕</span></button><button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" type="button"><span class="theme-icon" id="themeIcon">N</span></button></div></header>';
 
-function pageShell({ title, ogTitle, description, canonical, noindex, card, main }) {
+function highlightsScripts(highlights) {
+  if (!highlights) return '';
+  const ctx = JSON.stringify({ path: `manuals/${highlights.id}`, lang: 'en', title: highlights.title }).replace(/</g, '\\u003c');
+  return `<script src="highlights-anchor.js"></script>
+<script src="highlights-store.js"></script>
+<script src="highlights.js"></script>
+<script>(function () { function mount() { var article = document.querySelector('article.manual'); if (article && window.AIFSHighlights) window.AIFSHighlights.mount(article, ${ctx}); } if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount(); }());</script>
+`;
+}
+
+function pageShell({ title, ogTitle, description, canonical, noindex, card, main, highlights }) {
   const css = shared('tokens.css') + shared('manual.css') + shared('web.css');
   return `<!DOCTYPE html>
 <html lang="en" data-theme="light">
@@ -625,7 +638,7 @@ ${noindex ? '<meta name="robots" content="noindex">\n' : ''}<link rel="canonical
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="${FONT_LINK}" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<style>${css}</style>
+${highlights ? '<link rel="stylesheet" href="highlights.css">\n' : ''}<style>${css}</style>
 <script>${shared('theme.js')}</script>
 </head>
 <body>
@@ -639,7 +652,7 @@ ${main}
 <script src="cmdpalette.js" defer></script>
 <script>${shared('dither.js')}</script>
 <script>${shared('motion.js')}</script>
-</body>
+${highlightsScripts(highlights)}</body>
 </html>
 `;
 }
@@ -653,6 +666,7 @@ function webPage(manual) {
     noindex: manual.status === 'draft',
     card: manual.status === 'ready' ? `manual/${manual.id}` : 'page/manuals',
     main: `<main id="main" class="m-web"><div class="m-layout"><aside class="m-sidebar">${tocHtml(manual, 'web')}</aside>${manualArticle(manual, 'web')}</div></main>`,
+    highlights: { id: manual.id, title: manual.title },
   });
 }
 

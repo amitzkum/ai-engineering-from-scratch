@@ -7,6 +7,12 @@
   </picture>
 </p>
 
+<p align="center">
+ <a href="https://www.star-history.com/rohitg00/ai-engineering-from-scratch">
+  <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /><img alt="Positie in sterrengeschiedenis" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=rank" /></picture> <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /><img alt="Trending GitHub-repository van de dag" src="https://api.star-history.com/badge?repo=rohitg00/ai-engineering-from-scratch&type=trending" /></picture>
+ </a>
+</p>
+
 Implementeer de interne werking van modellen, zoekpijplijnen en uitvoeringsomgevingen voor agents. Test ze, onderzoek fouten en bewaar de code en evaluatieresultaten.
 
 **[Begin met leren](https://aiengineeringfromscratch.com/lesson?path=phases/00-setup-and-tooling/01-dev-environment)** · **[Kies een pad](#learning-routes)** · **[Probeer een lab](#interactive-lab)** · **[Bouw een project](#project-challenges)** · **[Bekijk het curriculum](#contents)**
@@ -36,7 +42,6 @@ Gratis, open source, met MIT-licentie. Leer op de webpagina, met een programmeer
 
 <p align="center">
   <a href="https://serpapi.com/ai-engineering-from-scratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/serpapi-banner-compact.png" width="48%"><img src="../../assets/sponsors/serpapi-banner-compact.png" alt="SerpApi. Webzoek-API voor je AI-apps. Beschikbaar in Markdown en JSON voor elke integratie." width="440"></picture></a>
-  <a href="https://nitrostack.ai/referral/aiengineeringfromscratch"><picture><source media="(min-width: 768px)" srcset="../../assets/sponsors/nitrostack-banner-equal.png" width="48%"><img src="../../assets/sponsors/nitrostack-banner-equal.png" alt="NitroStack. Bouw je MCP-app en rol die in 10 minuten uit. Breng je product naar de marktplaatsen van ChatGPT en Claude met gratis clouduitrol." width="440"></picture></a>
 </p>
 
 <p align="center">
