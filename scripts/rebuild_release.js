@@ -201,7 +201,10 @@ function main() {
   const latestApkPath = path.join(RELEASES_DIR, 'ai-engineering-latest.apk');
 
   fs.copyFileSync(builtApkPath, targetApkPath);
-  fs.copyFileSync(builtApkPath, latestApkPath);
+  if (fs.existsSync(latestApkPath) || fs.lstatSync(latestApkPath).isSymbolicLink()) {
+    try { fs.unlinkSync(latestApkPath); } catch (_) {}
+  }
+  fs.symlinkSync(path.join(`v${vInfo.nextVersion}`, targetApkName), latestApkPath);
 
   // Prune prior version APK binaries to prevent repository bloat
   try {
