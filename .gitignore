@@ -133,8 +133,6 @@ projects/*/solution/demo-output/
 package-lock.json
 *.apk
 *.aab
-!releases/**/*.apk
-!releases/*.apk
 .gradle/
 **/android/.gradle/
 **/android/build/
